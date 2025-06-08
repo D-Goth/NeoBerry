@@ -1,38 +1,94 @@
-# NeoBerry
+NeoBerry
 
-NeoBerry NeoBerry
-
-NeoBerry est conçu pour contrôler les broches GPIO des nouvelles Raspberry Pi (y compris la Raspberry Pi 5) via une interface web moderne. Il utilise Flask pour le backend et Bootstrap 5 pour une interface responsive.
+NeoBerry est  conçu pour contrôler les broches GPIO des nouvelles Raspberry Pi (y compris la Pi 5) via une interface web. Il utilise Flask, Bootstrap 5, et supporte un déploiement via Docker.
 
 Fonctionnalités
 
-Contrôle des GPIO via une interface web
 
-Compatibilité avec Raspberry Pi OS (Debian Bookworm) et Python 3.9+
 
-Interface utilisateur moderne et responsive
 
-Support des nouvelles Raspberry Pi (Pi 4, Pi 5)
+
+Contrôle des GPIO via une interface web responsive
+
+
+
+Compatibilité avec Raspberry Pi OS (Debian Bookworm) et Python 3.11
+
+
+
+Support des Raspberry Pi 4 et 5
+
+
+
+Déploiement facile avec Docker
+
+Prérequis
+
+
+
+
+
+Raspberry Pi (4 ou 5) avec Raspberry Pi OS
+
+
+
+Docker et Docker Compose (optionnel pour le déploiement conteneurisé)
+
+
+
+Python 3.11 et pip
 
 Installation
+
+
+
+
 
 Clonez le dépôt :
 
 git clone https://github.com/D-Goth/NeoBerry.git
 cd NeoBerry
 
+
+
 Installez les dépendances :
 
 pip install -r requirements.txt
 
+
+
 Lancez l’application :
 
-python app.py
+python app/main.py
+
+
 
 Ouvrez http://<IP-de-votre-Pi>:5000 dans un navigateur.
 
+Déploiement avec Docker
+
+
+
+
+
+Assurez-vous que Docker est installé :
+
+sudo apt install docker.io docker-compose
+
+
+
+Lancez le conteneur :
+
+docker-compose up --build
+
 Configuration
 
-Assurez-vous d’avoir une Raspberry Pi avec Raspberry Pi OS.
 
-Vérifiez que les broches GPIO sont correctement configurées dans app.py.
+
+
+
+Les broches GPIO sont configurées dans app/gpio_interface.py.
+
+
+
+Pour tester sans Raspberry Pi, activez le mode simulation dans gpio_interface.py.
