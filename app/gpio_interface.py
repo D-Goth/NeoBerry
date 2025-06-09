@@ -1,5 +1,5 @@
-import RPi.GPIO as GPIO
 import time
+import platform
 
 class GPIOInterface:
     def __init__(self):
@@ -8,36 +8,42 @@ class GPIOInterface:
         self._setup()
 
     def _setup(self):
-        try:
+        if platform.machine().startswith('arm'):  # Vérifie si c'est un Raspberry Pi
+            import RPi.GPIO as GPIO
             GPIO.setmode(GPIO.BCM)
             for pin in self.PINS:
                 GPIO.setup(pin, GPIO.OUT)
                 GPIO.output(pin, GPIO.LOW)
             GPIO.setup(self.FAN_PIN, GPIO.OUT)
-            self.fan_pwm = GPIO.PWM(self.FAN_PIN, 100)  # 100 Hz
+            self.fan_pwm = GPIO.PWM(self.FAN_PIN, 100)
             self.fan_pwm.start(0)
-        except:
-            print("Mode simulation activé (pas de RPi.GPIO)")
+            self._simulate = False
+        else:
+            print("Mode simulation activé (pas sur un Raspberry Pi)")
             self._simulate = True
 
     def get_pin_states(self):
-        if hasattr(self, '_simulate'):
+        if hasattr(self, '_simulate') and self._simulate:
             return {pin: False for pin in self.PINS}
+        import RPi.GPIO as GPIO
         return {pin: GPIO.input(pin) == GPIO.HIGH for pin in self.PINS}
 
     def set_pin_state(self, pin, state):
         if pin not in self.PINS:
             return
-        if not hasattr(self, '_simulate'):
+        if not (hasattr(self, '_simulate') and self._simulate):
+            import RPi.GPIO as GPIO
             GPIO.output(pin, GPIO.HIGH if state else GPIO.LOW)
 
     def set_fan_speed(self, speed):
-        if not hasattr(self, '_simulate'):
-            duty_cycle = min(100, max(0, speed))  # Limiter entre 0 et 100
+        if not (hasattr(self, '_simulate') and self._simulate):
+            import RPi.GPIO as GPIO
+            duty_cycle = min(100, max(0, speed))
             self.fan_pwm.ChangeDutyCycle(duty_cycle)
 
     def cleanup(self):
-        if not hasattr(self, '_simulate'):
+        if not (hasattr(self, '_simulate') and self._simulate):
+            import RPi.GPIO as GPIO
             self.fan_pwm.stop()
             for pin in self.PINS:
                 GPIO.output(pin, GPIO.LOW)
