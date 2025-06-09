@@ -22,7 +22,9 @@ Ventilateur PWM connecté à GPIO 18 (optionnel)
 
 Installation sans Docker
 
-Clonez le dépôt :git clone https://github.com/D-Goth/NeoBerry.git
+Clonez le dépôt :
+git clone https://github.com/D-Goth/NeoBerry.git
+
 cd NeoBerry
 
 
