@@ -1,6 +1,107 @@
-MIT License
+NeoBerry GPIO Control License (Version 1.0 - 2025)
+© 2025 [Loïc HERAUDEAU "D-Goth" | Black-Lab.fr]
 
-Copyright (c) 2025
+Droits d'utilisation
+Vous êtes libre d'utiliser, exécuter et modifier ce logiciel à des fins personnelles et non commerciales.
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-... (truncated for brevity) ...
+Toute amélioration, modification ou extension du projet doit obligatoirement mentionner le projet original et être distribuée sous les mêmes conditions.
+
+Vous pouvez redistribuer une version modifiée tant qu'elle respecte cette licence, mentionne le projet original et ne vise pas une exploitation commerciale.
+
+Restrictions
+Interdiction de vente ou d'exploitation commerciale
+
+Il est strictement interdit de vendre, louer ou proposer ce logiciel à des fins commerciales sans une autorisation explicite du créateur ([Ton Nom]).
+
+Toute entreprise souhaitant utiliser ce projet à des fins commerciales doit obtenir un accord écrit.
+
+Respect de l'intégrité du projet
+
+Les fonctionnalités essentielles du logiciel ne peuvent être altérées pour créer un projet dérivé sans autorisation explicite.
+
+Il est interdit de retirer ou masquer les crédits (nom du logiciel, créateur, mentions GitHub) affichés dans l’interface ou la documentation.
+
+Clause de non-responsabilité en cas de dommage matériel
+
+Le créateur décline toute responsabilité en cas de dommages matériels liés à l’utilisation du logiciel, notamment la gestion des GPIO pouvant endommager un Raspberry Pi ou d’autres composants électroniques.
+
+L’utilisateur assume l’intégralité des risques liés à l’exploitation de ce logiciel.
+
+Interdiction de rétro-ingénierie ou d’exploitation abusive
+
+Il est interdit de modifier, désassembler ou analyser le code source dans le but de s’approprier ou reproduire son fonctionnement pour un projet concurrent.
+
+Tout projet basé sur NeoBerry doit mentionner clairement l’origine du code.
+
+Clause d’évolution et mise à jour de la licence
+
+Le créateur se réserve le droit de modifier cette licence dans le futur pour améliorer la protection du logiciel.
+
+Les nouvelles versions de la licence s’appliqueront aux mises à jour du projet et devront être respectées par tous les utilisateurs.
+
+Exceptions et autorisations spécifiques
+Si vous souhaitez :
+
+Utiliser ce projet dans un cadre commercial
+
+Adapter NeoBerry GPIO Control dans un produit professionnel
+
+Vous devez obtenir une autorisation écrite du créateur. Contactez [ton adresse email / site web] pour discuter des licences commerciales.
+
+Acceptation des conditions
+En utilisant ce logiciel, vous acceptez les termes de cette licence. Cette licence garantit un logiciel libre et accessible, tout en protégeant son créateur contre les abus et les exploitations non autorisées.
+
+########################################################################################################
+
+NeoBerry GPIO Control License (Version 1.0 - 2025)
+© 2025 [Loïc HERAUDEAU "D-Goth" | Black-Lab.fr
+
+Usage Rights
+You are free to use, run, and modify this software for personal and non-commercial purposes.
+
+Any improvement, modification, or extension of the project must explicitly mention the original project and be distributed under the same conditions.
+
+You may redistribute a modified version as long as it respects this license, credits the original project, and does not aim for commercial exploitation.
+
+Restrictions
+Prohibition of sale or commercial exploitation
+
+It is strictly prohibited to sell, rent, or offer this software for commercial purposes without explicit authorization from the creator ([Your Name]).
+
+Any company wishing to use this project commercially must obtain written consent.
+
+Preservation of project integrity
+
+The software’s core functionalities must not be altered to create a derivative project without explicit authorization.
+
+It is forbidden to remove or hide credits (software name, creator, GitHub mentions) displayed in the interface or documentation.
+
+Disclaimer for hardware damage
+
+The creator disclaims all liability for hardware damage resulting from the use of this software, including improper GPIO management that could damage a Raspberry Pi or other electronic components.
+
+The user assumes full responsibility for any risks associated with using this software.
+
+Prohibition of reverse engineering and abusive exploitation
+
+It is prohibited to modify, disassemble, or analyze the source code to appropriate or replicate its functionality for a competing project.
+
+Any project based on NeoBerry must explicitly acknowledge the original source code.
+
+License evolution and updates
+
+The creator reserves the right to modify this license in the future to enhance software protection.
+
+New versions of this license will apply to updates of the project and must be respected by all users.
+
+Exceptions and Specific Authorizations
+If you wish to:
+
+Use this project in a commercial environment
+
+Adapt NeoBerry GPIO Control into a professional product
+
+You must obtain written permission from the creator. Contact [your email / website] to discuss commercial licenses.
+
+Acceptance of Terms
+By using this software, you agree to the terms of this license. This license ensures that the software remains free and accessible while protecting its creator from unauthorized exploitation or misuse.

@@ -1,314 +1,497 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>NeoBerry GPIO Control</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css?cache_bust=20250609" rel="stylesheet">
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js?cache_bust=20250609"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js?cache_bust=20250609"></script>
-    <style>
-        body { background-color: #121212; color: #fff; font-family: Arial, sans-serif; margin: 0; padding: 0; }
-        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
-        h1, h2 { text-align: center; margin-bottom: 20px; }
-
-        .led {
-            width: 20px; height: 20px; border-radius: 50%; display: inline-block; margin: 0 5px; border: 1px solid #fff;
-        }
-        .led-on { background-color: #28a745; }
-        .led-off { background-color: #dc3545; }
-        .led-blink { animation: blink 0.5s infinite; }
-        @keyframes blink { 50% { opacity: 0.3; } }
-
-        .gpio-container { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-bottom: 20px; }
-        .gpio-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 20px; }
-        .gpio-item { display: flex; align-items: center; margin: 5px; }
-        .info-btn { margin-left: 5px; cursor: pointer; }
-
-        .rpi-image { text-align: center; margin-bottom: 20px; }
-        .rpi-image img { height: auto; }
-
-        .meter-container h2 { margin-top: 0; }
-        .meter-table { width: 100%; border-collapse: separate; border-spacing: 10px; }
-        .meter-frame {
-            border: 2px solid #2c2c2c; border-radius: 10px; padding: 10px; text-align: center; min-height: 150px; position: relative; background-color: #2c2c2c;
-        }
-        .meter {
-            height: 100px; width: 40px; margin: 0 auto; background-color: #444; position: relative; display: inline-block;
-        }
-        .meter .fill {
-            width: 100%; position: absolute; bottom: 0; background: linear-gradient(to top, #28a745 0%, #dc3545 100%);
-            transition: height 0.5s ease-in-out;
-        }
-        .meter .value { position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); font-size: 14px; color: #fff; }
-
-        .bandwidth-container h2 { margin-top: 20px; }
-        .bandwidth-table { width: 100%; border-collapse: separate; border-spacing: 10px; }
-        .bandwidth-frame {
-            border: 2px solid #2c2c2c; border-radius: 10px; padding: 10px; text-align: center; min-height: 150px; position: relative; background-color: #2c2c2c;
-            display: flex; justify-content: center; align-items: center; flex-direction: column;
-        }
-        .bandwidth {
-            width: 200px; height: 20px; margin: 0 auto; background-color: #444; position: relative; display: block;
-        }
-        .bandwidth .fill {
-            height: 100%; position: absolute; left: 0; background: linear-gradient(to right, #28a745 0%, #dc3545 100%);
-            transition: width 0.5s ease-in-out;
-        }
-        .bandwidth .value { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 14px; color: #fff; }
-
-        .button-container { text-align: center; margin-top: 20px; display: flex; justify-content: center; align-items: center; gap: 20px; }
-        .button-container > * { display: flex; flex-direction: column; align-items: center; }
-        .button-container img { width: 50px; height: 50px; cursor: pointer; }
-        .button-label { font-size: 12px; display: block; margin-top: 5px; }
-
-        @media (max-width: 768px) {
-            .gpio-row { flex-direction: column; align-items: center; }
-            .meter { height: 80px; width: 30px; }
-            .bandwidth { width: 150px; height: 15px; }
-            .meter-frame, .bandwidth-frame { min-height: 120px; }
-            .meter .value, .bandwidth .value { font-size: 12px; }
-            .button-container { flex-direction: row; flex-wrap: nowrap; }
-            .button-container img { width: 40px; height: 40px; }
-            .button-label { font-size: 10px; }
-        }
-    </style>
+  <meta charset="UTF-8">
+  <title>NeoBerry GPIO Control</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css?cache_bust=20250609" rel="stylesheet">
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js?cache_bust=20250609"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js?cache_bust=20250609"></script>
+  <style>
+    body { 
+      background-color: #121212; 
+      color: #fff; 
+      font-family: Arial, sans-serif; 
+      margin: 0; 
+      padding: 0; 
+    }
+    .container { 
+      max-width: 1200px; 
+      margin: 0 auto; 
+      padding: 20px; 
+    }
+    /* Top bar regroupant le logo et le bouton de déconnexion */
+    .top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+    .top-bar .logo {
+      height: 50px;
+    }
+    /* Bouton de déconnexion personnalisé */
+    .btn-logout {
+      background-color: #00796B;
+      border: none;
+      color: #fff;
+    }
+    .btn-logout:hover {
+      background-color: #00695C;
+    }
+    h1, h2 { 
+      text-align: center; 
+      margin-bottom: 20px; 
+    }
+    /* Grille responsive pour la présentation des GPIO */
+    .gpio-container {
+      display: grid;
+      grid-template-columns: repeat(10, 1fr);
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    @media (max-width: 768px) {
+      .gpio-container {
+        grid-template-columns: repeat(5, 1fr);
+      }
+    }
+    .gpio-item {
+      background-color: #2c2c2c;
+      border: 1px solid #444;
+      border-radius: 5px;
+      padding: 5px;
+      text-align: center;
+    }
+    .pin-number {
+      display: block;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+    .led {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      display: inline-block;
+      border: 1px solid #fff;
+      margin-bottom: 5px;
+    }
+    .led-on { background-color: #28a745; }
+    .led-off { background-color: #dc3545; }
+    .led-blink {
+      animation: blink 0.5s infinite;
+    }
+    @keyframes blink {
+      50% { opacity: 0.3; }
+    }
+    /* Reste du style pour la zone System */
+    .rpi-image {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .rpi-image img {
+      height: auto;
+    }
+    .meter-container h2 { margin-top: 0; }
+    .meter-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 10px;
+    }
+    .meter-frame {
+      border: 2px solid #2c2c2c;
+      border-radius: 10px;
+      padding: 10px;
+      text-align: center;
+      min-height: 150px;
+      position: relative;
+      background-color: #2c2c2c;
+    }
+    .meter {
+      height: 100px;
+      width: 60px;
+      margin: 0 auto;
+      background-color: #444;
+      position: relative;
+      display: inline-block;
+    }
+    .meter .fill {
+      width: 100%;
+      position: absolute;
+      bottom: 0;
+      background: linear-gradient(to top, #28a745 0%, #dc3545 100%);
+      transition: height 0.5s ease-in-out;
+    }
+    .meter .value {
+      position: absolute;
+      bottom: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 14px;
+      color: #fff;
+    }
+    /* Zone Network */
+    .bandwidth-container h2 { margin-top: 20px; }
+    .bandwidth-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 10px;
+    }
+    .bandwidth-frame {
+      border: 2px solid #2c2c2c;
+      border-radius: 10px;
+      padding: 10px;
+      text-align: center;
+      min-height: 150px;
+      position: relative;
+      background-color: #2c2c2c;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+    }
+    .bandwidth {
+      width: 400px;
+      height: 30px;
+      margin: 0 auto;
+      background-color: #444;
+      position: relative;
+      display: block;
+    }
+    .bandwidth .fill {
+      height: 100%;
+      position: absolute;
+      left: 0;
+      background: linear-gradient(to right, #28a745 0%, #dc3545 100%);
+      transition: width 0.5s ease-in-out;
+    }
+    .bandwidth .value {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 14px;
+      color: #fff;
+    }
+    .button-container {
+      text-align: center;
+      margin-top: 20px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 20px;
+    }
+    .button-container > * {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .button-container img {
+      width: 50px;
+      height: 50px;
+      cursor: pointer;
+    }
+    .button-label {
+      font-size: 12px;
+      display: block;
+      margin-top: 5px;
+    }
+    @media (max-width: 768px) {
+      .meter { height: 80px; width: 45px; }
+      .bandwidth { width: 300px; height: 22px; }
+      .meter-frame, .bandwidth-frame { min-height: 120px; }
+      .meter .value, .bandwidth .value { font-size: 12px; }
+      .button-container img { width: 40px; height: 40px; }
+      .button-label { font-size: 10px; }
+    }
+  </style>
 </head>
 <body>
-<div class="container">
+  <div class="container">
+    <!-- Top bar avec logo et déconnexion -->
+    <div class="top-bar">
+      <img src="/img/website.png" alt="Logo" class="logo">
+      <a href="{{ url_for('logout') }}" class="btn btn-logout">Déconnexion</a>
+    </div>
+    
     <h1>NeoBerry GPIO Control</h1>
-
+<hr class="separator">
+    <!-- Zone GPIO en grid responsive -->
     <div class="gpio-container">
-        <div class="gpio-row">
-            {% for pin in range(1, 21) %}
-                {% set state = pins.get(pin, False) %}
-                {% set active = activity.get(pin, False) and state %}
-                <div class="gpio-item">
-                    <span>{{ pin }}</span>
-                    <span class="led {{ 'led-on led-blink' if active else 'led-on' if state else 'led-off' }}"></span>
-                    <div class="form-check form-switch">
-                        <input class="form-check-input toggle-switch" type="checkbox" role="switch" id="switch-{{ pin }}" data-pin="{{ pin }}" {{ 'checked' if state else '' }}>
-                    </div>
-                    <span class="info-btn" onclick="editInfo({{ pin }})" data-bs-toggle="tooltip" data-bs-placement="top" title="Cliquez pour éditer l'info de la pin {{ pin }}">?</span>
-                </div>
-            {% endfor %}
+      {% for pin in range(1, 41) %}
+        {% set state = pins.get(pin, False) %}
+        {% set active = activity.get(pin, False) and state %}
+        <div class="gpio-item">
+          <span class="pin-number">{{ pin }}</span>
+          <span class="led {{ 'led-on led-blink' if active else 'led-on' if state else 'led-off' }}"></span>
+          <div class="form-check form-switch">
+            <input class="form-check-input toggle-switch" type="checkbox" role="switch"
+                   id="switch-{{ pin }}" data-pin="{{ pin }}"
+                   {{ 'checked' if state else '' }}>
+          </div>
         </div>
-        <div class="gpio-row">
-            {% for pin in range(21, 41) %}
-                {% set state = pins.get(pin, False) %}
-                {% set active = activity.get(pin, False) and state %}
-                <div class="gpio-item">
-                    <span>{{ pin }}</span>
-                    <span class="led {{ 'led-on led-blink' if active else 'led-on' if state else 'led-off' }}"></span>
-                    <div class="form-check form-switch">
-                        <input class="form-check-input toggle-switch" type="checkbox" role="switch" id="switch-{{ pin }}" data-pin="{{ pin }}" {{ 'checked' if state else '' }}>
-                    </div>
-                    <span class="info-btn" onclick="editInfo({{ pin }})" data-bs-toggle="tooltip" data-bs-placement="top" title="Cliquez pour éditer l'info de la pin {{ pin }}">?</span>
-                </div>
-            {% endfor %}
-        </div>
+      {% endfor %}
     </div>
 
     <div class="rpi-image">
-        <img src="/img/RPIGPIO-800px.png" alt="Raspberry Pi GPIO Schematic">
+      <img src="/img/RPIGPIO-800px.png" alt="Raspberry Pi GPIO Schematic">
     </div>
 
     <div class="meter-container">
-        <h2>System</h2>
-        <table class="meter-table">
-            <tbody id="meters-body">
-                <tr>
-                    <td><div class="meter-frame"><div class="meter" data-label="cpu"><div class="fill" id="cpu-meter-fill"></div><div class="value" id="cpu">{{ metrics.cpu_usage or 'N/A' }}%</div></div><div class="label">CPU Usage</div></div></td>
-                    <td><div class="meter-frame"><div class="meter" data-label="ram"><div class="fill" id="ram-meter-fill"></div><div class="value" id="ram">{{ metrics.ram_usage or 'N/A' }}%</div></div><div class="label">Memory Usage</div></div></td>
-                    <td><div class="meter-frame"><div class="meter" data-label="board-temp"><div class="fill" id="board-temp-meter-fill"></div><div class="value" id="board-temp">{{ metrics.board_temp or 'N/A' }}°C</div></div><div class="label">Board Temp</div></div></td>
-                    <td><div class="meter-frame"><div class="meter" data-label="cpu-temp"><div class="fill" id="cpu-temp-meter-fill"></div><div class="value" id="cpu-temp">{{ metrics.cpu_temp or 'N/A' }}°C</div></div><div class="label">CPU Temp</div></div></td>
-                    <td><div class="meter-frame"><div class="meter" data-label="fan-speed"><div class="fill" id="fan-speed-meter-fill"></div><div class="value" id="fan-speed">{{ metrics.fan_speed or 'N/A' }} RPM</div></div><div class="label">Fan Speed</div></div></td>
-                </tr>
-            </tbody>
-        </table>
+      <h2>System</h2>
+      <hr class="separator">
+      <table class="meter-table">
+        <tbody id="meters-body">
+          <tr>
+            <td>
+              <div class="meter-frame">
+                <div class="meter" data-label="cpu">
+                  <div class="fill" id="cpu-meter-fill"></div>
+                  <div class="value" id="cpu">{{ metrics.cpu_usage or 'N/A' }}%</div>
+                </div>
+                <div class="label">CPU Usage</div>
+              </div>
+            </td>
+            <td>
+              <div class="meter-frame">
+                <div class="meter" data-label="ram">
+                  <div class="fill" id="ram-meter-fill"></div>
+                  <div class="value" id="ram">{{ metrics.ram_usage or 'N/A' }}%</div>
+                </div>
+                <div class="label">Memory Usage</div>
+              </div>
+            </td>
+            <td>
+              <div class="meter-frame">
+                <div class="meter" data-label="board-temp">
+                  <div class="fill" id="board-temp-meter-fill"></div>
+                  <div class="value" id="board-temp">{{ metrics.board_temp or 'N/A' }}°C</div>
+                </div>
+                <div class="label">Board Temp</div>
+              </div>
+            </td>
+            <td>
+              <div class="meter-frame">
+                <div class="meter" data-label="cpu-temp">
+                  <div class="fill" id="cpu-temp-meter-fill"></div>
+                  <div class="value" id="cpu-temp">{{ metrics.cpu_temp or 'N/A' }}°C</div>
+                </div>
+                <div class="label">CPU Temp</div>
+              </div>
+            </td>
+            <td>
+              <div class="meter-frame">
+                <div class="meter" data-label="fan-speed">
+                  <div class="fill" id="fan-speed-meter-fill"></div>
+                  <div class="value" id="fan-speed">{{ metrics.fan_speed or 'N/A' }} RPM</div>
+                </div>
+                <div class="label">Fan Speed</div>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
 
     <div class="bandwidth-container">
-        <h2>Network</h2>
-        <table class="bandwidth-table">
-            <tbody id="bandwidth-body">
-                <tr>
-                    <td><div class="bandwidth-frame"><div class="bandwidth" data-label="up"><div class="fill" id="network-up-fill"></div><div class="value" id="network-up">{{ metrics.network_up or 'N/A' }}</div></div><div class="label">Upload</div></div></td>
-                    <td><div class="bandwidth-frame"><div class="bandwidth" data-label="down"><div class="fill" id="network-down-fill"></div><div class="value" id="network-down">{{ metrics.network_down or 'N/A' }}</div></div><div class="label">Download</div></div></td>
-                </tr>
-                <tr>
-                    <td colspan="2" style="text-align: center; padding-top: 10px;">
-                        <select id="refresh-interval" onchange="updateRefreshInterval()">
-                            <option value="0">Temps réel</option>
-                            <option value="250">0.25s</option>
-                            <option value="500">0.5s</option>
-                            <option value="1000" selected>1s</option>
-                            <option value="2000">2s</option>
-                            <option value="5000">5s</option>
-                            <option value="10000">10s</option>
-                            <option value="30000">30s</option>
-                            <option value="60000">60s</option>
-                        </select>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
+      <h2>Network</h2>
+      <hr class="separator">
+      <table class="bandwidth-table">
+        <tbody id="bandwidth-body">
+          <tr>
+            <td>
+              <div class="bandwidth-frame">
+                <div class="bandwidth" data-label="up">
+                  <div class="fill" id="network-up-fill"></div>
+                  <div class="value" id="network-up">{{ metrics.network_up or 'N/A' }}</div>
+                </div>
+                <div class="label">Upload</div>
+              </div>
+            </td>
+            <td>
+              <div class="bandwidth-frame">
+                <div class="bandwidth" data-label="down">
+                  <div class="fill" id="network-down-fill"></div>
+                  <div class="value" id="network-down">{{ metrics.network_down or 'N/A' }}</div>
+                </div>
+                <div class="label">Download</div>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td colspan="2" style="text-align: center; padding-top: 10px;">
+              <select id="refresh-interval" onchange="updateRefreshInterval()">
+                <option value="0">Temps réel</option>
+                <option value="250">0.25s</option>
+                <option value="500">0.5s</option>
+                <option value="1000" selected>1s</option>
+                <option value="2000">2s</option>
+                <option value="5000">5s</option>
+                <option value="10000">10s</option>
+                <option value="30000">30s</option>
+                <option value="60000">60s</option>
+              </select>
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
 
     <div class="button-container">
-        <a href="https://github.com/D-Goth/NeoBerry" target="_blank"><img src="/img/github.png" alt="GitHub"><span class="button-label">GitHub</span></a>
-        <img src="/img/reboot.gif" alt="Reboot" onclick="rebootPi()"><span class="button-label">Reboot</span>
-        <img src="/img/shutdown.gif" alt="Shutdown" onclick="shutdownPi()"><span class="button-label">Shutdown</span>
-        <a href="https://www.Black-Lab.Fr" target="_blank"><img src="/img/website.png" alt="Website"><span class="button-label">Website</span></a>
+    <hr class="separator">
+      <a href="https://github.com/D-Goth/NeoBerry" target="_blank">
+        <img src="/img/github.png" alt="GitHub">
+        <span class="button-label">GitHub</span>
+      </a>
+      <img src="/img/reboot.gif" alt="Reboot" onclick="rebootPi()">
+      <span class="button-label">Reboot</span>
+      <img src="/img/shutdown.gif" alt="Shutdown" onclick="shutdownPi()">
+      <span class="button-label">Shutdown</span>
+      <a href="https://www.Black-Lab.Fr" target="_blank">
+        <img src="/img/website.png" alt="Website">
+        <span class="button-label">Website</span>
+      </a>
     </div>
-</div>
+  </div>
 
-<script>
+  <script>
     function updateMeter(id, value) {
-        const fill = document.getElementById(id + '-meter-fill');
-        const display = document.getElementById(id);
-        if (fill && display) {
-            let percent = parseFloat(value) || 0;
-            percent = Math.min(100, percent); // Limite à 100%
-            fill.style.height = percent + '%';
-            display.textContent = percent + (id.includes('temp') ? '°C' : id.includes('speed') ? ' RPM' : '%');
-            
-            // Choix de couleur dynamique
-            let color;
-            if (percent < 25) {
-                color = '#00CED1'; // Turquoise
-            } else if (percent < 50) {
-                color = '#28a745'; // Vert
-            } else if (percent < 65) {
-                color = '#ffd700'; // Jaune
-            } else if (percent < 80) {
-                color = '#ffc107'; // Orange
-            } else {
-                color = '#dc3545'; // Rouge
-            }
-            fill.style.backgroundColor = color;
-            fill.style.backgroundImage = 'none'; // Supprime le gradient
-            console.log(`Updated ${id} to ${percent}% with color ${color}`);
+      const fill = document.getElementById(id + '-meter-fill');
+      const display = document.getElementById(id);
+      if (fill && display) {
+        let percent = parseFloat(value) || 0;
+        percent = Math.min(100, percent);
+        fill.style.height = percent + '%';
+        display.textContent = percent + (id.includes('temp') ? '°C' : id.includes('speed') ? ' RPM' : '%');
+        let color;
+        if (percent < 25) {
+          color = '#00CED1';
+        } else if (percent < 50) {
+          color = '#28a745';
+        } else if (percent < 65) {
+          color = '#ffd700';
+        } else if (percent < 80) {
+          color = '#ffc107';
+        } else {
+          color = '#dc3545';
         }
+        fill.style.backgroundColor = color;
+        fill.style.backgroundImage = 'none';
+      }
     }
 
     function updateBandwidth(id, value) {
-        const fill = document.getElementById(id + '-fill');
-        const display = document.getElementById(id.replace('-fill', ''));
-        if (fill && display) {
-            let percent = 0;
-            if (value !== 'N/A') {
-                const bytes_per_sec = parseValueToBytes(value);
-                const max_bandwidth = 100 * 1024 * 1024; // 100 MB/s
-                percent = Math.min(100, (bytes_per_sec / max_bandwidth) * 100);
-            }
-            fill.style.width = percent + '%';
-            display.textContent = value;
-            let color;
-            if (percent < 25) {
-                color = '#00CED1'; // Turquoise
-            } else if (percent < 50) {
-                color = '#28a745'; // Vert
-            } else if (percent < 65) {
-                color = '#ffd700'; // Jaune
-            } else if (percent < 80) {
-                color = '#ffc107'; // Orange
-            } else {
-                color = '#dc3545'; // Rouge
-            }
-            fill.style.backgroundColor = color;
-            fill.style.backgroundImage = 'none';
-            console.log(`Updated ${id} to ${percent}% with color ${color}`);
+      const fill = document.getElementById(id + '-fill');
+      const display = document.getElementById(id.replace('-fill', ''));
+      if (fill && display) {
+        let percent = 0;
+        if (value !== 'N/A') {
+          const bytes_per_sec = parseValueToBytes(value);
+          const max_bandwidth = 10 * 1024 * 1024;
+          percent = Math.min(100, (bytes_per_sec / max_bandwidth) * 100);
         }
+        fill.style.width = percent + '%';
+        display.textContent = value;
+        let color;
+        if (percent < 25) {
+          color = '#00CED1';
+        } else if (percent < 50) {
+          color = '#28a745';
+        } else if (percent < 65) {
+          color = '#ffd700';
+        } else if (percent < 80) {
+          color = '#ffc107';
+        } else {
+          color = '#dc3545';
+        }
+        fill.style.backgroundColor = color;
+        fill.style.backgroundImage = 'none';
+      }
     }
 
     function parseValueToBytes(value) {
-        const match = value.match(/(\d+\.?\d*)\s*(B|KB|MB|GB)\/s/);
-        if (!match) return 0;
-        const num = parseFloat(match[1]);
-        const unit = match[2];
-        const units = { 'B': 1, 'KB': 1024, 'MB': 1024 * 1024, 'GB': 1024 * 1024 * 1024 };
-        return num * units[unit];
+      const match = value.match(/(\d+\.?\d*)\s*(B|KB|MB|GB)\/s/);
+      if (!match) return 0;
+      const num = parseFloat(match[1]);
+      const unit = match[2];
+      const units = { 'B': 1, 'KB': 1024, 'MB': 1024 * 1024, 'GB': 1024 * 1024 * 1024 };
+      return num * units[unit];
     }
-
-    function updateStatus() {
-        console.log("Calling /status");
-        $.getJSON('/status', function (data) {
-            console.log("Metrics received:", data.metrics);
-            const metrics = data.metrics;
-            updateMeter('cpu', metrics.cpu_usage || 0);
-            updateMeter('ram', metrics.ram_usage || 0);
-            updateMeter('board-temp', metrics.board_temp || 0);
-            updateMeter('cpu-temp', metrics.cpu_temp || 0);
-            updateMeter('fan-speed', metrics.fan_speed || 0);
-            updateBandwidth('network-up', metrics.network_up || 'N/A');
-            updateBandwidth('network-down', metrics.network_down || 'N/A');
-            // Gestion des disques si présents
-            if (metrics.disks) {
-                for (let disk in metrics.disks) {
-                    updateMeter(disk, metrics.disks[disk].usage || 0);
-                }
-            }
-        }).fail(function (jqXHR, textStatus, errorThrown) {
-            console.log("Erreur AJAX: ", textStatus, errorThrown);
-        });
-    }
-
-    $(document).ready(function () {
-        // Initialiser les tooltips Bootstrap
-        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-        tooltipTriggerList.map(function (tooltipTriggerEl) {
-            return new bootstrap.Tooltip(tooltipTriggerEl);
-        });
-
-        $('.toggle-switch').on('change', function () {
-            const pin = $(this).data('pin');
-            const state = $(this).is(':checked');
-            $.ajax({
-                url: `/toggle/${pin}`,
-                method: 'POST',
-                data: { state: state },
-                success: updateStatus,
-                error: function () {
-                    alert('Erreur lors du basculement de la broche ' + pin);
-                    $(`#switch-${pin}`).prop('checked', !state);
-                }
-            });
-        });
-
-        let refreshInterval = 1000; // Défaut : 1s
-        function updateRefreshInterval() {
-            const interval = parseInt($('#refresh-interval').val());
-            refreshInterval = interval === 0 ? 100 : interval;
-            clearInterval(updateStatusInterval);
-            updateStatusInterval = setInterval(updateStatus, refreshInterval);
-            console.log("Interval updated to", refreshInterval, "ms");
-        }
-
-        let updateStatusInterval = setInterval(updateStatus, refreshInterval);
-        console.log("Interval started, refreshing every", refreshInterval, "ms");
-
-        // Appels initiaux avec les données rendues
-        updateMeter('cpu', {{ metrics.cpu_usage or 0 }});
-        updateMeter('ram', {{ metrics.ram_usage or 0 }});
-        updateMeter('board-temp', {{ metrics.board_temp or 0 }});
-        updateMeter('cpu-temp', {{ metrics.cpu_temp or 0 }});
-        updateMeter('fan-speed', {{ metrics.fan_speed or 0 }});
-        updateBandwidth('network-up', '{{ metrics.network_up or 0 }}');
-        updateBandwidth('network-down', '{{ metrics.network_down or 0 }}');
-    });
 
     function rebootPi() {
-        if (confirm('Voulez-vous redémarrer la Raspberry Pi ?')) {
-            $.get('/reboot');
-        }
+      if (confirm('Voulez-vous redémarrer la Raspberry Pi ?')) {
+        $.get('/reboot');
+      }
     }
 
     function shutdownPi() {
-        if (confirm('Voulez-vous éteindre la Raspberry Pi ?')) {
-            $.get('/shutdown');
-        }
+      if (confirm('Voulez-vous éteindre la Raspberry Pi ?')) {
+        $.get('/shutdown');
+      }
     }
-</script>
 
+    function updateStatus() {
+      console.log("Calling /status");
+      $.getJSON('/status', function(data) {
+        console.log("Metrics received:", data.metrics);
+        const metrics = data.metrics;
+        updateMeter('cpu', metrics.cpu_usage || 0);
+        updateMeter('ram', metrics.ram_usage || 0);
+        updateMeter('board-temp', metrics.board_temp || 0);
+        updateMeter('cpu-temp', metrics.cpu_temp || 0);
+        updateMeter('fan-speed', metrics.fan_speed || 0);
+        updateBandwidth('network-up', metrics.network_up || 'N/A');
+        updateBandwidth('network-down', metrics.network_down || 'N/A');
+        if (metrics.disks) {
+          for (let disk in metrics.disks) {
+            updateMeter(disk, metrics.disks[disk].usage || 0);
+          }
+        }
+      }).fail(function(jqXHR, textStatus, errorThrown) {
+        console.log("Erreur AJAX: ", textStatus, errorThrown);
+      });
+    }
+
+    $(document).ready(function() {
+      const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+      tooltipTriggerList.map(function(tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+      });
+
+      $('.toggle-switch').on('change', function() {
+        const pin = $(this).data('pin');
+        const state = $(this).is(':checked');
+        $.ajax({
+          url: `/toggle/${pin}`,
+          method: 'POST',
+          data: { state: state },
+          success: updateStatus,
+          error: function() {
+            alert('Erreur lors du basculement de la broche ' + pin);
+            $(`#switch-${pin}`).prop('checked', !state);
+          }
+        });
+      });
+
+      let refreshInterval = 1000;
+      function updateRefreshInterval() {
+        const interval = parseInt($('#refresh-interval').val());
+        refreshInterval = interval === 0 ? 100 : interval;
+        clearInterval(updateStatusInterval);
+        updateStatusInterval = setInterval(updateStatus, refreshInterval);
+        console.log("Interval updated to", refreshInterval, "ms");
+      }
+
+      let updateStatusInterval = setInterval(updateStatus, refreshInterval);
+      console.log("Interval started, refreshing every", refreshInterval, "ms");
+
+      updateMeter('cpu', {{ metrics.cpu_usage or 0 }});
+      updateMeter('ram', {{ metrics.ram_usage or 0 }});
+      updateMeter('board-temp', {{ metrics.board_temp or 0 }});
+      updateMeter('cpu-temp', {{ metrics.cpu_temp or 0 }});
+      updateMeter('fan-speed', {{ metrics.fan_speed or 0 }});
+      updateBandwidth('network-up', '{{ metrics.network_up or "0 B/s" }}');
+      updateBandwidth('network-down', '{{ metrics.network_down or "0 B/s" }}');
+    });
+  </script>
 </body>
 </html>
+

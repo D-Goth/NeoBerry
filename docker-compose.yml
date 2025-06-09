@@ -1,16 +1,14 @@
-version: '3.8'
+version: "3.8"
+
 services:
   neoberry:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    container_name: neoberry_app
+    build: .
     ports:
       - "5000:5000"
     volumes:
       - .:/app
-    privileged: true  # Nécessaire pour accéder aux GPIO
-    devices:
-      - "/dev/gpiomem:/dev/gpiomem"  # Accès aux GPIO
     environment:
-      - FLASK_ENV=development
-    command: python app/main.py
+      - FLASK_SECRET_KEY=changeme
+    restart: unless-stopped
+
