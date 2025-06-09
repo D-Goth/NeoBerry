@@ -174,9 +174,13 @@
             
             // Choix de couleur dynamique
             let color;
-            if (percent < 50) {
+            if (percent < 25) {
+                color = '#00CED1'; // Turquoise
+            } else if (percent < 50) {
                 color = '#28a745'; // Vert
-            } else if (percent < 75) {
+            } else if (percent < 65) {
+                color = '#ffd700'; // Jaune
+            } else if (percent < 80) {
                 color = '#ffc107'; // Orange
             } else {
                 color = '#dc3545'; // Rouge
@@ -200,12 +204,16 @@
             fill.style.width = percent + '%';
             display.textContent = value;
             let color;
-            if (percent < 50) {
-                color = '#28a745';
-            } else if (percent < 75) {
-                color = '#ffc107';
+            if (percent < 25) {
+                color = '#00CED1'; // Turquoise
+            } else if (percent < 50) {
+                color = '#28a745'; // Vert
+            } else if (percent < 65) {
+                color = '#ffd700'; // Jaune
+            } else if (percent < 80) {
+                color = '#ffc107'; // Orange
             } else {
-                color = '#dc3545';
+                color = '#dc3545'; // Rouge
             }
             fill.style.backgroundColor = color;
             fill.style.backgroundImage = 'none';
@@ -267,15 +275,6 @@
             });
         });
 
-        function editInfo(pin) {
-            let currentInfo = getCookie(`pin_${pin}_info`) || `Info sur la pin ${pin}`;
-            let newInfo = prompt('Entrez une description pour la pin ' + pin, currentInfo);
-            if (newInfo) {
-                setCookie(`pin_${pin}_info`, newInfo, 365);
-                $(`[data-pin="${pin}"] + .info-btn`).attr('title', newInfo).tooltip('dispose').tooltip('show');
-            }
-        }
-
         let refreshInterval = 1000; // Défaut : 1s
         function updateRefreshInterval() {
             const interval = parseInt($('#refresh-interval').val());
@@ -294,29 +293,9 @@
         updateMeter('board-temp', {{ metrics.board_temp or 0 }});
         updateMeter('cpu-temp', {{ metrics.cpu_temp or 0 }});
         updateMeter('fan-speed', {{ metrics.fan_speed or 0 }});
-        updateBandwidth('network-up', '{{ metrics.network_up or "N/A" }}');
-        updateBandwidth('network-down', '{{ metrics.network_down or "N/A" }}');
+        updateBandwidth('network-up', '{{ metrics.network_up or 0 }}');
+        updateBandwidth('network-down', '{{ metrics.network_down or 0 }}');
     });
-
-    function setCookie(name, value, days) {
-        let expires = "";
-        if (days) {
-            const date = new Date();
-            date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
-            expires = "; expires=" + date.toUTCString();
-        }
-        document.cookie = name + "=" + (value || "") + expires + "; path=/";
-    }
-
-    function getCookie(name) {
-        const nameEQ = name + "=";
-        const ca = document.cookie.split(';');
-        for (let i = 0; i < ca.length; i++) {
-            let c = ca[i].trim();
-            if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
-        }
-        return null;
-    }
 
     function rebootPi() {
         if (confirm('Voulez-vous redémarrer la Raspberry Pi ?')) {
