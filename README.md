@@ -1,6 +1,3 @@
-
-
-````markdown
 # NeoBerry GPIO Control - 🇫🇷
 
 **NeoBerry GPIO Control** est une application web permettant de surveiller et contrôler les GPIO d'un Raspberry Pi via une interface moderne et responsive.
@@ -91,6 +88,7 @@ Voir le fichier `LICENSE`.
 
 * [Page GitHub](https://github.com/D-Goth/NeoBerry)
 
+---
 
 # NeoBerry GPIO Control - 🇬🇧
 
