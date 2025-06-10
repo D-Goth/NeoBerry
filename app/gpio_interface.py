@@ -4,7 +4,7 @@ import platform
 class GPIOInterface:
     def __init__(self):
         self.FAN_PIN = 18
-        self.PINS = list(range(2, 28))
+        self.PINS = list(range(1, 41))
         self._setup()
 
     def _setup(self):
