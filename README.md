@@ -15,6 +15,58 @@
 
 ---
 
+![Python](https://img.shields.io/badge/python-3.11-blue)
+![Licence](https://img.shields.io/badge/licence-MIT-green)
+
+---
+
+## Structure
+
+/NeoBerry
+├──docker-compose.yml
+├──Dockerfile
+├──LICENSE
+├──README.md
+├──requirements.txt
+├──NeoBerry_Tree.txt
+└──/app
+   ├──app.py
+   ├──gpio_interface.py
+   ├── /static
+   ├── /css
+   │   └── style.css
+   ├── /js
+   │   └── script.js
+   ├── /img
+   │   └── wall.jpg
+   └── /templates
+       ├── index.html
+       └── login.html
+
+---
+
+## 📦 Dépendances
+
+* NeoBerry s'appuie sur les bibliothèques Python suivantes :
+
+- psutil — Récupération des informations système (CPU, RAM, température, etc.)
+
+- gpiozero — Interface simplifiée pour piloter les GPIO du Raspberry Pi
+
+- requests — Requêtes HTTP faciles et robustes (communication avec APIs éventuelles)
+
+- werkzeug — Moteur WSGI utilisé sous Flask, pour la gestion des requêtes et des sessions
+
+- six — Compatibilité Python 2 / 3 (dépendance indirecte de certains packages)
+
+- gunicorn — Serveur WSGI performant pour déploiement (production ou staging)
+
+- platformdirs — Détection de chemins système selon OS (utile pour config/temp/logs)
+
+> Toutes les dépendances sont listées dans le fichier requirements.txt. > Pour les installer : > pip install -r requirements.txt
+
+---
+
 ## 🚀 Installation
 
 ### 🔧 1. Installation manuelle
@@ -95,6 +147,58 @@ Voir le fichier `LICENSE`.
 - Secure login via PAM authentication  
 - Protected reboot and shutdown buttons  
 - Test mode available without a Raspberry Pi (GPIO simulation)  
+
+---
+
+![Python](https://img.shields.io/badge/python-3.11-blue)
+![Licence](https://img.shields.io/badge/licence-MIT-green)
+
+---
+
+## Structure
+
+/NeoBerry
+├──docker-compose.yml
+├──Dockerfile
+├──LICENSE
+├──README.md
+├──requirements.txt
+├──NeoBerry_Tree.txt
+└──/app
+   ├──app.py
+   ├──gpio_interface.py
+   ├── /static
+   ├── /css
+   │   └── style.css
+   ├── /js
+   │   └── script.js
+   ├── /img
+   │   └── wall.jpg
+   └── /templates
+       ├── index.html
+       └── login.html
+
+---
+
+## 📦 Dependencies
+
+* NeoBerry relies on the following Python libraries:
+
+- psutil — Retrieves system metrics (CPU, RAM, temperature, etc.)
+
+- gpiozero — Simplified interface for controlling Raspberry Pi GPIO pins
+
+- requests — User-friendly and robust HTTP requests (useful for APIs)
+
+- werkzeug — WSGI engine used by Flask to manage requests and sessions
+
+- six — Compatibility layer between Python 2 and 3 (often used as an indirect dependency)
+
+- gunicorn — High-performance WSGI server for production or staging deployments
+
+- platformdirs — Determines system paths based on OS (for config, temp files, etc.)
+
+> All dependencies are listed in the requirements.txt file. > To install them: > pip install -r requirements.txt
 
 ---
 
