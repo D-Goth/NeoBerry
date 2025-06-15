@@ -8,7 +8,7 @@
 
 - Interface web intuitive et responsive  
 - Affichage et contrôle des broches GPIO  
-- Surveillance des performances système (CPU, RAM, température, réseau)  
+- Surveillance des performances système (CPU, RAM, température, réseau, batterie)  
 - Gestion sécurisée via login avec authentification PAM  
 - Boutons de reboot et shutdown (protégés)  
 - Mode test hors Raspberry Pi avec simulation GPIO  
@@ -141,7 +141,7 @@ Voir le fichier `LICENSE`.
 
 - Intuitive and responsive web interface  
 - Display and control of GPIO pins  
-- System performance monitoring (CPU, RAM, temperature, network)  
+- System performance monitoring (CPU, RAM, temperature, network, battery)  
 - Secure login via PAM authentication  
 - Protected reboot and shutdown buttons  
 - Test mode available without a Raspberry Pi (GPIO simulation)  
