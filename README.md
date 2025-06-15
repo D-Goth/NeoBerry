@@ -8,7 +8,7 @@
 
 - Interface web intuitive et responsive  
 - Affichage et contrôle des broches GPIO  
-- Surveillance des performances système (CPU, RAM, température, réseau, batterie)  
+- Surveillance des performances système (CPU, RAM, température, réseau)  
 - Gestion sécurisée via login avec authentification PAM  
 - Boutons de reboot et shutdown (protégés)  
 - Mode test hors Raspberry Pi avec simulation GPIO  
@@ -72,8 +72,8 @@
 ```bash
 git clone https://github.com/D-Goth/NeoBerry.git
 cd NeoBerry
-pip install -r requirements.txt / ou si restrictions : pip3 install --break-system-packages -r requirements.txt
-python app.py
+sudo apt install python3-flask python3-gpiozero python3-psutil python3-requests python3-werkzeug python3-gunicorn 
+python3.13 app/app.py
 ````
 
 > Accédez ensuite à l'interface via :
@@ -88,7 +88,7 @@ NeoBerry peut être exécuté sur un environnement de test sans Raspberry Pi en 
 #### Étape 1 : Créer et activer un environnement virtuel
 
 ```bash
-sudo apt install python3.12-venv
+sudo apt install python3.13-venv
 python -m venv venv
 source venv/bin/activate      # Sur Linux/macOS
 venv\Scripts\activate         # Sur Windows
@@ -141,7 +141,7 @@ Voir le fichier `LICENSE`.
 
 - Intuitive and responsive web interface  
 - Display and control of GPIO pins  
-- System performance monitoring (CPU, RAM, temperature, network, battery)  
+- System performance monitoring (CPU, RAM, temperature, network)  
 - Secure login via PAM authentication  
 - Protected reboot and shutdown buttons  
 - Test mode available without a Raspberry Pi (GPIO simulation)  
@@ -205,8 +205,8 @@ Voir le fichier `LICENSE`.
 ```bash
 git clone https://github.com/D-Goth/NeoBerry.git
 cd NeoBerry
-pip install -r requirements.txt
-python app.py
+sudo apt install python3-flask python3-gpiozero python3-psutil python3-requests python3-werkzeug python3-gunicorn 
+python3.13 app/app.py
 ````
 
 > Then access the interface at:
@@ -221,7 +221,7 @@ NeoBerry can be run in a test environment without a Raspberry Pi by enabling the
 #### Step 1: Create and activate a virtual environment
 
 ```bash
-sudo apt install python3.12-venv
+sudo apt install python3.13-venv
 python -m venv venv
 source venv/bin/activate      # On Linux/macOS
 venv\Scripts\activate         # On Windows
@@ -263,4 +263,3 @@ See the `LICENSE` file.
 * [GitHub Repository](https://github.com/D-Goth/NeoBerry)
 
 ```
-
