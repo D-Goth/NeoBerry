@@ -23,8 +23,6 @@
 ## Structure
 
 /NeoBerry
-├──docker-compose.yml
-├──Dockerfile
 ├──LICENSE
 ├──README.md
 ├──requirements.txt
@@ -158,8 +156,6 @@ Voir le fichier `LICENSE`.
 ## Structure
 
 /NeoBerry
-├──docker-compose.yml
-├──Dockerfile
 ├──LICENSE
 ├──README.md
 ├──requirements.txt
