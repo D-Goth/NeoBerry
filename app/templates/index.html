@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>NeoBerry - Black-Lab</title>
+<link rel="icon" href="{{ url_for('static', filename='img/rbw-bl_circle_400x400.png') }}" type="image/png">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body>
+  <header>
+    <a href="/" aria-label="Accueil">
+      <img src="{{ url_for('static', filename='img/website.png') }}" alt="Logo NeoBerry - By Black-Lab" id="logo" />
+    </a>
+    <div id="battery-gauge">
+    <div id="battery-level"></div>
+    <div id="battery-fill"></div>
+    <div id="battery-percent"></div>
+    <div id="battery-tip"></div>
+    <div class="gauge-marker" style="left: 25%;"></div>
+    <div class="gauge-marker" style="left: 50%;"></div>
+    <div class="gauge-marker" style="left: 75%;"></div>
+  </div>
+    <a href="/logout" id="logout-btn" role="button" aria-label="Déconnexion">Déconnexion</a>
+  </header>
+
+  <h1>NeoBerry - Black-Lab</h1>
+
+  <div id="refresh-container">
+    <label for="refresh-interval">Intervalle de rafraîchissement :</label>
+    <select id="refresh-interval">
+      <option value="1000">1 seconde</option>
+      <option value="3000" selected>3 secondes</option>
+      <option value="5000">5 secondes</option>
+      <option value="10000">10 secondes</option>
+      <option value="30000">30 secondes</option>
+      <option value="60000">60 secondes</option>
+    </select>
+  </div>
+
+  <section aria-labelledby="gpio-title">
+    <h2 id="gpio-title">Contrôle GPIO</h2>
+    <div id="gpio-controls" role="grid" aria-label="Contrôle des ports GPIO"></div>
+  </section>
+
+  <section aria-labelledby="system-title">
+    <h2 id="system-title">Surveillance Système</h2>
+    <div class="section-content"></div>
+      <div class="system-metrics-0" aria-label="Charge CPU, RAM et Températures">
+        <div class="metric-card-0">
+          <div class="metric-title">Charge CPU</div>
+          <canvas id="cpu-load-gauge" aria-label="Jauge de charge CPU" role="img"></canvas>
+        </div>
+        <div class="metric-card-0">
+          <div class="metric-title">Température CPU</div>
+          <canvas id="cpu-temp-gauge" aria-label="Jauge de température CPU" role="img"></canvas>
+        </div>
+        <div class="metric-card-0">
+          <div class="metric-title">Charge RAM</div>
+          <canvas id="ram-load-gauge" aria-label="Jauge de charge RAM" role="img"></canvas>
+        </div>
+        <div class="metric-card-0">
+          <div class="metric-title">Température Carte</div>
+          <canvas id="board-temp-gauge" aria-label="Jauge de température carte" role="img"></canvas>
+        </div>
+      </section>
+      <section aria-labelledby="system-title">
+    <h2 id="system-title">Surveillance Stockage</h2>
+      <div class="system-metrics" aria-label="Surveillance stockage disque">
+        <div class="metric-card">
+          <div class="metric-title">Capacité Stockage (%)</div>
+          <canvas id="disk-capacity-gauge" aria-label="Jauge capacité stockage" role="img"></canvas>
+        </div>
+        <div class="metric-card">
+          <div class="metric-title">Usage Ecriture (%)</div>
+          <canvas id="disk-write-gauge" aria-label="Jauge usage écriture disque" role="img"></canvas>
+        </div>
+        <div class="metric-card">
+          <div class="metric-title">Usage Lecture (%)</div>
+          <canvas id="disk-read-gauge" aria-label="Jauge usage lecture disque" role="img"></canvas>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="network-title">
+    <h2 id="network-title">État du Réseau</h2>
+    <div class="section-content">
+      <div class="network-field" role="region" aria-label="État Bluetooth">
+        <div style="display:flex; align-items:center; justify-content: space-between;">
+          <span class="network-label">Bluetooth</span>
+          <button id="bluetooth-toggle" class="network-toggle-button" aria-pressed="false" aria-label="Activer ou désactiver le Bluetooth">
+            OFF
+          </button>
+        </div>
+        <div class="network-info" id="bluetooth-device">Périphérique connecté : Aucun</div>
+        <div>
+          <div class="network-label">Qualité de la connexion Bluetooth</div>
+          <canvas id="bluetooth-quality-gauge" aria-label="Jauge qualité connexion Bluetooth" role="img"></canvas>
+        </div>
+      </div>
+ <div class="network-field" role="region" aria-label="État Ethernet et Wifi">
+  <div class="network-label">Type de Réseau</div>
+  <div id="network-type" style="font-weight:700; font-size: 1.1rem; margin-bottom: 12px;">Ethernet</div>
+
+  <div style="display: flex; gap: 24px; justify-content: center; margin-bottom: 20px;">
+    <div style="flex: 1; max-width: 220px; text-align: center;">
+      <div class="network-label">Upload</div>
+      <canvas id="network-up" aria-label="Jauge débit montant réseau" role="img"></canvas>
+    </div>
+    <div style="flex: 1; max-width: 220px; text-align: center;">
+      <div class="network-label">Download</div>
+      <canvas id="network-down" aria-label="Jauge débit descendant réseau" role="img"></canvas>
+    </div>
+  </div>
+
+
+  <div id="wifi-section" style="display:none; margin-top: 18px;">
+    <div class="network-label">Puissance Réseau WiFi</div>
+    <canvas id="wifi-strength-gauge" aria-label="Jauge puissance réseau WiFi" role="img"></canvas>
+    <div class="network-info" id="wifi-ssid">Nom réseau WiFi : Aucun</div>
+  </div>
+</div>
+
+    </div>
+  </section>
+
+  <section aria-labelledby="actions-title">
+    <h2 id="actions-title">Actions</h2>
+    <div id="action-buttons">
+      <a href="https://github.com/D-Goth/NeoBerry" target="_blank" rel="noopener" role="button" tabindex="0">Projet GitHub</a>
+      <a href="https://www.Black-Lab.fr" target="_blank" rel="noopener" role="button" tabindex="0">Site Web Black-Lab</a>
+      <button id="reboot-button" aria-label="Redémarrer le Raspberry Pi">Reboot Raspberry Pi</button>
+      <button id="shutdown-button" aria-label="Éteindre le Raspberry Pi">Shutdown Raspberry Pi</button>
+    </div>
+  </section>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.1"></script>
+<script src="{{ url_for('static', filename='js/script.js') }}" defer></script>
+</body>
+
+</html>
