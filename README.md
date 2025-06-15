@@ -12,7 +12,6 @@
 - Gestion sécurisée via login avec authentification PAM  
 - Boutons de reboot et shutdown (protégés)  
 - Mode test hors Raspberry Pi avec simulation GPIO  
-- Déploiement via Docker pour une installation rapide  
 
 ---
 
@@ -61,14 +60,6 @@ python app/app.py
 
 ---
 
-### 🐳 3. Déploiement via Docker
-
-```bash
-docker-compose up -d
-```
-
----
-
 ## 🧰 Utilisation
 
 * Se connecter avec un login Linux via l'interface web
@@ -104,7 +95,6 @@ Voir le fichier `LICENSE`.
 - Secure login via PAM authentication  
 - Protected reboot and shutdown buttons  
 - Test mode available without a Raspberry Pi (GPIO simulation)  
-- Docker deployment for fast and easy setup  
 
 ---
 
@@ -150,14 +140,6 @@ python app/app.py
 ```
 
 > The app will automatically detect the absence of a Raspberry Pi and activate simulation mode.
-
----
-
-### 🐳 3. Docker Deployment
-
-```bash
-docker-compose up -d
-```
 
 ---
 
