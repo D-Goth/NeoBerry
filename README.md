@@ -72,7 +72,7 @@
 ```bash
 git clone https://github.com/D-Goth/NeoBerry.git
 cd NeoBerry
-pip install -r requirements.txt
+pip install -r requirements.txt / ou si restrictions : pip3 install --break-system-packages -r requirements.txt
 python app.py
 ````
 
