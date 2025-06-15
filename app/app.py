@@ -4,8 +4,10 @@ import subprocess
 import threading
 from flask import Flask, jsonify, request, render_template, redirect, url_for, session, abort, Response, flash
 import psutil
+import time
 from functools import wraps
 import logging
+
 
 try:
     import RPi.GPIO as GPIO
@@ -26,6 +28,7 @@ app.secret_key = os.urandom(24)  # Needed for sessions
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+logging.getLogger('werkzeug').setLevel(logging.WARNING)
 
 GPIO_PINS = list(range(1, 41))
 gpio_states = {pin: False for pin in GPIO_PINS}
@@ -40,10 +43,6 @@ if IS_RPI:
             gpio_states[pin] = False
         except Exception as e:
             logger.warning(f"GPIO setup failed for pin {pin}: {e}")
-
-# Paramètres du ventilateur
-fan_gpio_pin = 18
-fan_speed = 0
 
 def is_raspberry_pi():
     uname_info = platform.uname()
@@ -113,6 +112,51 @@ def read_gpio(pin):
 def index():
     return render_template("index.html")
 
+last_counters = psutil.net_io_counters()
+last_time = time.time()
+
+def get_network_metrics():
+    global last_counters, last_time
+    current_counters = psutil.net_io_counters()
+    current_time = time.time()
+    elapsed_time = current_time - last_time
+
+    if elapsed_time > 0:
+        upload_speed = (current_counters.bytes_sent - last_counters.bytes_sent) / elapsed_time
+        download_speed = (current_counters.bytes_recv - last_counters.bytes_recv) / elapsed_time
+    else:
+        upload_speed, download_speed = 0, 0
+
+    last_counters = current_counters
+    last_time = current_time
+
+    return {
+        "network_up": convert_bytes(upload_speed) + "/s",
+        "network_down": convert_bytes(download_speed) + "/s"
+    }
+
+def convert_bytes(bytes_val):
+    """ Convertit une valeur en Bytes vers KB, MB ou GB """
+    if bytes_val < 1:
+        return "0 B/s"
+    units = ["B", "KB", "MB", "GB"]
+    index = 0
+    while bytes_val >= 1024 and index < len(units) - 1:
+        bytes_val /= 1024
+        index += 1
+    return f"{bytes_val:.2f} {units[index]}"
+
+@app.route("/api/network", methods=["GET"])
+@login_required
+def api_network():
+    """ Récupère les vitesses réseau (Upload/Download uniquement) """
+    try:
+        network_metrics = get_network_metrics()
+        return jsonify({"metrics": network_metrics})
+    except Exception as e:
+        logging.error(f"Erreur API /api/network: {e}")
+        return jsonify({"error": "Erreur interne serveur"}), 500
+
 @app.route("/api/status", methods=["GET"])
 @login_required
 def api_status():
@@ -140,8 +184,6 @@ def api_status():
                 cpu_temp = 42.0
                 board_temp = 38.0
 
-        fan_rpm = 1200  # Placeholder, peut être amélioré avec une mesure réelle si disponible
-
         disk_usage = psutil.disk_usage("/")
         disk_capacity_percent = disk_usage.percent
 
@@ -149,13 +191,13 @@ def api_status():
         disk_read_percent = min(100, (disk_io.read_bytes / (1024 * 1024 * 1024)) * 10)
         disk_write_percent = min(100, (disk_io.write_bytes / (1024 * 1024 * 1024)) * 10)
 
+        network_metrics = get_network_metrics()
+
         network_info = {
             "bluetooth_enabled": False,
             "bluetooth_device": None,
             "bluetooth_quality": 0,
             "network_type": "Ethernet",
-            "upload_speed": 0,
-            "download_speed": 0,
             "wifi_strength": 0,
             "wifi_ssid": None,
         }
@@ -169,7 +211,7 @@ def api_status():
                     network_info["network_type"] = "WiFi"
                     network_info["wifi_strength"] = 70
             except subprocess.CalledProcessError:
-                logger.warning("iwgetid n'est pas disponible sur ce système.")
+                pass  
             except Exception as e:
                 logger.error(f"Erreur lors de la récupération du SSID WiFi: {e}")
 
@@ -181,7 +223,6 @@ def api_status():
                 "ram_load": ram_load,
                 "cpu_temp": round(cpu_temp, 1),
                 "board_temp": round(board_temp, 1),
-                "fan_rpm": fan_rpm,
                 "disk_capacity_percent": round(disk_capacity_percent, 1),
                 "disk_read_percent": round(disk_read_percent, 1),
                 "disk_write_percent": round(disk_write_percent, 1),
@@ -192,8 +233,6 @@ def api_status():
                 },
                 "network": {
                     "type": network_info["network_type"],
-                    "upload_speed": network_info["upload_speed"],
-                    "download_speed": network_info["download_speed"],
                     "wifi_strength": network_info["wifi_strength"],
                     "wifi_ssid": network_info["wifi_ssid"],
                 },
@@ -203,7 +242,7 @@ def api_status():
     except Exception as e:
         logging.error(f"Erreur API /api/status: {e}")
         return jsonify({"error": "Erreur interne serveur"}), 500
-
+        
 @app.route("/api/gpio", methods=["GET"])
 @login_required
 def api_gpio_get():
@@ -233,40 +272,6 @@ def api_gpio_post():
         logger.error(f"Erreur écriture GPIO {pin}: {e}")
         return jsonify({"error": "Erreur serveur"}), 500
 
-@app.route("/api/fan_settings", methods=["GET"])
-@login_required
-def get_fan_settings():
-    return jsonify({'gpio_pin': fan_gpio_pin, 'speed': fan_speed})
-
-@app.route("/api/fan_gpio", methods=["POST"])
-@login_required
-def set_fan_gpio():
-    global fan_gpio_pin
-    data = request.get_json()
-    pin = data.get("gpio_pin")
-    if isinstance(pin, int) and pin in GPIO_PINS:
-        fan_gpio_pin = pin
-        # Ici, vous pouvez gérer le changement effectif de pin ventilateur si nécessaire
-        return jsonify({'success': True, 'gpio_pin': fan_gpio_pin})
-    return jsonify({'success': False, 'error': 'GPIO invalide'}), 400
-
-@app.route("/api/fan_speed", methods=["POST"])
-@login_required
-def set_fan_speed():
-    global fan_speed
-    data = request.get_json()
-    speed = data.get("speed")
-    if isinstance(speed, int) and 0 <= speed <= 100:
-        fan_speed = speed
-        if IS_RPI:
-            try:
-                # Ici, vous pouvez envoyer le signal PWM au ventilateur
-                pass  # Remplacez par votre logique de contrôle PWM
-            except Exception as e:
-                logger.error(f"Erreur contrôle ventilateur PWM: {e}")
-        return jsonify({'success': True, 'speed': fan_speed})
-    return jsonify({'success': False, 'error': 'Vitesse invalide'}), 400
-
 def async_reboot():
     import time
     time.sleep(2)
@@ -291,4 +296,3 @@ def api_shutdown():
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=False)
-
