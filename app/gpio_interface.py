@@ -1,15 +1,17 @@
 import time
 import platform
 
+if platform.machine().startswith('arm'):
+    import RPi.GPIO as GPIO
+
 class GPIOInterface:
     def __init__(self):
         self.FAN_PIN = 18
-        self.PINS = list(range(1, 41))
+        self.PINS = list(range(2, 28))
         self._setup()
 
     def _setup(self):
-        if platform.machine().startswith('arm'):  # Vérifie si c'est un Raspberry Pi
-            import RPi.GPIO as GPIO
+        if platform.machine().startswith('arm'):
             GPIO.setmode(GPIO.BCM)
             for pin in self.PINS:
                 GPIO.setup(pin, GPIO.OUT)
@@ -25,25 +27,22 @@ class GPIOInterface:
     def get_pin_states(self):
         if hasattr(self, '_simulate') and self._simulate:
             return {pin: False for pin in self.PINS}
-        import RPi.GPIO as GPIO
-        return {pin: GPIO.input(pin) == GPIO.HIGH for pin in self.PINS}
+        else:
+            return {pin: GPIO.input(pin) == GPIO.HIGH for pin in self.PINS}
 
     def set_pin_state(self, pin, state):
         if pin not in self.PINS:
             return
         if not (hasattr(self, '_simulate') and self._simulate):
-            import RPi.GPIO as GPIO
             GPIO.output(pin, GPIO.HIGH if state else GPIO.LOW)
 
     def set_fan_speed(self, speed):
         if not (hasattr(self, '_simulate') and self._simulate):
-            import RPi.GPIO as GPIO
             duty_cycle = min(100, max(0, speed))
             self.fan_pwm.ChangeDutyCycle(duty_cycle)
 
     def cleanup(self):
         if not (hasattr(self, '_simulate') and self._simulate):
-            import RPi.GPIO as GPIO
             self.fan_pwm.stop()
             for pin in self.PINS:
                 GPIO.output(pin, GPIO.LOW)
@@ -59,3 +58,4 @@ if __name__ == '__main__':
             time.sleep(1)
     except KeyboardInterrupt:
         gpio.cleanup()
+
