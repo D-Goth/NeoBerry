@@ -7,6 +7,8 @@ import psutil
 import time
 from functools import wraps
 import logging
+import json
+
 
 
 try:
@@ -29,6 +31,16 @@ app.secret_key = os.getenv("FLASK_SECRET_KEY", "default_key_insecure")
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 logging.getLogger('werkzeug').setLevel(logging.WARNING)
+
+def async_reboot():
+    import time
+    time.sleep(2)
+    os.system("sudo reboot")
+
+def async_shutdown():
+    import time
+    time.sleep(2)
+    os.system("sudo shutdown now")
 
 GPIO_PINS = list(range(1, 41))
 gpio_states = {pin: False for pin in GPIO_PINS}
@@ -272,16 +284,6 @@ def api_gpio_post():
         logger.error(f"Erreur écriture GPIO {pin}: {e}")
         return jsonify({"error": "Erreur serveur"}), 500
 
-def async_reboot():
-    import time
-    time.sleep(2)
-    os.system("sudo reboot")
-
-def async_shutdown():
-    import time
-    time.sleep(2)
-    os.system("sudo shutdown now")
-
 @app.route("/api/reboot", methods=["POST"])
 @login_required
 def api_reboot():
@@ -293,6 +295,127 @@ def api_reboot():
 def api_shutdown():
     threading.Thread(target=async_shutdown).start()
     return jsonify({"message": "Extinction en cours..."})
+
+@app.route('/api/bluetooth/scan')
+def scan_bluetooth_devices():
+    devices = [
+        {"name": "Bose QC35", "mac": "AA:BB:CC:DD:EE:01", "connected": False},
+        {"name": "Nintendo Switch", "mac": "AA:BB:CC:DD:EE:02", "connected": False},
+        {"name": "Xiaomi Speaker", "mac": "AA:BB:CC:DD:EE:03", "connected": False}
+    ]
+
+    folder = 'paired-devices'
+    os.makedirs(folder, exist_ok=True)
+
+    for dev in devices:
+        mac = dev['mac']
+        filepath = os.path.join(folder, f"{mac}.json")
+        with open(filepath, 'w') as f:
+            json.dump(dev, f, indent=2)
+
+    js_path = '/app/static/js/list.js'
+    try:
+        with open(js_path, 'w') as jsf:
+            jsf.write("// Fichier généré automatiquement par le scan\n")
+            jsf.write("const pairedDevices = ")
+            json.dump(devices, jsf, indent=2)
+            jsf.write(";\nexport default pairedDevices;\n")
+    except Exception as e:
+        print(f"[ERREUR] Impossible de mettre à jour list.js :", e)
+
+    return jsonify({"devices": devices})
+
+@app.route('/api/bluetooth/pair', methods=['POST'])
+@login_required
+def pair_device():
+    data = request.get_json()
+    mac = data.get('mac')
+    name = data.get('name') or f"Appareil-{mac[-5:].replace(':','')}"
+    folder = 'paired-devices'
+    js_path = 'NeoBerry/app/static/js/list.js'
+
+    if not mac:
+        return jsonify({'error': 'MAC manquant'}), 400
+
+    # Création du dossier si nécessaire
+    os.makedirs(folder, exist_ok=True)
+
+    # Création ou mise à jour du fichier JSON individuel
+    device_file = os.path.join(folder, f"{mac}.json")
+    with open(device_file, 'w') as f:
+        json.dump({'mac': mac, 'name': name}, f, indent=2)
+
+    # Reconstruction du list.js complet
+    devices = []
+    for filename in os.listdir(folder):
+        if filename.endswith('.json'):
+            try:
+                with open(os.path.join(folder, filename), 'r') as f:
+                    dev = json.load(f)
+                    devices.append(dev)
+            except Exception as e:
+                print(f"Erreur lecture {filename} :", e)
+
+    # Générer le list.js final (exporté en JS)
+    try:
+        with open(js_path, 'w') as jsf:
+            jsf.write("// Liste des périphériques appairés – générée automatiquement\n")
+            jsf.write("const pairedDevices = ")
+            json.dump(devices, jsf, indent=2)
+            jsf.write(";\nexport default pairedDevices;\n")
+    except Exception as e:
+        print(f"Erreur écriture {js_path} :", e)
+        return jsonify({'error': 'Fichier JS non mis à jour'}), 500
+
+    return jsonify({'status': 'paired', 'mac': mac}) 
+    
+@app.route('/api/bluetooth/paired')
+@login_required
+def get_paired_devices():
+    folder = 'paired-devices'
+    default_list_path = 'NeoBerry/app/static/js/list.js'
+    devices = []
+
+    # Création du fichier de base s'il n'existe pas
+    if not os.path.exists(default_list_path):
+        try:
+            with open(default_list_path, 'w') as f:
+                f.write("// Fichier généré automatiquement : liste des périphériques appairés\n")
+                f.write("const pairedDevices = [];\n")
+        except Exception as e:
+            print(f"Erreur création {default_list_path} :", e)
+
+    # Lecture des périphériques déjà enregistrés
+    if os.path.exists(folder):
+        for filename in os.listdir(folder):
+            if filename.endswith('.json'):
+                try:
+                    with open(os.path.join(folder, filename), 'r') as f:
+                        device_info = json.load(f)
+                        devices.append(device_info)
+                except Exception as e:
+                    print(f"Erreur lecture {filename} :", e)
+
+    return jsonify(devices)
+
+@app.route('/api/bluetooth/forget', methods=['POST'])
+@login_required
+def forget_paired_device():
+    data = request.get_json()
+    mac = data.get('mac')
+    if not mac:
+        return jsonify({'error': 'MAC manquant'}), 400
+
+    filename = f'paired-devices/{mac}.json'
+    if os.path.exists(filename):
+        try:
+            os.remove(filename)
+            return jsonify({'status': 'deleted', 'mac': mac})
+        except Exception as e:
+            print(f"Erreur suppression {filename} :", e)
+            return jsonify({'error': 'Suppression impossible'}), 500
+    else:
+        return jsonify({'error': 'Fichier introuvable'}), 404
     
 @app.route('/api/battery')
 @login_required
@@ -333,6 +456,7 @@ def battery_status():
         })
     except Exception as e:
         return jsonify({"error": str(e), "percent": 100, "power_plugged": True, "secsleft": None, "no_battery_detected": True})
-        
+ 
+from flask import request 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=False)

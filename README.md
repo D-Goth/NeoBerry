@@ -144,7 +144,6 @@ Voir le fichier `LICENSE`.
 ## 🔗 Liens utiles
 
 * [Page GitHub](https://github.com/D-Goth/NeoBerry)
-* [Black-Lab](https://www.black-lab.fr)
 
 ---
 
@@ -294,6 +293,6 @@ See the `LICENSE` file.
 ## 🔗 Useful Links
 
 * [GitHub Repository](https://github.com/D-Goth/NeoBerry)
-* [Black-Lab](https://www.black-lab.fr)
 
 ```
+

@@ -13,15 +13,14 @@
     <a href="/" aria-label="Accueil">
       <img src="{{ url_for('static', filename='img/website.png') }}" alt="Logo NeoBerry - By Black-Lab" id="logo" />
     </a>
-    <div id="battery-gauge">
-    <div id="battery-level"></div>
-    <div id="battery-fill"></div>
-    <div id="battery-percent"></div>
-    <div id="battery-tip"></div>
-    <div class="gauge-marker" style="left: 25%;"></div>
-    <div class="gauge-marker" style="left: 50%;"></div>
-    <div class="gauge-marker" style="left: 75%;"></div>
-  </div>
+      <div id="battery-gauge">
+       <div id="battery-level">
+         <div id="battery-fill"></div>
+         <div id="battery-percent">--%</div>
+       </div>
+       <div id="battery-tip"></div>
+      </div>
+
     <a href="/logout" id="logout-btn" role="button" aria-label="Déconnexion">Déconnexion</a>
   </header>
 
@@ -84,26 +83,63 @@
     </div>
   </section>
 
-  <section aria-labelledby="network-title">
-    <h2 id="network-title">État du Réseau</h2>
-    <div class="section-content">
-      <div class="network-field" role="region" aria-label="État Bluetooth">
-        <div style="display:flex; align-items:center; justify-content: space-between;">
-          <span class="network-label">Bluetooth</span>
-          <button id="bluetooth-toggle" class="network-toggle-button" aria-pressed="false" aria-label="Activer ou désactiver le Bluetooth">
-            OFF
-          </button>
-        </div>
-        <div class="network-info" id="bluetooth-device">Périphérique connecté : Aucun</div>
-        <div>
-          <div class="network-label">Qualité de la connexion Bluetooth</div>
-          <canvas id="bluetooth-quality-gauge" aria-label="Jauge qualité connexion Bluetooth" role="img"></canvas>
+<section aria-labelledby="network-title">
+  <h2 id="network-title">État du Réseau</h2>
+  <div class="section-content">
+    
+    <div class="network-field" aria-label="État Bluetooth">
+      <div style="display:flex; align-items:center; justify-content: space-between;">
+        <span class="network-label">Bluetooth</span>
+        <label class="bt">
+          <input type="checkbox" id="bluetooth-toggle" />
+          <span class="slider-2"></span>
+        </label>
+      </div>
+
+      <div class="network-info" id="bluetooth-device">Périphérique connecté : Aucun</div>
+
+      <div>
+        <div class="network-label">Qualité de la connexion Bluetooth</div>
+        <canvas id="bluetooth-quality-gauge" aria-label="Jauge qualité connexion Bluetooth" role="img"></canvas>
+      </div>
+    </div>
+
+    <div class="network-field" aria-label="Options Bluetooth">
+      <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 12px;">
+        <div class="terminal-actions">
+        <button id="scan-devices">🔍 Scanner les périphériques</button></div>
+        <ul id="devices-list" class="network-info"></ul>
+    </div>
+    
+    <div class="paired-devices" aria-label="Périphériques appairés">
+       <ul id="paired-devices-list"></ul>
+       <div class="terminal-cursor">▮</div>
+       
+    </div>
+
+      <div id="pin-modal" class="modal hidden">
+        <div class="modal-content">
+          <button id="network-label" disabled>Connecter</button></div>
+          <div><span class="network-label">Saisir Code</span>
+          <input id="pin-input" type="text" placeholder="Validez code">
+          <div class="terminal-actions">
+          <button id="scan-devices">Valider</button></div>
         </div>
       </div>
- <div class="network-field" role="region" aria-label="État Ethernet et Wifi">
+    </div>
+
+      <div class="network-info" id="scan-progress-container" style="display: none;">
+        <div class="scan-bar-wrapper">
+          <div id="scan-progress-bar" class="scan-bar-fill"></div>
+        </div>
+      </div>
+
+  </div>
+  <div class="section-content"> 
+ <div class="network-field-0" role="region" aria-label="État Ethernet et Wifi">
   <div class="network-label">Type de Réseau</div>
   <div id="network-type" style="font-weight:700; font-size: 1.1rem; margin-bottom: 12px;">Ethernet</div>
-
+  
   <div style="display: flex; gap: 24px; justify-content: center; margin-bottom: 20px;">
     <div style="flex: 1; max-width: 220px; text-align: center;">
       <div class="network-label">Upload</div>
@@ -112,6 +148,7 @@
     <div style="flex: 1; max-width: 220px; text-align: center;">
       <div class="network-label">Download</div>
       <canvas id="network-down" aria-label="Jauge débit descendant réseau" role="img"></canvas>
+      </div>
     </div>
   </div>
 
@@ -137,6 +174,8 @@
   </section>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.1"></script>
 <script src="{{ url_for('static', filename='js/script.js') }}" defer></script>
+<script src="{{ url_for('static', filename='js/list.js') }}"></script>
+
 </body>
 
 </html>

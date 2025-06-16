@@ -1,6 +1,6 @@
     @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
 
-    * {
+    *, *::before, *::after {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
@@ -103,8 +103,9 @@
 
     .section-content {
       display: flex;
-      flex-direction: column;
       gap: 32px;
+      justify-content: center;
+      padding: 0 80px;
     }
 
     #refresh-container {
@@ -237,6 +238,8 @@
     
      .system-metrics {
       display: grid;
+      align-content: start;
+      align-items: start;
       grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
       gap: 28px;
       justify-items: center;
@@ -275,16 +278,27 @@
     }
 
     canvas {
-      max-width: 420px;
-      max-height: 420px;
+      width: 100%;
+      height: 100%;
       margin: auto;
       display: block;
     }
 
-    .network-field {
+    .network-field-0 {
       width: 100%;
-      max-width: 720px;
+      max-width: 800px;
       margin: 0 auto 22px auto;
+      background: rgba(255, 46, 99, 0.12);
+      border-radius: 14px;
+      padding: 20px 24px;
+      box-shadow: 0 6px 20px rgba(255, 46, 99, 0.12);
+      color: white;
+    }
+    
+    .network-field {
+      flex: 1 1 48%;
+      max-width: 360px;
+      margin-bottom: 22px;
       background: rgba(255, 46, 99, 0.12);
       border-radius: 14px;
       padding: 20px 24px;
@@ -410,9 +424,10 @@
       }
     }
     
-/* Styles pour la jauge de batterie */
+/* Jauge de batterie */
 #battery-gauge {
   position: relative;
+  border-radius: 12px;
   width: 120px;
   height: 40px;
   margin: 0 20px;
@@ -425,23 +440,33 @@
   position: absolute;
   width: 100%;
   height: 70%;
+  top: 15%;
   background: #2c2c2c;
   border: 4px solid #db0038;
   border-radius: 4px 0 0 4px;
-  top: 15%;
   box-sizing: border-box;
+  z-index: 1;
 }
 
 #battery-fill {
   position: absolute;
   height: 100%;
+  width: 0%;
+  left: 0;
   background: #00cc66;
   transition: width 0.5s ease-in-out, background-color 0.3s;
   border-radius: 4px 0 0 4px;
+  z-index: 2;
 }
 
-#battery-fill.charging {
-  animation: charging-blink 1s infinite;
+#battery-fill.charging::after {
+  content: ' ⚡';
+  animation: blink-battery 1s infinite;
+  position: absolute;
+  right: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 14px;
 }
 
 #battery-percent {
@@ -453,49 +478,28 @@
   font-size: 14px;
   font-weight: bold;
   text-shadow: 1px 1px 3px #000, -1px -1px 3px #000;
-  z-index: 10; 
+  z-index: 3;
 }
 
 #battery-tip {
   position: absolute;
+  border-radius: 12px;
   width: 6px;
   height: 30%;
   background: #db0038;
   right: -6px;
   top: 25%;
   border-radius: 0 2px 2px 0;
+  z-index: 2;
 }
 
-#battery-gauge::after {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  border: 3px solid #fff; 
-  pointer-events: none;
-  box-sizing: border-box;
-  z-index: 5;
+
+@keyframes blink-battery {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.2; }
 }
 
-.gauge-marker {
-  position: absolute;
-  top: 0;
-  height: 100%;
-  width: 2px; 
-  background: #fff;
-  opacity: 0.7;
-  pointer-events: none;
-  z-index: 6; 
-}
-
-/* Animation pour la recharge */
-@keyframes charging-blink {
-  50% { opacity: 0.7; }
-}
-
-/* Styles pour le graphique et le statut */
+/* Graphique et statut */
 .chart-container {
   max-width: 400px;
   margin: 20px auto;
@@ -506,15 +510,274 @@
   color: #fff;
   margin-bottom: 20px;
   font-weight: bold;
-  text-shadow: 1px 1px 3px #000, -1px -1px 3px #000; 
-  z-index: 10; 
+  text-shadow: 1px 1px 3px #000, -1px -1px 3px #000;
+  z-index: 10;
 }
-.gauge-marker {
+
+.bluetooth-switch {
+  position: relative;
+  display: inline-block;
+  width: 60px;
+  height: 34px;
+}
+.bluetooth-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+.slider-2 {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: #ff2e63;
+  transition: 0.4s;
+  border-radius: 34px;
+  cursor: pointer;
+}
+.slider-2::before {
+  content: "";
+  position: absolute;
+  height: 26px; width: 26px;
+  left: 4px; bottom: 4px;
+  background-color: white;
+  transition: 0.4s;
+  border-radius: 50%;
+}
+input:checked + .slider-2 {
+  background-color: #00c896;
+}
+input:checked + .slider-2::before {
+  transform: translateX(26px);
+}
+
+/* Conteneur de l'interrupteur */
+.bt {
+  position: relative;
+  display: inline-block;
+  width: 44px;
+  height: 24px;
+}
+
+/* Input masqué */
+.bt input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+/* Barre de fond de l'interrupteur */
+.bt .slider-2 {
   position: absolute;
   top: 0;
-  height: 100%;
-  width: 1px;
-  background: #fff;
-  opacity: 0.7;
-  pointer-events: none;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ff2e63; /* rouge par défaut */
+  border-radius: 24px;
+  transition: 0.4s;
+  cursor: pointer;
 }
+
+/* Bulle glissante (rond blanc) */
+.bt .slider-2::before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  border-radius: 50%;
+  transition: 0.4s;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+}
+
+/* État activé : vert avec effet lumineux */
+.bt input:checked + .slider-2 {
+  background-color: #31d0aa;
+  box-shadow: 0 0 8px #31d0aa;
+}
+
+/* Animation de glissement vers la droite */
+.bt input:checked + .slider-2::before {
+  transform: translateX(20px);
+}
+
+#scan-devices {
+  background-color: #ff2e63;
+  border: none;
+  border-radius: 12px;
+  color: white;
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: pointer;
+  padding: 8px 18px;
+  box-shadow: 0 5px 15px rgba(255, 46, 99, 0.45);
+  transition: background-color 0.3s ease;
+  user-select: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+#scan-devices:hover {
+  background-color: #ff5f93;
+  box-shadow: 0 6px 20px rgba(255, 46, 99, 0.7);
+  color: white;
+}
+
+.scan-bar-wrapper {
+  width: 100%;
+  height: 8px;
+  background-color: #333;
+  border-radius: 8px;
+  overflow: hidden;
+  margin: 10px 0;
+}
+
+.scan-bar-fill {
+  height: 100%;
+  width: 0%;
+  background-color: #ff2e63;
+  transition: width 0.3s ease;
+}
+
+#devices-list {
+  flex: 1;
+  max-height: 200px;
+  overflow-y: auto;
+  margin-left: 12px;
+  padding-left: 16px;
+}
+
+.device-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  max-height: 200px;
+  overflow-y: auto;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  box-shadow: inset 0 0 4px rgba(255, 255, 255, 0.08);
+  padding: 12px;
+}
+
+.device-list li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 10px;
+  margin-bottom: 6px;
+  border-radius: 6px;
+  background-color: rgba(255, 255, 255, 0.06);
+  transition: background 0.2s ease;
+}
+
+.device-list li:hover {
+  background-color: rgba(255, 255, 255, 0.12);
+}
+
+.device-list li button {
+  background-color: #ff2e63;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 8px;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.device-list li button:hover {
+  background-color: #ff5f93;
+}
+
+.paired-devices {
+  background-color: #0a0a0a;
+  padding: 12px;
+  border-radius: 8px;
+  min-height: calc(8 * 1.5em + 24px);
+  max-height: 180px;
+  overflow-y: auto;
+  box-shadow: inset 0 0 8px rgba(255, 46, 99, 0.3);
+  margin: 16px 0;
+  font-family: monospace;
+}
+
+#paired-devices-list li {
+  color: white;
+  margin: 4px 0;
+}
+
+#paired-devices-list li.connected {
+  color: #ff2e63;
+}
+
+#paired-devices-list li button {
+  margin-left: 12px;
+  padding: 2px 6px;
+  background: transparent;
+  border: 1px solid #ff2e63;
+  color: #ff2e63;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+
+.terminal-cursor {
+  color: #ff2e63;
+  font-family: monospace;
+  font-size: 1.05rem;
+  padding-left: 6px;
+  animation: blink 1s infinite;
+  line-height: 1.4;
+  user-select: none;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+.terminal-actions {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  margin: 12px 0;
+}
+
+.terminal-actions button {
+  background-color: #ff2e63;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.terminal-actions button:hover {
+  background-color: #ff5f93;
+}
+
+.scanning-line {
+  color: #aaa;
+  font-style: italic;
+  animation: blink-scan 1.3s infinite;
+}
+
+@keyframes blink-scan {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+#paired-devices-list li.selected {
+  background-color: #ff2e63;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+
+

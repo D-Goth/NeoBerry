@@ -1,9 +1,8 @@
 /NeoBerry
-├──docker-compose.yml
-├──Dockerfile
 ├──LICENSE
 ├──README.md
 ├──requirements.txt
+├──run_neoBerry.sh
 ├──NeoBerry_Tree.txt
 └──/app
    ├──app.py
@@ -13,7 +12,12 @@
    │   └── style.css
    ├── /js
    │   └── script.js
+   │   └── list.js
    ├── /img
+   │   ├── Github.png
+   │   ├── rbw-bl_circle_400x400.png
+   │   ├── RPIGPIO-800px.png
+   │   ├── website.png
    │   └── wall.jpg
    └── /templates
        ├── index.html

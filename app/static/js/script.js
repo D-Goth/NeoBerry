@@ -1,3 +1,47 @@
+document.addEventListener("DOMContentLoaded", function () {
+    fetchStatus();
+    setInterval(fetchStatus, 3000);
+
+    fetchNetworkStats();
+    setInterval(fetchNetworkStats, 3000);
+
+    updateBattery();
+    setInterval(updateBattery, 3000);
+
+    loadPairedDevices();
+
+    const scanBtn = document.getElementById("scan-btn");
+    if (scanBtn) {
+        scanBtn.addEventListener("click", scanDevices);
+    }
+
+    const connectBtn = document.getElementById("connect-button");
+    if (connectBtn) {
+        connectBtn.addEventListener("click", () => {
+            if (!selectedDevice) return;
+            connectToDevice(selectedDevice.mac);
+        });
+    }
+
+
+    const networkUpGauge = createGauge(document.getElementById('network-up').getContext('2d'), 'Upload', 0, true);
+    const networkDownGauge = createGauge(document.getElementById('network-down').getContext('2d'), 'Download', 0, true);
+
+    let refreshInterval = 3000;
+    let refreshTimer;
+
+    const intervalSelector = document.getElementById('refresh-interval');
+    if (intervalSelector) {
+        intervalSelector.addEventListener('change', () => {
+            refreshInterval = Number(intervalSelector.value);
+            clearInterval(refreshTimer);
+            refreshTimer = setInterval(fetchStatus, refreshInterval);
+        });
+    }
+
+    refreshTimer = setInterval(fetchStatus, refreshInterval);
+});
+
   function getGaugeColor(value) {
     if (value < 10) return '#00aaff';
     if (value < 25) return '#30d5c8';
@@ -50,36 +94,9 @@ Chart.register({
   }
 });
 
-function createGauge(ctx, label, initialValue = 0, isNetworkGauge = false) {
-  return new Chart(ctx, {
-    type: 'doughnut',
-    data: {
-      labels: [label, 'Libre'],
-      datasets: [{
-        label: label,
-        data: [initialValue, 100 - initialValue],
-        backgroundColor: [getGaugeColor(initialValue), 'rgba(44, 44, 44, 0.75)'],
-        borderWidth: 0,
-        cutout: '75%'
-      }]
-    },
-    options: {
-      responsive: true,
-      aspectRatio: 1,
-      animation: true,
-      plugins: {
-        tooltip: { enabled: false },
-        legend: { display: false },
-        customNetworkLabel: isNetworkGauge // Indique si le plugin personnalisé doit être utilisé
-      }
-    },
-    plugins: isNetworkGauge ? [{ id: 'customNetworkLabel' }] : [{ id: 'defaultDoughnutLabel' }]
-  });
-}
-
   const gpioContainer = document.getElementById('gpio-controls');
   let gpioPins = [];
-
+  
   function updateGPIOControl(gpioStates) {
     if (gpioPins.length === 0) {
       for (let i = 1; i <= 40; i++) {
@@ -143,18 +160,33 @@ function createGauge(ctx, label, initialValue = 0, isNetworkGauge = false) {
     const diskReadGauge = createGauge(document.getElementById('disk-read-gauge').getContext('2d'), 'Lecture Disque', 0);
     const bluetoothQualityGauge = createGauge(document.getElementById('bluetooth-quality-gauge').getContext('2d'), 'Qualité Bluetooth', 0);
     const wifiStrengthGauge = createGauge(document.getElementById('wifi-strength-gauge').getContext('2d'), 'Puissance WiFi', 0);
-    const networkUpGauge = createGauge(document.getElementById('network-up').getContext('2d'), 'Upload', 0, true);
-    const networkDownGauge = createGauge(document.getElementById('network-down').getContext('2d'), 'Download', 0, true);
 
-  let refreshInterval = 3000;
-  let refreshTimer;
-
-  const intervalSelector = document.getElementById('refresh-interval');
-  intervalSelector.addEventListener('change', () => {
-    refreshInterval = Number(intervalSelector.value);
-    clearInterval(refreshTimer);
-    refreshTimer = setInterval(fetchStatus, refreshInterval);
+function createGauge(ctx, label, initialValue = 0, isNetworkGauge = false) {
+  return new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: [label, 'Libre'],
+      datasets: [{
+        label: label,
+        data: [initialValue, 100 - initialValue],
+        backgroundColor: [getGaugeColor(initialValue), 'rgba(44, 44, 44, 0.75)'],
+        borderWidth: 0,
+        cutout: '75%'
+      }]
+    },
+    options: {
+      responsive: true,
+      aspectRatio: 1,
+      animation: true,
+      plugins: {
+        tooltip: { enabled: false },
+        legend: { display: false },
+        customNetworkLabel: isNetworkGauge // Indique si le plugin personnalisé doit être utilisé
+      }
+    },
+    plugins: isNetworkGauge ? [{ id: 'customNetworkLabel' }] : [{ id: 'defaultDoughnutLabel' }]
   });
+}
 
   async function fetchStatus() {
     try {
@@ -163,6 +195,7 @@ function createGauge(ctx, label, initialValue = 0, isNetworkGauge = false) {
       const data = await response.json();
       
       updateGPIOControl(data.gpio_states);
+      updateBluetoothUI(data);
 
       cpuLoadGauge.data.datasets[0].data[0] = data.cpu_load;
       cpuLoadGauge.data.datasets[0].data[1] = 100 - data.cpu_load;
@@ -208,14 +241,7 @@ function createGauge(ctx, label, initialValue = 0, isNetworkGauge = false) {
       wifiStrengthGauge.data.datasets[0].data[1] = 100 - data.network.wifi_strength;
       wifiStrengthGauge.data.datasets[0].backgroundColor[0] = getGaugeColor(data.network.wifi_strength);
       wifiStrengthGauge.update();
-
-      const bluetoothToggleBtn = document.getElementById('bluetooth-toggle');
-      const bluetoothDeviceInfo = document.getElementById('bluetooth-device');
-      bluetoothToggleBtn.classList.toggle('on', data.bluetooth.enabled);
-      bluetoothToggleBtn.textContent = data.bluetooth.enabled ? 'ON' : 'OFF';
-      bluetoothToggleBtn.setAttribute('aria-pressed', data.bluetooth.enabled);
-      bluetoothDeviceInfo.textContent = `Périphérique connecté : ${data.bluetooth.device || 'Aucun'}`;
-      
+   
       document.getElementById('network-type').textContent = data.network.type || 'Inconnu';
       const wifiSection = document.getElementById('wifi-section');
       const wifiSsid = document.getElementById('wifi-ssid');
@@ -229,14 +255,6 @@ function createGauge(ctx, label, initialValue = 0, isNetworkGauge = false) {
       console.error('Erreur récupération status', err);
     }
   }
-
-  fetchStatus();
-  refreshTimer = setInterval(fetchStatus, refreshInterval);
-
-  document.addEventListener("DOMContentLoaded", function () {
-    fetchNetworkStats();
-    setInterval(fetchNetworkStats, 3000);
-  });
 
   function customMin(a, b) {
     return (a < b) ? a : b;
@@ -326,7 +344,7 @@ function createGauge(ctx, label, initialValue = 0, isNetworkGauge = false) {
     }
   });
   
-  // Mise à jour de la jauge
+ // Mise à jour de la jauge
 function updateBatteryGauge(data) {
   const percent = data.percent;
   const fill = document.getElementById('battery-fill');
@@ -398,4 +416,200 @@ function updateBattery() {
 }
 
 setInterval(updateBattery, 5000); // Mise à jour toutes les 5 secondes
-updateBattery(); // Chargement initial
+updateBattery();
+
+function updateBluetoothUI(data) {
+      const bluetoothToggleBtn = document.getElementById('bluetooth-toggle');
+      const bluetoothDeviceInfo = document.getElementById('bluetooth-device');
+      bluetoothToggleBtn.classList.toggle('on', data.bluetooth.enabled);
+      bluetoothToggleBtn.textContent = data.bluetooth.enabled ? 'ON' : 'OFF';
+      bluetoothToggleBtn.setAttribute('aria-pressed', data.bluetooth.enabled);
+      bluetoothDeviceInfo.textContent = `Périphérique connecté : ${data.bluetooth.device || 'Aucun'}`;
+    }
+
+
+function scanDevices() {
+    const list = document.getElementById("paired-devices-list");
+    if (!list) return;
+
+    const scanning = document.createElement("li");
+    scanning.textContent = "[ SCANNING... ]";
+    scanning.classList.add("scanning-line");
+    list.appendChild(scanning);
+
+    fetch("/api/bluetooth/scan")
+        .then(res => res.json())
+        .then(data => {
+            list.innerHTML = "";
+            
+            data.devices.forEach(dev => {
+                const li = document.createElement("li");
+                li.textContent = dev.name || dev.mac;
+                if (dev.connected) li.classList.add("connected");
+                list.appendChild(li);
+            });
+            
+            renderPairedDevices(data.devices);
+        })
+        .catch(err => {
+            list.innerHTML = "";
+            const errorLi = document.createElement("li");
+            errorLi.textContent = `[ ERREUR SCAN : ${err.message} ]`;
+            errorLi.style.color = "red";
+            list.appendChild(errorLi);
+            appendTerminalCursor();
+        });
+}
+
+    
+function loadPairedDevices() {
+    fetch("/api/bluetooth/paired")
+        .then(res => res.json())
+        .then(devices => {
+            const list = document.getElementById("paired-devices-list");
+            if (!list) return;
+
+            list.innerHTML = "";
+
+            devices.forEach(dev => {
+                const li = document.createElement("li");
+                li.textContent = dev.name || dev.mac;
+
+                if (dev.connected) li.classList.add("connected");
+
+                const forgetBtn = document.createElement("button");
+                forgetBtn.textContent = "Oublier";
+                forgetBtn.onclick = () => forgetDevice(dev.mac);
+
+                li.appendChild(forgetBtn);
+                list.appendChild(li);
+            });
+
+            
+            renderPairedDevices(devices);
+        });
+}
+
+
+function forgetDevice(mac) {
+  fetch("/api/bluetooth/forget", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ mac })
+  }).then(loadPairedDevices);
+}
+
+let selectedDevice = null;
+
+function renderPairedDevices(devices) {
+    const list = document.getElementById("paired-devices-list");
+    if (!list) return;
+
+    list.innerHTML = "";
+
+    const minLines = 8;
+    const total = devices.length;
+
+    for (let i = 0; i < Math.max(minLines, total); i++) {
+        const li = document.createElement("li");
+
+        if (i < total) {
+            const dev = devices[i];
+            li.textContent = dev.name || dev.mac;
+            if (dev.connected) li.classList.add("connected");
+
+            li.addEventListener("click", () => {
+                document.querySelectorAll("#paired-devices-list li").forEach(el =>
+                    el.classList.remove("selected")
+                );
+
+                li.classList.add("selected");
+                selectedDevice = dev;
+
+                const btn = document.getElementById("connect-button");
+                if (btn) btn.disabled = false;
+            });
+        } else {
+            li.innerHTML = "&nbsp;";
+        }
+
+        list.appendChild(li);
+    }
+
+    appendTerminalCursor();
+}
+
+
+document.getElementById("connect-button").addEventListener("click", () => {
+  if (!selectedDevice) return;
+  connectToDevice(selectedDevice.mac);
+});
+
+function connectToDevice(mac) {
+  const pin = document.getElementById("pin-input").value.trim();
+  const list = document.getElementById("paired-devices-list");
+
+  if (!pin) {
+    alert("Merci de renseigner le code PIN.");
+    return;
+  }
+
+  list.innerHTML = "";
+  const msg = document.createElement("li");
+  msg.textContent = `[ CONNECTING TO ${mac}... ]`;
+  msg.classList.add("scanning-line");
+  list.appendChild(msg);
+
+  fetch("/api/bluetooth/connect", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ mac, pin })
+  })
+    .then(res => res.json())
+    .then(result => {
+      msg.remove(); 
+
+      const statusLi = document.createElement("li");
+      if (result.status === "connected") {
+        statusLi.textContent = `[ CONNECTED ✔ ]`;
+        statusLi.style.color = "#00ff99";
+      } else {
+        statusLi.textContent = `[ FAILED ✖ ]`;
+        statusLi.style.color = "orangered";
+      }
+
+      list.appendChild(statusLi);
+      appendTerminalCursor();
+    })
+    .catch(err => {
+      msg.remove();
+      const errLi = document.createElement("li");
+      errLi.textContent = `[ ERREUR : ${err.message} ]`;
+      errLi.style.color = "red";
+      list.appendChild(errLi);
+      appendTerminalCursor();
+    });
+}
+
+function appendTerminalCursor() {
+
+  const oldCursor = document.querySelector(".terminal-cursor");
+  if (oldCursor) oldCursor.remove();
+
+  const cursor = document.createElement("div");
+  cursor.className = "terminal-cursor";
+  cursor.textContent = "▮";
+  document.querySelector(".paired-devices").appendChild(cursor);
+}
+
+function showScanningLine() {
+  const list = document.getElementById("paired-devices-list");
+  if (!list) return;
+
+  const scanning = document.createElement("li");
+  scanning.textContent = "[ SCANNING... ]";
+  scanning.classList.add("scanning-line");
+  list.appendChild(scanning);
+}
+
+
