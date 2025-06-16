@@ -102,9 +102,8 @@ gunicorn --bind 0.0.0.0:5000 app:app
 sudo systemctl enable flask-dashboard
 sudo systemctl start flask-dashboard
 
---- 
-
 ````
+
 > Accédez ensuite à l'interface via :
 > [http://localhost:5000](http://localhost:5000)
 
@@ -121,18 +120,6 @@ sudo apt install python3.13-venv
 python -m venv venv
 source venv/bin/activate      # Sur Linux/macOS
 venv\Scripts\activate         # Sur Windows
-```
-
-#### Étape 2 : Installer les dépendances
-
-```bash
-pip install -r requirements.txt
-```
-
-#### Étape 3 : Lancer l'application en mode simulation
-
-```bash
-python app/app.py
 ```
 
 > L'application détectera automatiquement qu'elle ne tourne pas sur un Raspberry Pi et activera le mode simulation.
@@ -157,6 +144,7 @@ Voir le fichier `LICENSE`.
 ## 🔗 Liens utiles
 
 * [Page GitHub](https://github.com/D-Goth/NeoBerry)
+* [Black-Lab](https://www.black-lab.fr)
 
 ---
 
@@ -233,13 +221,37 @@ Voir le fichier `LICENSE`.
 
 ## 🚀 Installation
 
-### 🔧 1. Manual Installation
+### 🔧 1.1 Manual Installation (Non-Raspberry Pi Environment - DEV Mode)
 
 ```bash
 git clone https://github.com/D-Goth/NeoBerry.git
 cd NeoBerry
 sudo apt install python3-flask python3-gpiozero python3-psutil python3-requests python3-werkzeug python3-gunicorn 
 python3.13 app/app.py
+````
+
+> Then access the interface at:
+> [http://localhost:5000](http://localhost:5000)
+
+---
+
+### 🔧 1.1 Manual Installation (Raspberry Pi Environment - PROD Mode)
+
+```bash
+git clone https://github.com/D-Goth/NeoBerry.git
+cd NeoBerry
+sudo apt install python3-flask python3-gpiozero python3-psutil python3-requests python3-werkzeug python3-gunicorn 
+
+* Test launch with Gunicorn
+cd app
+gunicorn --bind 0.0.0.0:5000 app:app
+
+* Launch in background via .sh script
+./run_neoBerry.sh
+
+* Create a systemd service → auto-start on boot
+sudo systemctl enable flask-dashboard
+sudo systemctl start flask-dashboard
 ````
 
 > Then access the interface at:
@@ -258,18 +270,6 @@ sudo apt install python3.13-venv
 python -m venv venv
 source venv/bin/activate      # On Linux/macOS
 venv\Scripts\activate         # On Windows
-```
-
-#### Step 2: Install dependencies
-
-```bash
-pip install -r requirements.txt
-```
-
-#### Step 3: Launch the app in simulation mode
-
-```bash
-python app/app.py
 ```
 
 > The app will automatically detect the absence of a Raspberry Pi and activate simulation mode.
@@ -294,5 +294,6 @@ See the `LICENSE` file.
 ## 🔗 Useful Links
 
 * [GitHub Repository](https://github.com/D-Goth/NeoBerry)
+* [Black-Lab](https://www.black-lab.fr)
 
 ```
