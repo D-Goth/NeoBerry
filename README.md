@@ -26,6 +26,7 @@
 ├──LICENSE
 ├──README.md
 ├──requirements.txt
+├──run_neoBerry.sh
 ├──NeoBerry_Tree.txt
 └──/app
    ├──app.py
@@ -35,7 +36,12 @@
    │   └── style.css
    ├── /js
    │   └── script.js
+   │   └── list.js
    ├── /img
+   │   ├── Github.png
+   │   ├── rbw-bl_circle_400x400.png
+   │   ├── RPIGPIO-800px.png
+   │   ├── website.png
    │   └── wall.jpg
    └── /templates
        ├── index.html
@@ -61,13 +67,11 @@
 
 - platformdirs — Détection de chemins système selon OS (utile pour config/temp/logs)
 
-> Toutes les dépendances sont listées dans le fichier requirements.txt. > Pour les installer : > pip install -r requirements.txt
-
 ---
 
 ## 🚀 Installation
 
-### 🔧 1. Installation manuelle
+### 🔧 1.1 Installation manuelle (Environnement hors Raspberry Pi - mode DEV)
 
 ```bash
 git clone https://github.com/D-Goth/NeoBerry.git
@@ -75,7 +79,32 @@ cd NeoBerry
 sudo apt install python3-flask python3-gpiozero python3-psutil python3-requests python3-werkzeug python3-gunicorn 
 python3.13 app/app.py
 ````
+---
 
+> Accédez ensuite à l'interface via :
+> [http://localhost:5000](http://localhost:5000)
+
+### 🔧 1.2 Installation manuelle (Environnement Raspberry Pi - mode PROD)
+
+```bash
+git clone https://github.com/D-Goth/NeoBerry.git
+cd NeoBerry
+sudo apt install python3-flask python3-gpiozero python3-psutil python3-requests python3-werkzeug python3-gunicorn 
+
+* Test lancement avec Gunicorn
+cd app
+gunicorn --bind 0.0.0.0:5000 app:app
+
+* Lancer en arrière-plan via script .sh
+./run_neoBerry.sh
+
+* Créer un service systemd → auto au démarrage
+sudo systemctl enable flask-dashboard
+sudo systemctl start flask-dashboard
+
+--- 
+
+````
 > Accédez ensuite à l'interface via :
 > [http://localhost:5000](http://localhost:5000)
 
@@ -85,7 +114,7 @@ python3.13 app/app.py
 
 NeoBerry peut être exécuté sur un environnement de test sans Raspberry Pi en activant le mode simulation des GPIO.
 
-#### Étape 1 : Créer et activer un environnement virtuel
+* : Créer et activer un environnement virtuel
 
 ```bash
 sudo apt install python3.13-venv
@@ -159,6 +188,7 @@ Voir le fichier `LICENSE`.
 ├──LICENSE
 ├──README.md
 ├──requirements.txt
+├──run_neoBerry.sh
 ├──NeoBerry_Tree.txt
 └──/app
    ├──app.py
@@ -168,7 +198,12 @@ Voir le fichier `LICENSE`.
    │   └── style.css
    ├── /js
    │   └── script.js
+   │   └── list.js
    ├── /img
+   │   ├── Github.png
+   │   ├── rbw-bl_circle_400x400.png
+   │   ├── RPIGPIO-800px.png
+   │   ├── website.png
    │   └── wall.jpg
    └── /templates
        ├── index.html
@@ -193,8 +228,6 @@ Voir le fichier `LICENSE`.
 - gunicorn — High-performance WSGI server for production or staging deployments
 
 - platformdirs — Determines system paths based on OS (for config, temp files, etc.)
-
-> All dependencies are listed in the requirements.txt file. > To install them: > pip install -r requirements.txt
 
 ---
 
