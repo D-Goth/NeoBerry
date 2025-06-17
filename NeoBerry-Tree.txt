@@ -1,7 +1,6 @@
 /NeoBerry
 ├──LICENSE
 ├──README.md
-├──requirements.txt
 ├──run_neoBerry.sh
 ├──NeoBerry_Tree.txt
 └──/app

@@ -8,8 +8,9 @@ import time
 from functools import wraps
 import logging
 import json
+from dotenv import load_dotenv
 
-
+load_dotenv()
 
 try:
     import RPi.GPIO as GPIO
@@ -26,7 +27,16 @@ except ImportError:
     p = None
 
 app = Flask(__name__)
-app.secret_key = os.getenv("FLASK_SECRET_KEY", "default_key_insecure")
+secret_key = os.getenv("FLASK_SECRET_KEY")
+
+if not secret_key:
+    print("⚠️ Aucune clé FLASK_SECRET_KEY trouvée, génération d'une nouvelle clé...")
+    secret_key = secrets.token_hex(32)
+    
+    with open(".env", "a") as f:
+        f.write(f"\nFLASK_SECRET_KEY={secret_key}\n")
+
+app.secret_key = secret_key
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -313,7 +323,8 @@ def scan_bluetooth_devices():
         with open(filepath, 'w') as f:
             json.dump(dev, f, indent=2)
 
-    js_path = '/app/static/js/list.js'
+    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+    default_list_path = os.path.join(BASE_DIR, 'static', 'js', 'list.js')
     try:
         with open(js_path, 'w') as jsf:
             jsf.write("// Fichier généré automatiquement par le scan\n")
@@ -332,7 +343,8 @@ def pair_device():
     mac = data.get('mac')
     name = data.get('name') or f"Appareil-{mac[-5:].replace(':','')}"
     folder = 'paired-devices'
-    js_path = 'NeoBerry/app/static/js/list.js'
+    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+    default_list_path = js.path.join(BASE_DIR, 'static', 'js', 'list.js')
 
     if not mac:
         return jsonify({'error': 'MAC manquant'}), 400
@@ -373,7 +385,8 @@ def pair_device():
 @login_required
 def get_paired_devices():
     folder = 'paired-devices'
-    default_list_path = 'NeoBerry/app/static/js/list.js'
+    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+    default_list_path = os.path.join(BASE_DIR, 'static', 'js', 'list.js')
     devices = []
 
     # Création du fichier de base s'il n'existe pas

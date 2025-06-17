@@ -30,6 +30,12 @@ document.addEventListener("DOMContentLoaded", function () {
     let refreshInterval = 3000;
     let refreshTimer;
 
+    document.getElementById('scan-progress-container').style.display = 'block';
+
+    let bar = document.getElementById('scan-progress-bar');
+    bar.style.width = '60%'; // ou animation, ou mise à jour live
+
+
     const intervalSelector = document.getElementById('refresh-interval');
     if (intervalSelector) {
         intervalSelector.addEventListener('change', () => {
@@ -269,25 +275,25 @@ function createGauge(ctx, label, initialValue = 0, isNetworkGauge = false) {
   if (!gauge) {
     gauge = createGauge(ctx, label, 0, canvasId === 'network-up' || canvasId === 'network-down');
   }
-  let value = parseSpeed(speed) || 0; // Valeur en MB/s ou équivalent
-  const maxSpeed = 100; // Ajuster selon ta connexion max
-  let percentage = (value > maxSpeed) ? 100 : (value / maxSpeed) * 100; // Pourcentage pour la jauge
+  let value = parseSpeed(speed) || 0; 
+  const maxSpeed = 100; 
+  let percentage = (value > maxSpeed) ? 100 : (value / maxSpeed) * 100; 
   percentage = (percentage < 0) ? 0 : percentage;
 
   // Convertir la valeur en unité appropriée
-  let convertedValue = value; // Valeur de base en MB/s
+  let convertedValue = value; 
   let unit = 'MB/s';
   if (convertedValue < 0.001) {
-    convertedValue *= 1024 * 1024; // Convertir en B/s
+    convertedValue *= 1024 * 1024; 
     unit = 'B/s';
   } else if (convertedValue < 1) {
-    convertedValue *= 1024; // Convertir en KB/s
+    convertedValue *= 1024; 
     unit = 'KB/s';
   } else if (convertedValue >= 1024) {
-    convertedValue /= 1024; // Convertir en GB/s
+    convertedValue /= 1024; 
     unit = 'GB/s';
   }
-  convertedValue = convertedValue.toFixed(2); // Limiter à 2 décimales
+  convertedValue = convertedValue.toFixed(2); 
 
   // Mettre à jour la jauge avec le pourcentage
   gauge.data.datasets[0].data[0] = percentage;
@@ -507,7 +513,7 @@ function renderPairedDevices(devices) {
 
     list.innerHTML = "";
 
-    const minLines = 8;
+    const minLines = 5;
     const total = devices.length;
 
     for (let i = 0; i < Math.max(minLines, total); i++) {
@@ -538,7 +544,6 @@ function renderPairedDevices(devices) {
 
     appendTerminalCursor();
 }
-
 
 document.getElementById("connect-button").addEventListener("click", () => {
   if (!selectedDevice) return;

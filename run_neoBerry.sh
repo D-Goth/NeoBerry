@@ -33,3 +33,4 @@ else
   tail -n 15 "$LOGFILE"
   exit 1
 fi
+
