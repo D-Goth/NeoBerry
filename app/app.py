@@ -325,7 +325,7 @@ def scan_bluetooth_devices():
             json.dump(dev, f, indent=2)
 
     BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-    default_list_path = os.path.join(BASE_DIR, 'static', 'js', 'list.js')
+    js_path = os.path.join(BASE_DIR, 'static', 'js', 'list.js')
     try:
         with open(js_path, 'w') as jsf:
             jsf.write("// Fichier généré automatiquement par le scan\n")
@@ -345,20 +345,17 @@ def pair_device():
     name = data.get('name') or f"Appareil-{mac[-5:].replace(':','')}"
     folder = 'paired-devices'
     BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-    default_list_path = js.path.join(BASE_DIR, 'static', 'js', 'list.js')
+    js_path = os.path.join(BASE_DIR, 'static', 'js', 'list.js')
 
     if not mac:
         return jsonify({'error': 'MAC manquant'}), 400
 
-    # Création du dossier si nécessaire
     os.makedirs(folder, exist_ok=True)
 
-    # Création ou mise à jour du fichier JSON individuel
     device_file = os.path.join(folder, f"{mac}.json")
     with open(device_file, 'w') as f:
         json.dump({'mac': mac, 'name': name}, f, indent=2)
 
-    # Reconstruction du list.js complet
     devices = []
     for filename in os.listdir(folder):
         if filename.endswith('.json'):
@@ -369,7 +366,6 @@ def pair_device():
             except Exception as e:
                 print(f"Erreur lecture {filename} :", e)
 
-    # Générer le list.js final (exporté en JS)
     try:
         with open(js_path, 'w') as jsf:
             jsf.write("// Liste des périphériques appairés – générée automatiquement\n")
@@ -380,26 +376,24 @@ def pair_device():
         print(f"Erreur écriture {js_path} :", e)
         return jsonify({'error': 'Fichier JS non mis à jour'}), 500
 
-    return jsonify({'status': 'paired', 'mac': mac}) 
-    
+    return jsonify({'status': 'paired', 'mac': mac})
+
 @app.route('/api/bluetooth/paired')
 @login_required
 def get_paired_devices():
     folder = 'paired-devices'
     BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-    default_list_path = os.path.join(BASE_DIR, 'static', 'js', 'list.js')
+    js_path = os.path.join(BASE_DIR, 'static', 'js', 'list.js')
     devices = []
 
-    # Création du fichier de base s'il n'existe pas
-    if not os.path.exists(default_list_path):
+    if not os.path.exists(js_path):
         try:
-            with open(default_list_path, 'w') as f:
+            with open(js_path, 'w') as f:
                 f.write("// Fichier généré automatiquement : liste des périphériques appairés\n")
                 f.write("const pairedDevices = [];\n")
         except Exception as e:
-            print(f"Erreur création {default_list_path} :", e)
+            print(f"Erreur création {js_path} :", e)
 
-    # Lecture des périphériques déjà enregistrés
     if os.path.exists(folder):
         for filename in os.listdir(folder):
             if filename.endswith('.json'):
@@ -430,6 +424,19 @@ def forget_paired_device():
             return jsonify({'error': 'Suppression impossible'}), 500
     else:
         return jsonify({'error': 'Fichier introuvable'}), 404
+
+@app.route('/api/bluetooth/status')
+@login_required
+def get_bluetooth_status():
+    # Simulez la récupération de la qualité de la connexion Bluetooth
+    quality = 75  # Exemple de valeur de qualité (0 à 100)
+    connected_device = "Bose QC35"  # Exemple de périphérique connecté
+
+    return jsonify({
+        'quality': quality,
+        'device': connected_device
+    })
+
     
 @app.route('/api/battery')
 @login_required
