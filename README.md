@@ -76,7 +76,7 @@
 ```bash
 git clone https://github.com/D-Goth/NeoBerry.git
 cd NeoBerry
-sudo apt install python3-flask python3-gpiozero python3-psutil python3-requests python3-werkzeug python3-gunicorn 
+sudo apt install python3-flask python3-gpiozero python3-psutil python3-requests python3-werkzeug python3-gunicorn dotenv
 python3.13 app/app.py
 ````
 ---
@@ -89,7 +89,7 @@ python3.13 app/app.py
 ```bash
 git clone https://github.com/D-Goth/NeoBerry.git
 cd NeoBerry
-sudo apt install python3-flask python3-gpiozero python3-psutil python3-requests python3-werkzeug python3-gunicorn 
+sudo apt install python3-flask python3-gpiozero python3-psutil python3-requests python3-werkzeug python3-gunicorn dotenv
 
 * Test lancement avec Gunicorn
 cd app
@@ -226,7 +226,7 @@ Voir le fichier `LICENSE`.
 ```bash
 git clone https://github.com/D-Goth/NeoBerry.git
 cd NeoBerry
-sudo apt install python3-flask python3-gpiozero python3-psutil python3-requests python3-werkzeug python3-gunicorn 
+sudo apt install python3-flask python3-gpiozero python3-psutil python3-requests python3-werkzeug python3-gunicorn dotenv
 python3.13 app/app.py
 ````
 
@@ -240,7 +240,7 @@ python3.13 app/app.py
 ```bash
 git clone https://github.com/D-Goth/NeoBerry.git
 cd NeoBerry
-sudo apt install python3-flask python3-gpiozero python3-psutil python3-requests python3-werkzeug python3-gunicorn 
+sudo apt install python3-flask python3-gpiozero python3-psutil python3-requests python3-werkzeug python3-gunicorn dotenv
 
 * Test launch with Gunicorn
 cd app
