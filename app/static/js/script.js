@@ -468,14 +468,14 @@ function scanDevices() {
         .then(res => res.json())
         .then(data => {
             list.innerHTML = "";
-            
+
             data.devices.forEach(dev => {
                 const li = document.createElement("li");
                 li.textContent = dev.name || dev.mac;
                 if (dev.connected) li.classList.add("connected");
                 list.appendChild(li);
             });
-            
+
             renderPairedDevices(data.devices);
         })
         .catch(err => {
@@ -488,7 +488,7 @@ function scanDevices() {
         });
 }
 
-    
+
 function loadPairedDevices() {
     fetch("/api/bluetooth/paired")
         .then(res => res.json())
@@ -512,7 +512,7 @@ function loadPairedDevices() {
                 list.appendChild(li);
             });
 
-            
+
             renderPairedDevices(devices);
         });
 }
@@ -593,7 +593,7 @@ function connectToDevice(mac) {
   })
     .then(res => res.json())
     .then(result => {
-      msg.remove(); 
+      msg.remove();
 
       const statusLi = document.createElement("li");
       if (result.status === "connected") {
