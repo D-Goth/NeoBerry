@@ -124,6 +124,11 @@ venv\Scripts\activate         # Sur Windows
 
 > L'application détectera automatiquement qu'elle ne tourne pas sur un Raspberry Pi et activera le mode simulation.
 
+### Si besoin d'installer Python 3.13
+
+sudo add-apt-repository ppa:deadsnakes/ppa
+sudo apt install python3.13-full
+
 ---
 
 ## 🧰 Utilisation
