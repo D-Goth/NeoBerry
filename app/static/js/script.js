@@ -10,19 +10,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
     loadPairedDevices();
 
-    const scanBtn = document.getElementById("scan-btn");
-    if (scanBtn) {
-        scanBtn.addEventListener("click", scanDevices);
-    }
-
-    const connectBtn = document.getElementById("connect-button");
-    if (connectBtn) {
-        connectBtn.addEventListener("click", () => {
-            if (!selectedDevice) return;
-            connectToDevice(selectedDevice.mac);
-        });
-    }
-
 
     const networkUpGauge = createGauge(document.getElementById('network-up').getContext('2d'), 'Upload', 0, true);
     const networkDownGauge = createGauge(document.getElementById('network-down').getContext('2d'), 'Download', 0, true);
@@ -78,27 +65,37 @@ Chart.register({
   }
 });
 
-  // Plugin personnalisé pour les jauges réseau (avec unités)
+// Plugin personnalisé pour les jauges réseau (avec unités)
 Chart.register({
   id: 'customNetworkLabel',
   afterDraw: function(chart) {
     const { ctx, data } = chart;
     const { width, height } = chart;
-    if (chart.options.plugins.customNetworkLabel) { // Appliqué uniquement si spécifié
+
+    // Vérifie si le plugin est spécifié dans les options
+    if (chart.options.plugins.customNetworkLabel) {
       ctx.save();
+
+      // Configuration de la police pour la valeur affichée
       ctx.font = '700 22px Poppins';
-      ctx.fillStyle = getGaugeColor(data.datasets[0].data[0]);
+      ctx.fillStyle = getGaugeColor(data.datasets[0].data[0]); // Couleur basée sur le pourcentage
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
+
+      // Valeur à afficher, avec unité si disponible
       const valueToDisplay = chart.valueToDisplay || data.datasets[0].data[0];
-      ctx.fillText(valueToDisplay, width / 2, height / 2 - 8);
+      ctx.fillText(valueToDisplay, width / 2, height / 2 - 8); // Affiche la valeur au centre
+
+      // Configuration de la police pour le label
       ctx.font = '400 12px Poppins';
-      ctx.fillStyle = '#ffffffcc';
-      ctx.fillText(data.labels[0], width / 2, height / 2 + 14);
-      ctx.restore();
+      ctx.fillStyle = '#ffffffcc'; // Couleur du texte pour le label
+      ctx.fillText(data.labels[0], width / 2, height / 2 + 14); // Affiche le label sous la valeur
+
+      ctx.restore(); // Restaure le contexte
     }
   }
 });
+
 
   const gpioContainer = document.getElementById('gpio-controls');
   let gpioPins = [];
@@ -248,7 +245,7 @@ function createGauge(ctx, label, initialValue = 0, isNetworkGauge = false) {
       wifiStrengthGauge.data.datasets[0].backgroundColor[0] = getGaugeColor(data.network.wifi_strength);
       wifiStrengthGauge.update();
    
-      document.getElementById('network-type').textContent = data.network.type || 'Inconnu';
+      document.getElementById('network-info').textContent = data.network.type || 'Inconnu';
       const wifiSection = document.getElementById('wifi-section');
       const wifiSsid = document.getElementById('wifi-ssid');
       if (data.network.type && data.network.type.toLowerCase() === 'wifi') {
@@ -270,44 +267,54 @@ function createGauge(ctx, label, initialValue = 0, isNetworkGauge = false) {
   }
 
   function updateBandwidth(canvasId, speed, label) {
-  const ctx = document.getElementById(canvasId).getContext('2d');
-  let gauge = Chart.getChart(ctx);
-  if (!gauge) {
-    gauge = createGauge(ctx, label, 0, canvasId === 'network-up' || canvasId === 'network-down');
+    const ctx = document.getElementById(canvasId).getContext('2d');
+    let gauge = Chart.getChart(ctx);
+    if (!gauge) {
+      gauge = createGauge(ctx, label, 0, canvasId === 'network-up' || canvasId === 'network-down');
+    }
+
+    let value = parseSpeed(speed) || 0;
+    const maxSpeed = 100 * 1024 * 1024;
+    let percentage = (value > maxSpeed) ? 100 : (value / maxSpeed) * 100;
+    percentage = (percentage < 0) ? 0 : percentage;
+
+    // Convertir la valeur en unité appropriée
+    let convertedValue = value;
+    let unit = 'b/s';
+
+    if (convertedValue >= 1024 * 1024 * 1024) {
+      // Plus grand ou égal à 1 gigabit -> afficher en Gb/s
+      convertedValue = convertedValue / (1024 * 1024 * 1024);
+      unit = 'Gb/s';
+    } else if (convertedValue >= 1024 * 1024) {
+      // Plus grand ou égal à 1 mégabit -> afficher en Mb/s
+      convertedValue = convertedValue / (1024 * 1024);
+      unit = 'Mb/s';
+    } else if (convertedValue >= 1024) {
+      // Plus grand ou égal à 1 kilobit -> afficher en Kb/s
+      convertedValue = convertedValue / 1024;
+      unit = 'Kb/s';
+    } else {
+      // Sinon en bits par seconde
+      unit = 'b/s';
+    }
+
+    convertedValue = convertedValue.toFixed(2);
+
+    // Mettre à jour la jauge avec le pourcentage
+    gauge.data.datasets[0].data[0] = percentage;
+    gauge.data.datasets[0].data[1] = 100 - percentage;
+    gauge.data.datasets[0].backgroundColor[0] = getGaugeColor(percentage);
+    gauge.data.labels = [label, 'Libre'];
+
+    // Définir la valeur à afficher dans le plugin pour les jauges réseau
+    if (canvasId === 'network-up' || canvasId === 'network-down') {
+      gauge.valueToDisplay = convertedValue + ' ' + unit;
+    }
+
+    gauge.update();
   }
-  let value = parseSpeed(speed) || 0; 
-  const maxSpeed = 100; 
-  let percentage = (value > maxSpeed) ? 100 : (value / maxSpeed) * 100; 
-  percentage = (percentage < 0) ? 0 : percentage;
 
-  // Convertir la valeur en unité appropriée
-  let convertedValue = value; 
-  let unit = 'MB/s';
-  if (convertedValue < 0.001) {
-    convertedValue *= 1024 * 1024; 
-    unit = 'B/s';
-  } else if (convertedValue < 1) {
-    convertedValue *= 1024; 
-    unit = 'KB/s';
-  } else if (convertedValue >= 1024) {
-    convertedValue /= 1024; 
-    unit = 'GB/s';
-  }
-  convertedValue = convertedValue.toFixed(2); 
-
-  // Mettre à jour la jauge avec le pourcentage
-  gauge.data.datasets[0].data[0] = percentage;
-  gauge.data.datasets[0].data[1] = 100 - percentage;
-  gauge.data.datasets[0].backgroundColor[0] = getGaugeColor(percentage);
-  gauge.data.labels = [label, 'Libre'];
-
-  // Définir la valeur à afficher dans le plugin pour les jauges réseau
-  if (canvasId === 'network-up' || canvasId === 'network-down') {
-    gauge.valueToDisplay = convertedValue + ' ' + unit;
-  }
-
-  gauge.update();
-}
 
   function fetchNetworkStats() {
     fetch('/api/network')
@@ -325,18 +332,20 @@ function createGauge(ctx, label, initialValue = 0, isNetworkGauge = false) {
 
   function parseSpeed(speedStr) {
     if (!speedStr || speedStr === 'N/A') return 0;
-    const match = speedStr.match(/([\d\.]+)\s*(B\/s|KB\/s|MB\/s|GB\/s)/);
+    const match = speedStr.match(/([\d.]+)\s*(b\/s|kb\/s|mb\/s|gb\/s)/i);
     if (!match) return 0;
     const value = parseFloat(match[1]);
-    const unit = match[2];
+    const unit = match[2].toLowerCase();
+
     switch (unit) {
-      case 'GB/s': return value * 1024 * 1024;
-      case 'MB/s': return value * 1024;
-      case 'KB/s': return value;
-      case 'B/s': return value / 1024;
+      case 'gb/s': return value * 1024 * 1024 * 1024;
+      case 'mb/s': return value * 1024 * 1024;
+      case 'kb/s': return value * 1024;
+      case 'b/s': return value;
       default: return 0;
     }
   }
+
 
   document.getElementById('reboot-button').addEventListener('click', () => {
     if (confirm('Êtes-vous sûr de vouloir redémarrer le Raspberry Pi ?')) {
@@ -433,6 +442,18 @@ function updateBluetoothUI(data) {
       bluetoothDeviceInfo.textContent = `Périphérique connecté : ${data.bluetooth.device || 'Aucun'}`;
     }
 
+    const scanBtn = document.getElementById("scan-btn");
+    if (scanBtn) {
+      scanBtn.addEventListener("click", scanDevices);
+    }
+
+    const connectBtn = document.getElementById("connect-button");
+    if (connectBtn) {
+      connectBtn.addEventListener("click", () => {
+        if (!selectedDevice) return;
+        connectToDevice(selectedDevice.mac);
+      });
+    }
 
 function scanDevices() {
     const list = document.getElementById("paired-devices-list");
