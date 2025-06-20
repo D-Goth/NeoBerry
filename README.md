@@ -15,7 +15,7 @@
 
 ---
 
-![Python](https://img.shields.io/badge/python-3.11-blue)
+![Python](https://img.shields.io/badge/python-3.13-blue)
 ![Licence](https://img.shields.io/badge/licence-MIT-green)
 
 ---
@@ -214,7 +214,7 @@ Voir le fichier `LICENSE`.
 
 ---
 
-![Python](https://img.shields.io/badge/python-3.11-blue)
+![Python](https://img.shields.io/badge/python-3.13-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
 ---
