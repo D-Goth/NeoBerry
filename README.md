@@ -14,8 +14,15 @@
 - Mode test hors Raspberry Pi avec simulation GPIO  
 
 ---
-
+![NeoBerry](https://img.shields.io/badge/🍓-NeoBerry-red)
 ![Python](https://img.shields.io/badge/python-3.13-blue)
+![JavaScript](https://img.shields.io/badge/javascript-ES6-yellow)
+![HTML](https://img.shields.io/badge/html-5-orange)
+![CSS](https://img.shields.io/badge/css-3-blueviolet)
+![Flask](https://img.shields.io/badge/flask-2.3-lightgrey)
+![PAM](https://img.shields.io/badge/authentication-PAM-critical)
+![GPIO](https://img.shields.io/badge/RPi-GPIO-brightgreen)
+![BLE](https://img.shields.io/badge/Bluetooth-LE-00599e)
 ![Licence](https://img.shields.io/badge/licence-MIT-green)
 
 ---
@@ -213,9 +220,16 @@ Voir le fichier `LICENSE`.
 - Test mode without Raspberry Pi with GPIO simulation  
 
 ---
-
+![NeoBerry](https://img.shields.io/badge/🍓-NeoBerry-red)
 ![Python](https://img.shields.io/badge/python-3.13-blue)
-![License](https://img.shields.io/badge/license-MIT-green)
+![JavaScript](https://img.shields.io/badge/javascript-ES6-yellow)
+![HTML](https://img.shields.io/badge/html-5-orange)
+![CSS](https://img.shields.io/badge/css-3-blueviolet)
+![Flask](https://img.shields.io/badge/flask-2.3-lightgrey)
+![PAM](https://img.shields.io/badge/authentication-PAM-critical)
+![GPIO](https://img.shields.io/badge/RPi-GPIO-brightgreen)
+![BLE](https://img.shields.io/badge/Bluetooth-LE-00599e)
+![Licence](https://img.shields.io/badge/licence-MIT-green)
 
 ---
 
