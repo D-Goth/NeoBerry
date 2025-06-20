@@ -15,9 +15,8 @@ def login_required(f):
     return decorated
 
 def run_cmd(cmd):
-    return subprocess.run(
-        f"sudo {cmd}", shell=True, capture_output=True, text=True
-    ).stdout.strip()
+    return subprocess.run(cmd, shell=True, capture_output=True, text=True).stdout.strip()
+
 
 @bluetooth_bp.route("/bluetooth/on", methods=["POST"])
 @login_required
