@@ -107,6 +107,11 @@ git clone https://github.com/D-Goth/NeoBerry.git
 cd NeoBerry
 sudo ./install_neoBerry.sh
 
+or
+
+curl -sSL https://raw.githubusercontent.com/D-Goth/NeoBerry/main/install_neoBerry.sh | bash
+
+
 ````
 
 
@@ -155,7 +160,6 @@ python3.13 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
 python app/app.py
-
 
 ```
 
@@ -284,6 +288,11 @@ python3.13 app/app.py
 git clone https://github.com/D-Goth/NeoBerry.git
 cd NeoBerry
 sudo ./install_neoBerry.sh
+
+or 
+
+curl -sSL https://raw.githubusercontent.com/D-Goth/NeoBerry/main/install_neoBerry.sh | bash
+
 ```
 
 * ✅ Test launch with Gunicorn [Optional]  
