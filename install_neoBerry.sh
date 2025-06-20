@@ -63,22 +63,21 @@ apt install -y \
   git \
   curl
 
-echo "🔒 Ajout de l'utilisateur courant aux groupes système (gpio, dialout)..."
+echo "🔒 Vérification des groupes système nécessaires (gpio, dialout)..."
 
 # Détection du matériel pour info
 if grep -q 'Raspberry Pi' /proc/device-tree/model 2>/dev/null; then
   echo "🍓 Matériel détecté : Raspberry Pi"
 else
-  echo "💻 Matériel non-Raspberry, certains groupes peuvent être absents"
+  echo "💻 Matériel non-Raspberry, certains groupes peuvent être absents (et ce n’est pas bloquant)"
 fi
 
-# Ajout conditionnel à chaque groupe
 for grp in gpio dialout; do
-  if getent group "$grp" > /dev/null; then
+  if getent group "$grp" >/dev/null; then
     usermod -aG "$grp" "$SUDO_USER"
-    echo "✅ Ajouté au groupe '$grp'"
+    echo "✅ Ajout de l’utilisateur '$SUDO_USER' au groupe '$grp'"
   else
-    echo "⚠️ Groupe '$grp' introuvable — ignoré"
+    echo "ℹ️ Groupe '$grp' non présent sur ce système — ignoré"
   fi
 done
 
