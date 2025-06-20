@@ -129,12 +129,14 @@ gunicorn --bind 0.0.0.0:5000 app:app
 ./run_neoBerry.sh --status
 
 * Créer un service systemd → auto au démarrage
+
+```bash
 sudo cp neoBerry.service /etc/systemd/system/flask-dashboard.service
 sudo systemctl enable flask-dashboard
 sudo systemctl start flask-dashboard
 
-
 ````
+
 
 > Accédez ensuite à l'interface via :
 > [http://localhost:5000](http://localhost:5000)
@@ -303,9 +305,12 @@ sudo ./install_neoBerry.sh
 ./run_neoBerry.sh --status  
 
 * Create a systemd service → auto-start at boot  
-sudo cp neoBerry.service /etc/systemd/system/flask-dashboard.service  
-sudo systemctl enable flask-dashboard  
-sudo systemctl start flask-dashboard  
+```bash
+sudo cp neoBerry.service /etc/systemd/system/flask-dashboard.service
+sudo systemctl enable flask-dashboard
+sudo systemctl start flask-dashboard
+
+````
 
 > Then access the interface at:  
 > [http://localhost:5000](http://localhost:5000)
