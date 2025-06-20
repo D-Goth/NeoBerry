@@ -107,27 +107,39 @@ git clone https://github.com/D-Goth/NeoBerry.git
 cd NeoBerry
 sudo ./install_neoBerry.sh
 
-
 ````
 
-
 * ✅ Test lancement avec Gunicorn [Optionnel]
+```bash
 cd app
 gunicorn --bind 0.0.0.0:5000 app:app
 
+````
 * Utilisation du script run_neoBerry.sh
 
 ### Démarrer NeoBerry
+```bash
 ./run_neoBerry.sh --start
 
+````
+
 ### Arrêter NeoBerry
+```bash
 ./run_neoBerry.sh --stop
 
+````
+
 ### Redémarrer NeoBerry
+```bash
 ./run_neoBerry.sh --restart
 
+````
+
 ### Vérifier l'état de l'application
+```bash
 ./run_neoBerry.sh --status
+
+````
 
 * Créer un service systemd → auto au démarrage
 
@@ -287,23 +299,37 @@ sudo ./install_neoBerry.sh
 
 ```
 
-* ✅ Test launch with Gunicorn [Optional]  
+* ✅ Test launch with Gunicorn [Optional]
+```bash 
   cd app  
   gunicorn --bind 0.0.0.0:5000 app:app  
+```
 
 * Using the run_neoBerry.sh script  
 
 ### Start NeoBerry  
-./run_neoBerry.sh --start  
+```bash
+./run_neoBerry.sh --start
+
+````
 
 ### Stop NeoBerry  
-./run_neoBerry.sh --stop  
+```bash
+./run_neoBerry.sh --stop
+
+```` 
 
 ### Restart NeoBerry  
-./run_neoBerry.sh --restart  
+```bash
+./run_neoBerry.sh --restart
+
+````  
 
 ### Check application status  
-./run_neoBerry.sh --status  
+```bash
+./run_neoBerry.sh --status
+
+````  
 
 * Create a systemd service → auto-start at boot  
 ```bash
