@@ -109,7 +109,7 @@ sudo ./install_neoBerry.sh
 
 or
 
-curl -sSL https://raw.githubusercontent.com/D-Goth/NeoBerry/main/install_neoBerry.sh | bash
+curl -sSL https://raw.githubusercontent.com/D-Goth/NeoBerry/main/install_neoBerry.sh | sudo bash
 
 
 ````
@@ -291,7 +291,7 @@ sudo ./install_neoBerry.sh
 
 or 
 
-curl -sSL https://raw.githubusercontent.com/D-Goth/NeoBerry/main/install_neoBerry.sh | bash
+curl -sSL https://raw.githubusercontent.com/D-Goth/NeoBerry/main/install_neoBerry.sh | sudo bash
 
 ```
 
