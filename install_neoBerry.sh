@@ -63,8 +63,24 @@ apt install -y \
   git \
   curl
 
-echo "🔒 Ajout de l'utilisateur courant aux groupes gpio et dialout..."
-usermod -aG gpio,dialout "$SUDO_USER"
+echo "🔒 Ajout de l'utilisateur courant aux groupes système (gpio, dialout)..."
+
+# Détection du matériel pour info
+if grep -q 'Raspberry Pi' /proc/device-tree/model 2>/dev/null; then
+  echo "🍓 Matériel détecté : Raspberry Pi"
+else
+  echo "💻 Matériel non-Raspberry, certains groupes peuvent être absents"
+fi
+
+# Ajout conditionnel à chaque groupe
+for grp in gpio dialout; do
+  if getent group "$grp" > /dev/null; then
+    usermod -aG "$grp" "$SUDO_USER"
+    echo "✅ Ajouté au groupe '$grp'"
+  else
+    echo "⚠️ Groupe '$grp' introuvable — ignoré"
+  fi
+done
 
 echo "🔧 Configuration sudoers pour commandes sans mot de passe (rfkill, bluetoothctl, gpio, etc.)"
 CMD_LIST="/usr/bin/rfkill, /usr/bin/bluetoothctl, /usr/bin/gpio, /usr/bin/hcitool"
