@@ -113,6 +113,11 @@ python3.13 app/app.py
 git clone https://github.com/D-Goth/NeoBerry.git
 cd NeoBerry
 sudo ./install_neoBerry.sh
+ ou
+
+curl -sSL https://raw.githubusercontent.com/D-Goth/NeoBerry/main/install_neoBerry.sh | sudo bash
+sudo chown -R "$USER":"$USER" ~/NeoBerry
+chmod +x ~/NeoBerry/run_neoBerry.sh
 
 ````
 
@@ -310,6 +315,12 @@ python3.13 app/app.py
 git clone https://github.com/D-Goth/NeoBerry.git
 cd NeoBerry
 sudo ./install_neoBerry.sh
+
+ or
+
+curl -sSL https://raw.githubusercontent.com/D-Goth/NeoBerry/main/install_neoBerry.sh | sudo bash
+sudo chown -R "$USER":"$USER" ~/NeoBerry
+chmod +x ~/NeoBerry/run_neoBerry.sh
 
 ```
 
