@@ -98,6 +98,7 @@ echo "🧹 Nettoyage éventuel des .pyc..."
 
 # ✅ Fin
 echo ""
-echo "🍓 Installation terminée."
-echo "📁 Dossier : $INSTALL_DIR"
-echo "▶️  Lancez NeoBerry avec : ./run_neoBerry.sh --start"
+echo "🍓 NeoBerry est prêt."
+echo "Retrouvez d'autres projets sur le Github/D-Goth"
+echo "Et sur le site Black-Lab.fr"
+echo "👉 Lancez-le avec : ./run_neoBerry.sh --start"
