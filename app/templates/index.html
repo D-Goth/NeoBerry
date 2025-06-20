@@ -40,10 +40,11 @@
     </select>
   </div>
 
-  <section aria-labelledby="gpio-title">
+<section aria-labelledby="gpio-title" class="gpio-section" data-expanded="true">
     <h2 id="gpio-title">Contrôle GPIO</h2>
-    <div id="gpio-controls" role="grid" aria-label="Contrôle des ports GPIO"></div>
-  </section>
+  <div id="gpio-controls" class="gpio-content" role="grid" aria-label="Contrôle des ports GPIO"></div>
+</section>
+
 
   <section aria-labelledby="system-title">
     <h2 id="system-title">Surveillance Système</h2>
@@ -109,7 +110,8 @@
     <div class="network-field" aria-label="Options Bluetooth">
       <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 12px;">
         <div class="terminal-actions">
-        <button id="scan-devices">🔍 Scanner les périphériques</button></div>
+        <button onclick="scanDevices()">🔍 Scanner les périphériques</button>
+        </div>
         <ul id="devices-list" class="network-info"></ul>
     </div>
     

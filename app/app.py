@@ -2,61 +2,79 @@ import os
 import platform
 import subprocess
 import threading
-from flask import Flask, jsonify, request, render_template, redirect, url_for, session, abort, Response, flash
+from flask import (
+    Flask,
+    jsonify,
+    request,
+    render_template,
+    redirect,
+    url_for,
+    session,
+    abort,
+    Response,
+    flash,
+)
 import psutil
 import time
 from functools import wraps
 import logging
 import json
 import secrets
+import re
+
 from dotenv import load_dotenv
 
 load_dotenv()
 
 try:
     import RPi.GPIO as GPIO
+
     IS_RPI = True
 except (ImportError, RuntimeError):
     IS_RPI = False
-
 try:
     import pam
+
     PAM_AVAILABLE = True
     p = pam.pam()
 except ImportError:
     PAM_AVAILABLE = False
     p = None
-
 app = Flask(__name__)
 secret_key = os.getenv("FLASK_SECRET_KEY")
 
 if not secret_key:
     print("⚠️ Aucune clé FLASK_SECRET_KEY trouvée, génération d'une nouvelle clé...")
     secret_key = secrets.token_hex(32)
-    
+
     with open(".env", "a") as f:
         f.write(f"\nFLASK_SECRET_KEY={secret_key}\n")
-
 app.secret_key = secret_key
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
-logging.getLogger('werkzeug').setLevel(logging.WARNING)
+logging.getLogger("werkzeug").setLevel(logging.WARNING)
+
 
 def async_reboot():
     import time
+
     time.sleep(2)
     os.system("sudo reboot")
 
+
 def async_shutdown():
     import time
+
     time.sleep(2)
     os.system("sudo shutdown now")
+
 
 GPIO_PINS = list(range(1, 41))
 gpio_states = {pin: False for pin in GPIO_PINS}
 
 # Initialisation des GPIO
+
 if IS_RPI:
     GPIO.setmode(GPIO.BCM)
     for pin in GPIO_PINS:
@@ -67,9 +85,15 @@ if IS_RPI:
         except Exception as e:
             logger.warning(f"GPIO setup failed for pin {pin}: {e}")
 
+
 def is_raspberry_pi():
     uname_info = platform.uname()
-    return IS_RPI or 'raspberrypi' in uname_info.system.lower() or 'raspberrypi' in uname_info.release.lower()
+    return (
+        IS_RPI
+        or "raspberrypi" in uname_info.system.lower()
+        or "raspberrypi" in uname_info.release.lower()
+    )
+
 
 def login_required(f):
     @wraps(f)
@@ -77,7 +101,9 @@ def login_required(f):
         if not session.get("logged_in"):
             return redirect(url_for("login", next=request.url))
         return f(*args, **kwargs)
+
     return decorated
+
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
@@ -99,10 +125,12 @@ def login():
             return redirect(next_url or url_for("index"))
     return render_template("login.html")
 
+
 @app.route("/logout")
 def logout():
     session.clear()
     return redirect(url_for("login"))
+
 
 def write_gpio(pin, state):
     if pin not in GPIO_PINS:
@@ -115,6 +143,7 @@ def write_gpio(pin, state):
             logger.error(f"Erreur écriture GPIO {pin}: {e}")
     else:
         gpio_states[pin] = state
+
 
 def read_gpio(pin):
     if pin not in GPIO_PINS:
@@ -130,13 +159,16 @@ def read_gpio(pin):
     else:
         return gpio_states.get(pin, False)
 
+
 @app.route("/")
 @login_required
 def index():
     return render_template("index.html")
 
+
 last_counters = psutil.net_io_counters()
 last_time = time.time()
+
 
 def get_network_metrics():
     global last_counters, last_time
@@ -145,21 +177,25 @@ def get_network_metrics():
     elapsed_time = current_time - last_time
 
     if elapsed_time > 0:
-        upload_speed = (current_counters.bytes_sent - last_counters.bytes_sent) / elapsed_time
-        download_speed = (current_counters.bytes_recv - last_counters.bytes_recv) / elapsed_time
+        upload_speed = (
+            current_counters.bytes_sent - last_counters.bytes_sent
+        ) / elapsed_time
+        download_speed = (
+            current_counters.bytes_recv - last_counters.bytes_recv
+        ) / elapsed_time
     else:
         upload_speed, download_speed = 0, 0
-
     last_counters = current_counters
     last_time = current_time
 
     return {
         "network_up": convert_bytes(upload_speed) + "/s",
-        "network_down": convert_bytes(download_speed) + "/s"
+        "network_down": convert_bytes(download_speed) + "/s",
     }
 
+
 def convert_bytes(bytes_val):
-    """ Convertit une valeur en Bytes vers KB, MB ou GB """
+    """Convertit une valeur en Bytes vers KB, MB ou GB"""
     if bytes_val < 1:
         return "0 B/s"
     units = ["B", "KB", "MB", "GB"]
@@ -169,16 +205,18 @@ def convert_bytes(bytes_val):
         index += 1
     return f"{bytes_val:.2f} {units[index]}"
 
+
 @app.route("/api/network", methods=["GET"])
 @login_required
 def api_network():
-    """ Récupère les vitesses réseau (Upload/Download uniquement) """
+    """Récupère les vitesses réseau (Upload/Download uniquement)"""
     try:
         network_metrics = get_network_metrics()
         return jsonify({"metrics": network_metrics})
     except Exception as e:
         logging.error(f"Erreur API /api/network: {e}")
         return jsonify({"error": "Erreur interne serveur"}), 500
+
 
 @app.route("/api/status", methods=["GET"])
 @login_required
@@ -206,7 +244,6 @@ def api_status():
             else:
                 cpu_temp = 42.0
                 board_temp = 38.0
-
         disk_usage = psutil.disk_usage("/")
         disk_capacity_percent = disk_usage.percent
 
@@ -227,17 +264,25 @@ def api_status():
 
         if platform.system() == "Linux":
             try:
-                subprocess.run(["which", "iwgetid"], check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-                out = subprocess.check_output("iwgetid -r", shell=True).decode("utf-8").strip()
+                subprocess.run(
+                    ["which", "iwgetid"],
+                    check=True,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                )
+                out = (
+                    subprocess.check_output("iwgetid -r", shell=True)
+                    .decode("utf-8")
+                    .strip()
+                )
                 if out:
                     network_info["wifi_ssid"] = out
                     network_info["network_type"] = "WiFi"
                     network_info["wifi_strength"] = 70
             except subprocess.CalledProcessError:
-                pass  
+                pass
             except Exception as e:
                 logger.error(f"Erreur lors de la récupération du SSID WiFi: {e}")
-
         gpio_data = {pin: read_gpio(pin) for pin in GPIO_PINS}
 
         return jsonify(
@@ -265,7 +310,8 @@ def api_status():
     except Exception as e:
         logging.error(f"Erreur API /api/status: {e}")
         return jsonify({"error": "Erreur interne serveur"}), 500
-        
+
+
 @app.route("/api/gpio", methods=["GET"])
 @login_required
 def api_gpio_get():
@@ -275,6 +321,7 @@ def api_gpio_get():
     except Exception as e:
         logger.error(f"Erreur API /api/gpio GET: {e}")
         return jsonify({"error": "Erreur serveur"}), 500
+
 
 @app.route("/api/gpio", methods=["POST"])
 @login_required
@@ -295,11 +342,19 @@ def api_gpio_post():
         logger.error(f"Erreur écriture GPIO {pin}: {e}")
         return jsonify({"error": "Erreur serveur"}), 500
 
+
+def run_cmd(cmd):
+    return subprocess.run(
+        cmd, shell=True, capture_output=True, text=True
+    ).stdout.strip()
+
+
 @app.route("/api/reboot", methods=["POST"])
 @login_required
 def api_reboot():
     threading.Thread(target=async_reboot).start()
     return jsonify({"message": "Redémarrage en cours..."})
+
 
 @app.route("/api/shutdown", methods=["POST"])
 @login_required
@@ -307,155 +362,147 @@ def api_shutdown():
     threading.Thread(target=async_shutdown).start()
     return jsonify({"message": "Extinction en cours..."})
 
-@app.route('/api/bluetooth/scan')
-def scan_bluetooth_devices():
-    devices = [
-        {"name": "Bose QC35", "mac": "AA:BB:CC:DD:EE:01", "connected": False},
-        {"name": "Nintendo Switch", "mac": "AA:BB:CC:DD:EE:02", "connected": False},
-        {"name": "Xiaomi Speaker", "mac": "AA:BB:CC:DD:EE:03", "connected": False}
-    ]
 
-    folder = 'paired-devices'
-    os.makedirs(folder, exist_ok=True)
-
-    for dev in devices:
-        mac = dev['mac']
-        filepath = os.path.join(folder, f"{mac}.json")
-        with open(filepath, 'w') as f:
-            json.dump(dev, f, indent=2)
-
-    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-    js_path = os.path.join(BASE_DIR, 'static', 'js', 'list.js')
-    try:
-        with open(js_path, 'w') as jsf:
-            jsf.write("// Fichier généré automatiquement par le scan\n")
-            jsf.write("const pairedDevices = ")
-            json.dump(devices, jsf, indent=2)
-            jsf.write(";\nexport default pairedDevices;\n")
-    except Exception as e:
-        print(f"[ERREUR] Impossible de mettre à jour list.js :", e)
-
-    return jsonify({"devices": devices})
-
-@app.route('/api/bluetooth/pair', methods=['POST'])
+@app.route("/bluetooth/on", methods=["POST"])
 @login_required
-def pair_device():
-    data = request.get_json()
-    mac = data.get('mac')
-    name = data.get('name') or f"Appareil-{mac[-5:].replace(':','')}"
-    folder = 'paired-devices'
-    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-    js_path = os.path.join(BASE_DIR, 'static', 'js', 'list.js')
+def bluetooth_on():
+    run_cmd("rfkill unblock bluetooth")
+    run_cmd("bluetoothctl power on")
+    return jsonify({"status": "on"})
 
-    if not mac:
-        return jsonify({'error': 'MAC manquant'}), 400
 
-    os.makedirs(folder, exist_ok=True)
-
-    device_file = os.path.join(folder, f"{mac}.json")
-    with open(device_file, 'w') as f:
-        json.dump({'mac': mac, 'name': name}, f, indent=2)
-
-    devices = []
-    for filename in os.listdir(folder):
-        if filename.endswith('.json'):
-            try:
-                with open(os.path.join(folder, filename), 'r') as f:
-                    dev = json.load(f)
-                    devices.append(dev)
-            except Exception as e:
-                print(f"Erreur lecture {filename} :", e)
-
-    try:
-        with open(js_path, 'w') as jsf:
-            jsf.write("// Liste des périphériques appairés – générée automatiquement\n")
-            jsf.write("const pairedDevices = ")
-            json.dump(devices, jsf, indent=2)
-            jsf.write(";\nexport default pairedDevices;\n")
-    except Exception as e:
-        print(f"Erreur écriture {js_path} :", e)
-        return jsonify({'error': 'Fichier JS non mis à jour'}), 500
-
-    return jsonify({'status': 'paired', 'mac': mac})
-
-@app.route('/api/bluetooth/paired')
+@app.route("/bluetooth/off", methods=["POST"])
 @login_required
-def get_paired_devices():
-    folder = 'paired-devices'
-    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-    js_path = os.path.join(BASE_DIR, 'static', 'js', 'list.js')
+def bluetooth_off():
+    run_cmd("bluetoothctl power off")
+    return jsonify({"status": "off"})
+
+
+@app.route("/bluetooth/scan", methods=["GET"])
+@login_required
+def bluetooth_scan():
+    run_cmd("bluetoothctl scan on")
+    output = run_cmd("timeout 5s bluetoothctl devices")
     devices = []
-
-    if not os.path.exists(js_path):
-        try:
-            with open(js_path, 'w') as f:
-                f.write("// Fichier généré automatiquement : liste des périphériques appairés\n")
-                f.write("const pairedDevices = [];\n")
-        except Exception as e:
-            print(f"Erreur création {js_path} :", e)
-
-    if os.path.exists(folder):
-        for filename in os.listdir(folder):
-            if filename.endswith('.json'):
-                try:
-                    with open(os.path.join(folder, filename), 'r') as f:
-                        device_info = json.load(f)
-                        devices.append(device_info)
-                except Exception as e:
-                    print(f"Erreur lecture {filename} :", e)
-
+    for line in output.splitlines():
+        match = re.match(r"Device ([0-9A-F:]+) (.+)", line)
+        if match:
+            addr, name = match.groups()
+            devices.append({"address": addr, "name": name})
+    run_cmd("bluetoothctl scan off")
     return jsonify(devices)
 
-@app.route('/api/bluetooth/forget', methods=['POST'])
+
+@app.route("/bluetooth/pair", methods=["POST"])
 @login_required
-def forget_paired_device():
+def bluetooth_pair():
     data = request.get_json()
-    mac = data.get('mac')
-    if not mac:
-        return jsonify({'error': 'MAC manquant'}), 400
+    address = data.get("address")
+    output = run_cmd(f"bluetoothctl pair {address}")
+    return jsonify({"result": output})
 
-    filename = f'paired-devices/{mac}.json'
-    if os.path.exists(filename):
-        try:
-            os.remove(filename)
-            return jsonify({'status': 'deleted', 'mac': mac})
-        except Exception as e:
-            print(f"Erreur suppression {filename} :", e)
-            return jsonify({'error': 'Suppression impossible'}), 500
+
+@app.route("/bluetooth/connect", methods=["POST"])
+@login_required
+def bluetooth_connect():
+    data = request.get_json()
+    address = data.get("address")
+    output = run_cmd(f"bluetoothctl connect {address}")
+    return jsonify({"result": output})
+
+
+@app.route("/bluetooth/trusted", methods=["POST"])
+@login_required
+def bluetooth_trust():
+    data = request.get_json()
+    address = data.get("address")
+    run_cmd(f"bluetoothctl trust {address}")
+    return jsonify({"status": "trusted"})
+
+
+@app.route("/bluetooth/remove", methods=["POST"])
+@login_required
+def bluetooth_remove():
+    data = request.get_json()
+    address = data.get("address")
+    output = run_cmd(f"bluetoothctl remove {address}")
+    return jsonify({"result": output})
+
+
+@app.route("/bluetooth/paired", methods=["GET"])
+@login_required
+def bluetooth_paired():
+    output = run_cmd("bluetoothctl paired-devices")
+    devices = []
+    for line in output.splitlines():
+        match = re.match(r"Device ([0-9A-F:]+) (.+)", line)
+        if match:
+            addr, name = match.groups()
+            devices.append({"address": addr, "name": name})
+    return jsonify(devices)
+
+
+@app.route("/bluetooth/signal", methods=["POST"])
+@login_required
+def bluetooth_signal():
+    address = request.get_json().get("address")
+    output = run_cmd(f"hcitool rssi {address}")
+    match = re.search(r"RSSI return value:\s*(-?\d+)", output)
+    if match:
+        rssi = int(match.group(1))
+        quality = min(
+            max(int((rssi + 100) * 1.25), 0), 100
+        )  # convert RSSI to 0-100 scale
     else:
-        return jsonify({'error': 'Fichier introuvable'}), 404
+        quality = 0
+    return jsonify({"rssi": rssi if match else None, "quality": quality})
 
-@app.route('/api/bluetooth/status')
+
+@app.route("/api/bluetooth/status")
 @login_required
 def get_bluetooth_status():
     # Simulez la récupération de la qualité de la connexion Bluetooth
+
     quality = 75  # Exemple de valeur de qualité (0 à 100)
     connected_device = "Bose QC35"  # Exemple de périphérique connecté
 
-    return jsonify({
-        'quality': quality,
-        'device': connected_device
-    })
+    return jsonify({"quality": quality, "device": connected_device})
 
-    
-@app.route('/api/battery')
+
+@app.route("/api/battery")
 @login_required
 def battery_status():
     try:
         # Tentative avec psutil
+
         battery = psutil.sensors_battery()
         if battery is not None:
             percent = battery.percent
             power_plugged = battery.power_plugged
-            secsleft = battery.secsleft if battery.secsleft != psutil.POWER_TIME_UNKNOWN else None
+            secsleft = (
+                battery.secsleft
+                if battery.secsleft != psutil.POWER_TIME_UNKNOWN
+                else None
+            )
         else:
             # Fallback avec upower si psutil échoue
+
             try:
                 output = check_output(["upower", "-e"]).decode().strip()
-                if "battery" in output or "device" in output:  # Cherche un périphérique batterie
+                if (
+                    "battery" in output or "device" in output
+                ):  # Cherche un périphérique batterie
                     device = output.split()[-1]
-                    percent = float(check_output(["upower", "-i", device, "| grep percentage"], text=True).split()[-1].rstrip("%"))
-                    state = check_output(["upower", "-i", device, "| grep state"], text=True).split()[-1]
+                    percent = float(
+                        check_output(
+                            ["upower", "-i", device, "| grep percentage"], text=True
+                        )
+                        .split()[-1]
+                        .rstrip("%")
+                    )
+                    state = check_output(
+                        ["upower", "-i", device, "| grep state"], text=True
+                    ).split()[-1]
                     power_plugged = state == "charging" or state == "fully-charged"
                     secsleft = None  # upower ne donne pas toujours le temps restant
                 else:
@@ -468,16 +515,29 @@ def battery_status():
                 power_plugged = True
                 secsleft = None
                 print(f"Error with upower: {e}")
-
-        return jsonify({
-            "percent": percent,
-            "power_plugged": power_plugged,
-            "secsleft": secsleft,
-            "no_battery_detected": percent == 100 and not battery  # Indique si c'est par défaut
-        })
+        return jsonify(
+            {
+                "percent": percent,
+                "power_plugged": power_plugged,
+                "secsleft": secsleft,
+                "no_battery_detected": percent == 100
+                and not battery,  # Indique si c'est par défaut
+            }
+        )
     except Exception as e:
-        return jsonify({"error": str(e), "percent": 100, "power_plugged": True, "secsleft": None, "no_battery_detected": True})
- 
-from flask import request 
+        return jsonify(
+            {
+                "error": str(e),
+                "percent": 100,
+                "power_plugged": True,
+                "secsleft": None,
+                "no_battery_detected": True,
+            }
+        )
+
+
+from flask import request
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=False)
+
