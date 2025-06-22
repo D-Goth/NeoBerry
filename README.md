@@ -73,8 +73,8 @@ NeoBerry/
     │   └── login.html
     └── utils/
         ├── __init__.py
-        ├── gpio_helpers.py
-        └── __pycache__/
+        └── gpio_helpers.py
+
 
 
 ---
@@ -289,8 +289,7 @@ NeoBerry/
     │   └── login.html
     └── utils/
         ├── __init__.py
-        ├── gpio_helpers.py
-        └── __pycache__/
+        └── gpio_helpers.py
 
 
 ---
