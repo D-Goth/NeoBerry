@@ -47,7 +47,15 @@ NeoBerry/
     │   └── system.py
     ├── static/
     │   ├── css/
-    │   │    └── style.css
+    │  	│    ├── animations.css
+    │  	│    ├── battery.css
+    │  	│    ├── bluetooth.css
+    │  	│    ├── gpio.css
+    │  	│    ├── index.css
+    │  	│    ├── layout.css
+    │  	│    ├── metrics.css
+    │  	│    ├── reset.css
+    │   │    └── terminal.css
     │   ├── img/
     │   └── js/
     │       ├── battery.js
@@ -58,7 +66,8 @@ NeoBerry/
     │       ├── main.js
     │       ├── network.js
     │       ├── status.js
-    │       └── utils.js
+    │       ├── utils.js
+    │       └── watchdog.js
     ├── templates/
     │   ├── index.html
     │   └── login.html
@@ -66,6 +75,7 @@ NeoBerry/
         ├── __init__.py
         ├── gpio_helpers.py
         └── __pycache__/
+
 
 ---
 
@@ -253,7 +263,15 @@ NeoBerry/
     │   └── system.py
     ├── static/
     │   ├── css/
-    │   │    └── style.css
+    │  	│    ├── animations.css
+    │  	│    ├── battery.css
+    │  	│    ├── bluetooth.css
+    │  	│    ├── gpio.css
+    │  	│    ├── index.css
+    │  	│    ├── layout.css
+    │  	│    ├── metrics.css
+    │  	│    ├── reset.css
+    │   │    └── terminal.css
     │   ├── img/
     │   └── js/
     │       ├── battery.js
@@ -264,7 +282,8 @@ NeoBerry/
     │       ├── main.js
     │       ├── network.js
     │       ├── status.js
-    │       └── utils.js
+    │       ├── utils.js
+    │       └── watchdog.js
     ├── templates/
     │   ├── index.html
     │   └── login.html
@@ -272,6 +291,7 @@ NeoBerry/
         ├── __init__.py
         ├── gpio_helpers.py
         └── __pycache__/
+
 
 ---
 
@@ -397,4 +417,3 @@ See the `LICENSE` file.
 * [Black-Lab](https://www.black-lab.fr)  
 
 ---
-
