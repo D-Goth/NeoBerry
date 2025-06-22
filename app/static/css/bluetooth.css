@@ -103,7 +103,6 @@ input:checked + .slider-2::before {
   margin-left: 16px;
 }
 
-
 /* === SCAN BUTTON === */
 #scan-devices {
   background-color: #ff2e63;

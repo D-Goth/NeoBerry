@@ -1,6 +1,25 @@
+/* ===============================
+   Fichier maître : index.css
+   Import des modules CSS
+   ===============================
+
+   reset.css        → Réinitialisation navigateur
+   layout.css       → Gabarit général (grille, conteneurs)
+   gpio.css         → Composants GPIO (pins)
+   infosys.css      → Informations système + services
+   metrics.css      → Statistiques et métriques
+   battery.css      → Interface batterie
+   bluetooth.css    → Gestion Bluetooth
+   terminal.css     → Interface console
+   animations.css   → Transitions et effets
+   responsive.css   → Media queries adaptatives
+*/
+
+
 @import url("reset.css");
 @import url("layout.css");
 @import url("gpio.css");
+@import url("infosys.css");
 @import url("metrics.css");
 @import url("battery.css");
 @import url("bluetooth.css");

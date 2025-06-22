@@ -29,6 +29,9 @@ from core.system import system_bp
 from core.network import network_bp
 from core.battery import battery_bp
 from core.bluetooth import bluetooth_bp
+from core.infosys import infosys_bp
+
+
 
 # Enregistrement des Blueprints
 app.register_blueprint(auth_bp)
@@ -37,6 +40,7 @@ app.register_blueprint(system_bp)
 app.register_blueprint(network_bp)
 app.register_blueprint(battery_bp)
 app.register_blueprint(bluetooth_bp)
+app.register_blueprint(infosys_bp)
 
 # Route racine protégée
 from flask import render_template, session, redirect, url_for

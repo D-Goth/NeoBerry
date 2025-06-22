@@ -135,7 +135,7 @@
                 </div>
             </div>
         </div>
-        
+               
     <div class="section-content">
         <div class="network-field-0" role="region" aria-label="État Ethernet et Wifi">
             <div class="network-label">Type de Réseau</div>
@@ -159,6 +159,32 @@
             <div class="network-info" id="wifi-ssid">Nom réseau WiFi : Aucun</div>
         </div>
     </div>
+</section>
+
+<section id="info-sys" aria-labelledby="system-info-title">
+  <h2 id="system-info-title">Informations Système</h2>
+
+  <div class="section-content-sys">
+    <div class="info-sys-content">
+      <div class="sys-panel" aria-label="Informations système">
+        <h3>Système</h3>
+        <ul class="system-info-list">
+          <li><strong>OS :</strong> <span id="sys-os">⏳</span></li>
+          <li><strong>Nom :</strong> <span id="sys-hostname">⏳</span></li>
+          <li><strong>Uptime :</strong> <span id="sys-uptime">⏳</span></li>
+        </ul>
+      </div>
+    </div>
+  <div class="section-content-svc">
+    <div class="info-svc-content">
+      <div class="svc-panel" aria-label="Services actifs">
+        <h3>Services Actifs</h3>
+        <ul class="services-list" id="services-list">
+          <!-- Services injectés dynamiquement -->
+        </ul>
+      </div>
+    </div>
+  </div>
 </section>
 
 

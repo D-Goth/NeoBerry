@@ -13,7 +13,7 @@ import { fetchNetworkStats } from './network.js';
 import { initGauges } from './gauges.js';
 import { setupSystemActionListeners } from './system.js';
 import { waitForNeoBerryToRestart } from './watchdog.js';
-
+import { loadSystemInfo } from './infosys.js';
 
 let pendingAction = { value: null };
 
@@ -60,6 +60,9 @@ document.addEventListener('DOMContentLoaded', () => {
   fetchNetworkStats();
   initBatteryModule();
   loadPairedDevices();
+  
+  loadSystemInfo();
+  setInterval(loadSystemInfo, 600000);
 
   fetch('/api/gpio')
     .then(res => res.json())

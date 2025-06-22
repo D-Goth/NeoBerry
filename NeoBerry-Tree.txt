@@ -12,6 +12,7 @@ NeoBerry/
     │   ├── battery.py
     │   ├── bluetooth.py
     │   ├── gpio.py
+    │   ├── infosys.py
     │   ├── network.py
     │   └── system.py
     ├── static/
@@ -20,6 +21,7 @@ NeoBerry/
     │  	│    ├── battery.css
     │  	│    ├── bluetooth.css
     │  	│    ├── gpio.css
+    │  	│    ├── infosys.css
     │  	│    ├── index.css
     │  	│    ├── layout.css
     │  	│    ├── metrics.css
@@ -31,6 +33,7 @@ NeoBerry/
     │       ├── bluetooth.js
     │       ├── gauges.js
     │       ├── gpio.js
+    │       ├── infosys.js
     │       ├── list.js
     │       ├── main.js
     │       ├── network.js
@@ -42,6 +45,5 @@ NeoBerry/
     │   └── login.html
     └── utils/
         ├── __init__.py
-        ├── gpio_helpers.py
-        └── __pycache__/
+        └── gpio_helpers.py
 

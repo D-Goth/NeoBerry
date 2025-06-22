@@ -42,7 +42,14 @@
    text-shadow: 0 0 2px #ff2e63cc;
 }
 
-.network-field-0,
+.network-field-0 {
+   background: rgba(255, 46, 99, 0.12);
+   border-radius: 14px;
+   padding: 20px 24px;
+   box-shadow: 0 6px 20px rgba(255, 46, 99, 0.12);
+   color: white;
+}
+
 .network-field {
    background: rgba(255, 46, 99, 0.12);
    border-radius: 14px;
@@ -78,8 +85,6 @@
    margin: 4px 0 20px 0;
    user-select: none;
 }
-
-/* ----- Ajout : boutons d’action système (Reboot, Shutdown...) ----- */
 
 #action-buttons {
    display: flex;

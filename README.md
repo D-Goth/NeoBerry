@@ -83,7 +83,7 @@ NeoBerry/
 
 * NeoBerry s'appuie sur les bibliothèques Python suivantes :
 
-- Flask — Framework web léger pour créer l’interface et les endpoints backend
+- Flask — Framework web léger pour créer l’interface et les endpoints backend (+ flask-login)
 
 - RPi.GPIO — Contrôle bas niveau des broches GPIO du Raspberry Pi (utilisé dans le cœur du projet)
 
@@ -416,3 +416,4 @@ See the `LICENSE` file.
 * [Black-Lab](https://www.black-lab.fr)  
 
 ---
+
