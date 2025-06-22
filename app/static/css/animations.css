@@ -1,0 +1,35 @@
+@keyframes blink {
+   0%, 100% { opacity: 1; }
+   50%      { opacity: 0; }
+}
+
+@keyframes blink-battery {
+   0%, 100% { opacity: 1; }
+   50%      { opacity: 0.2; }
+}
+
+@keyframes blink-scan {
+   0%, 100% { opacity: 1; }
+   50%      { opacity: 0.3; }
+}
+
+@keyframes pulseSwitch {
+   0% {
+      transform: scale(1);
+      box-shadow: 0 0 0px #00ffcc;
+   }
+   50% {
+      transform: scale(1.05);
+      box-shadow: 0 0 8px #00ffcc;
+   }
+   100% {
+      transform: scale(1);
+      box-shadow: 0 0 0px transparent;
+   }
+}
+
+/* Liaison GPIO pour toucher visuel */
+.gpio-pin.touched {
+   animation: pulseSwitch 0.3s ease-out;
+}
+

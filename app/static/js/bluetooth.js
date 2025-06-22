@@ -211,3 +211,27 @@ export function showScanningLine() {
 
 window.scanDevices = scanDevices;
 
+window.addEventListener('DOMContentLoaded', () => {
+   const toggle = document.getElementById('bluetooth-toggle');
+   const terminalPanel = document.querySelector('.bluetooth-terminal-panel');
+
+   // Charger l’état initial du Bluetooth
+   fetch('/api/bluetooth/status')
+      .then((res) => res.json())
+      .then((data) => {
+         toggle.checked = !!data.device; // Si un périphérique est connecté → BT actif
+         if (!toggle.checked && terminalPanel) terminalPanel.style.opacity = '0.25';
+      });
+
+   // Changement d’état
+   toggle.addEventListener('change', () => {
+      const isEnabled = toggle.checked;
+      toggleBluetooth(isEnabled);
+      if (terminalPanel) {
+         terminalPanel.style.opacity = isEnabled ? '1' : '0.25';
+         terminalPanel.style.pointerEvents = isEnabled ? 'auto' : 'none';
+      }
+   });
+});
+
+

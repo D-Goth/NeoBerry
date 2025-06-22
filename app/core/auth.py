@@ -38,4 +38,14 @@ def login():
 def logout():
     session.clear()
     return redirect(url_for("auth.login"))
+    
+# Vérification du mot de passe pour l'utilisateur connecté
+def verify(password: str) -> bool:
+    if not PAM_AVAILABLE or not p:
+        return False
+    username = session.get("username")
+    if not username:
+        return False
+    return p.authenticate(username, password)
+
 

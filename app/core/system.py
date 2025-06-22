@@ -1,14 +1,13 @@
-from flask import Blueprint, jsonify, session
-from flask import request
+from flask import Blueprint, jsonify, session, request
 from functools import wraps
 import subprocess
 import platform
 import psutil
-import threading
 import logging
 import time
 
 from utils.gpio_helpers import read_gpio, GPIO_PINS, is_raspberry_pi
+from core import auth  # utilisé pour vérifier le mot de passe de l'utilisateur
 
 system_bp = Blueprint("system", __name__)
 
@@ -20,7 +19,6 @@ def login_required(f):
         return f(*args, **kwargs)
     return decorated
 
-# 🧠 Mémoire partagée pour suivi réseau
 last_counters = psutil.net_io_counters()
 last_time = time.time()
 
@@ -50,13 +48,45 @@ def get_network_metrics():
         "network_down": convert_bytes(download) + "/s",
     }
 
-def async_reboot():
-    time.sleep(2)
-    subprocess.run(["sudo", "reboot"])
+@system_bp.route("/api/reboot", methods=["POST"])
+@login_required
+def reboot_system():
+    data = request.get_json()
+    password = data.get("password", "")
+    username = session.get("username")
 
-def async_shutdown():
-    time.sleep(2)
-    subprocess.run(["sudo", "shutdown", "now"])
+    if not username or not password:
+        return jsonify(success=False, error="Champs requis manquants."), 400
+
+    if not auth.verify(password):
+        return jsonify(success=False, error="Mot de passe incorrect."), 403
+
+    try:
+        subprocess.run(["sudo", "/usr/sbin/reboot"], check=True)
+        return jsonify(success=True)
+    except subprocess.CalledProcessError:
+        return jsonify(success=False, error="Impossible de redémarrer le système."), 500
+
+
+@system_bp.route("/api/shutdown", methods=["POST"])
+@login_required
+def api_shutdown():
+    data = request.get_json()
+    password = data.get("password", "")
+    username = session.get("username")
+
+    if not username or not password:
+        return jsonify(success=False, error="Champs requis manquants."), 400
+
+    if not auth.verify(password):
+        return jsonify(success=False, error="Mot de passe incorrect."), 403
+
+    try:
+        subprocess.run(["sudo", "shutdown", "-h", "now"], check=True)
+        return jsonify(success=True)
+    except subprocess.CalledProcessError as e:
+        logging.error(f"[SHUTDOWN] Erreur commande : {e.stderr}")
+        return jsonify(success=False, error="Échec de l'arrêt."), 500
 
 @system_bp.route("/api/network", methods=["GET"])
 @login_required
@@ -67,18 +97,6 @@ def api_network():
     except Exception as e:
         logging.error(f"Erreur API /api/network: {e}")
         return jsonify({"error": "Erreur interne serveur"}), 500
-
-@system_bp.route("/api/reboot", methods=["POST"])
-@login_required
-def api_reboot():
-    threading.Thread(target=async_reboot).start()
-    return jsonify({"message": "Redémarrage en cours..."})
-
-@system_bp.route("/api/shutdown", methods=["POST"])
-@login_required
-def api_shutdown():
-    threading.Thread(target=async_shutdown).start()
-    return jsonify({"message": "Extinction en cours..."})
 
 @system_bp.route("/api/status", methods=["GET"])
 @login_required
@@ -161,4 +179,18 @@ def api_status():
     except Exception as e:
         logging.error(f"Erreur API /api/status: {e}")
         return jsonify({"error": "Erreur interne serveur"}), 500
+        
+@system_bp.route("/api/restart-neoberry", methods=["POST"])
+@login_required
+def restart_neoberry():
+    try:
+        subprocess.Popen(
+            ["/bin/bash", "/chemin/vers/run_neoBerry.sh"],
+            start_new_session=True
+        )
+        return jsonify(success=True)
+    except Exception:
+        return jsonify(success=False, error="Impossible de relancer NeoBerry."), 500
+
+
 
