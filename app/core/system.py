@@ -48,46 +48,6 @@ def get_network_metrics():
         "network_down": convert_bytes(download) + "/s",
     }
 
-@system_bp.route("/api/reboot", methods=["POST"])
-@login_required
-def reboot_system():
-    data = request.get_json()
-    password = data.get("password", "")
-    username = session.get("username")
-
-    if not username or not password:
-        return jsonify(success=False, error="Champs requis manquants."), 400
-
-    if not auth.verify(password):
-        return jsonify(success=False, error="Mot de passe incorrect."), 403
-
-    try:
-        subprocess.run(["sudo", "/usr/sbin/reboot"], check=True)
-        return jsonify(success=True)
-    except subprocess.CalledProcessError:
-        return jsonify(success=False, error="Impossible de redémarrer le système."), 500
-
-
-@system_bp.route("/api/shutdown", methods=["POST"])
-@login_required
-def api_shutdown():
-    data = request.get_json()
-    password = data.get("password", "")
-    username = session.get("username")
-
-    if not username or not password:
-        return jsonify(success=False, error="Champs requis manquants."), 400
-
-    if not auth.verify(password):
-        return jsonify(success=False, error="Mot de passe incorrect."), 403
-
-    try:
-        subprocess.run(["sudo", "shutdown", "-h", "now"], check=True)
-        return jsonify(success=True)
-    except subprocess.CalledProcessError as e:
-        logging.error(f"[SHUTDOWN] Erreur commande : {e.stderr}")
-        return jsonify(success=False, error="Échec de l'arrêt."), 500
-
 @system_bp.route("/api/network", methods=["GET"])
 @login_required
 def api_network():
@@ -192,5 +152,44 @@ def restart_neoberry():
     except Exception:
         return jsonify(success=False, error="Impossible de relancer NeoBerry."), 500
 
+@system_bp.route("/api/reboot", methods=["POST"])
+@login_required
+def reboot_system():
+    data = request.get_json()
+    password = data.get("password", "")
+    username = session.get("username")
+
+    if not username or not password:
+        return jsonify(success=False, error="Champs requis manquants."), 400
+
+    if not auth.verify(password):
+        return jsonify(success=False, error="Mot de passe incorrect."), 403
+
+    try:
+        subprocess.run(["sudo", "/usr/sbin/reboot"], check=True)
+        return jsonify(success=True)
+    except subprocess.CalledProcessError:
+        return jsonify(success=False, error="Impossible de redémarrer le système."), 500
+
+
+@system_bp.route("/api/shutdown", methods=["POST"])
+@login_required
+def api_shutdown():
+    data = request.get_json()
+    password = data.get("password", "")
+    username = session.get("username")
+
+    if not username or not password:
+        return jsonify(success=False, error="Champs requis manquants."), 400
+
+    if not auth.verify(password):
+        return jsonify(success=False, error="Mot de passe incorrect."), 403
+
+    try:
+        subprocess.run(["sudo", "shutdown", "-h", "now"], check=True)
+        return jsonify(success=True)
+    except subprocess.CalledProcessError as e:
+        logging.error(f"[SHUTDOWN] Erreur commande : {e.stderr}")
+        return jsonify(success=False, error="Échec de l'arrêt."), 500
 
 

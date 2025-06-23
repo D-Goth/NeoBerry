@@ -100,16 +100,22 @@
 
 .wifi-section {
    background: rgba(255, 46, 99, 0.15);
+   border: 1px solid rgba(255, 255, 255, 0.08);
    border-radius: 14px;
    padding: 20px 24px;
-   box-shadow: 0 6px 20px rgba(255, 46, 99, 0.12);
+   backdrop-filter: blur(6px);
+   -webkit-backdrop-filter: blur(6px);
+   box-shadow: 0 6px 22px rgba(255, 46, 99, 0.12);
    color: white;
+   margin: 0 auto 22px auto;
 }
+
 
 .wifi-secion {
    flex: 1 1 48%;
    max-width: 360px;
    margin-bottom: 22px;
+   flex-shrink: 0;
 }
 
 #action-buttons {
