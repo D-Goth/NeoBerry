@@ -124,6 +124,7 @@ git clone https://github.com/D-Goth/NeoBerry.git
 cd NeoBerry
 chmod +x ./install_neoBerry.sh
 sudo ./install_neoBerry.sh
+chmod +x ./run_neoBerry.sh
 
 ````
 
@@ -331,6 +332,7 @@ git clone https://github.com/D-Goth/NeoBerry.git
 cd NeoBerry
 chmod +x ./install_neoBerry.sh
 sudo ./install_neoBerry.sh
+chmod +x ./run_neoBerry.sh
 
 ```
 
