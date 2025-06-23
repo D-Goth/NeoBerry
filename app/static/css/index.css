@@ -26,6 +26,7 @@
 @import url("terminal.css");
 @import url("animations.css");
 @import url("responsive.css");
+@import url("voltage.css");
 
 /* 🔳 Conteneur sombre flouté pour modale */
 .modal-container {

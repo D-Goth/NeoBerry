@@ -43,30 +43,36 @@ NeoBerry/
     │   ├── battery.py
     │   ├── bluetooth.py
     │   ├── gpio.py
+    │   ├── infosys.py
     │   ├── network.py
-    │   └── system.py
+    │   ├── system.py
+    │   └── voltage.py
     ├── static/
     │   ├── css/
     │  	│    ├── animations.css
     │  	│    ├── battery.css
     │  	│    ├── bluetooth.css
     │  	│    ├── gpio.css
+    │  	│    ├── infosys.css
     │  	│    ├── index.css
     │  	│    ├── layout.css
     │  	│    ├── metrics.css
     │  	│    ├── reset.css
-    │   │    └── terminal.css
+    │  	│    ├── terminal.css
+    │   │    └── voltage.css 
     │   ├── img/
     │   └── js/
     │       ├── battery.js
     │       ├── bluetooth.js
     │       ├── gauges.js
     │       ├── gpio.js
+    │       ├── infosys.js
     │       ├── list.js
     │       ├── main.js
     │       ├── network.js
     │       ├── status.js
     │       ├── utils.js
+    │       ├── voltage.js
     │       └── watchdog.js
     ├── templates/
     │   ├── index.html
@@ -74,6 +80,7 @@ NeoBerry/
     └── utils/
         ├── __init__.py
         └── gpio_helpers.py
+
 
 
 
@@ -122,7 +129,10 @@ python3.13 app/app.py
 ```bash
 git clone https://github.com/D-Goth/NeoBerry.git
 cd NeoBerry
+chmod +x install_neoBerry.sh
 sudo ./install_neoBerry.sh
+chmod +x run_neoBerry.sh
+sudo ./run_neoBerry.sh [--start, --stop, --restart, --status]
 
 ````
 
@@ -259,30 +269,36 @@ NeoBerry/
     │   ├── battery.py
     │   ├── bluetooth.py
     │   ├── gpio.py
+    │   ├── infosys.py
     │   ├── network.py
-    │   └── system.py
+    │   ├── system.py
+    │   └── voltage.py
     ├── static/
     │   ├── css/
     │  	│    ├── animations.css
     │  	│    ├── battery.css
     │  	│    ├── bluetooth.css
     │  	│    ├── gpio.css
+    │  	│    ├── infosys.css
     │  	│    ├── index.css
     │  	│    ├── layout.css
     │  	│    ├── metrics.css
     │  	│    ├── reset.css
-    │   │    └── terminal.css
+    │  	│    ├── terminal.css
+    │   │    └── voltage.css
     │   ├── img/
     │   └── js/
     │       ├── battery.js
     │       ├── bluetooth.js
     │       ├── gauges.js
     │       ├── gpio.js
+    │       ├── infosys.js
     │       ├── list.js
     │       ├── main.js
     │       ├── network.js
     │       ├── status.js
     │       ├── utils.js
+    │       ├── voltage.js
     │       └── watchdog.js
     ├── templates/
     │   ├── index.html
@@ -290,6 +306,7 @@ NeoBerry/
     └── utils/
         ├── __init__.py
         └── gpio_helpers.py
+
 
 
 ---
@@ -328,7 +345,10 @@ python3.13 app/app.py
 ```bash
 git clone https://github.com/D-Goth/NeoBerry.git
 cd NeoBerry
+chmod +x install_neoBerry.sh
 sudo ./install_neoBerry.sh
+chmod +x run_neoBerry.sh 
+sudo ./run_neoBerry.sh [--start, --stop, --restart, --status]
 
 ```
 

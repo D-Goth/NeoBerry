@@ -30,6 +30,7 @@ from core.network import network_bp
 from core.battery import battery_bp
 from core.bluetooth import bluetooth_bp
 from core.infosys import infosys_bp
+from core.voltage import voltage_bp
 
 
 
@@ -41,6 +42,7 @@ app.register_blueprint(network_bp)
 app.register_blueprint(battery_bp)
 app.register_blueprint(bluetooth_bp)
 app.register_blueprint(infosys_bp)
+app.register_blueprint(voltage_bp)
 
 # Route racine protégée
 from flask import render_template, session, redirect, url_for
@@ -54,4 +56,8 @@ def index():
 # Lancement de l'application
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=False)
+
+
+
+
 

@@ -14,7 +14,8 @@ NeoBerry/
     │   ├── gpio.py
     │   ├── infosys.py
     │   ├── network.py
-    │   └── system.py
+    │   ├── system.py
+    │   └── voltage.py
     ├── static/
     │   ├── css/
     │  	│    ├── animations.css
@@ -26,7 +27,8 @@ NeoBerry/
     │  	│    ├── layout.css
     │  	│    ├── metrics.css
     │  	│    ├── reset.css
-    │   │    └── terminal.css   
+    │  	│    ├── terminal.css
+    │   │    └── voltage.css   
     │   ├── img/
     │   └── js/
     │       ├── battery.js
@@ -39,6 +41,7 @@ NeoBerry/
     │       ├── network.js
     │       ├── status.js
     │       ├── utils.js
+    │       ├── voltage.js
     │       └── watchdog.js
     ├── templates/
     │   ├── index.html

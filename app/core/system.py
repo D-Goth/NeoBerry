@@ -1,5 +1,6 @@
 from flask import Blueprint, jsonify, session, request
 from functools import wraps
+from pathlib import Path
 import subprocess
 import platform
 import psutil
@@ -141,15 +142,15 @@ def api_status():
         return jsonify({"error": "Erreur interne serveur"}), 500
         
 @system_bp.route("/api/restart-neoberry", methods=["POST"])
-@login_required
 def restart_neoberry():
     try:
+        script_path = Path.home() / "NeoBerry" / "run_neoBerry.sh"
         subprocess.Popen(
-            ["/bin/bash", "/chemin/vers/run_neoBerry.sh"],
+            ["/bin/bash", str(script_path), "--restart"],
             start_new_session=True
         )
         return jsonify(success=True)
-    except Exception:
+    except Exception as e:
         return jsonify(success=False, error="Impossible de relancer NeoBerry."), 500
 
 @system_bp.route("/api/reboot", methods=["POST"])

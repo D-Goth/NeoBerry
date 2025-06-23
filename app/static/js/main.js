@@ -14,6 +14,8 @@ import { initGauges } from './gauges.js';
 import { setupSystemActionListeners } from './system.js';
 import { waitForNeoBerryToRestart } from './watchdog.js';
 import { loadSystemInfo } from './infosys.js';
+import { updateVoltage } from './voltage.js';
+
 
 let pendingAction = { value: null };
 
@@ -61,6 +63,9 @@ document.addEventListener('DOMContentLoaded', () => {
   initBatteryModule();
   loadPairedDevices();
   
+  updateVoltage();
+  setInterval(updateVoltage, 15000);
+    
   loadSystemInfo();
   setInterval(loadSystemInfo, 600000);
 
@@ -123,4 +128,8 @@ document.getElementById('toggle-password')?.addEventListener('click', () => {
   const input = document.getElementById('auth-password');
   input.type = input.type === 'password' ? 'text' : 'password';
 });
+
+
+
+
 

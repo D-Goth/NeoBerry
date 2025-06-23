@@ -13,14 +13,18 @@
     <a href="/" aria-label="Accueil">
       <img src="{{ url_for('static', filename='img/website.png') }}" alt="Logo NeoBerry - By Black-Lab" id="logo" />
     </a>
+    <div class="battery-wrapper">
       <div id="battery-gauge">
        <div id="battery-level">
          <div id="battery-fill"></div>
          <div id="battery-percent">--%</div>
-       </div>
+        </div>
        <div id="battery-tip"></div>
-      </div>
-
+     </div>
+    </div>
+    <div class="voltage-wrapper">
+     <p id="voltage-status" class="voltage" title="État de l'alimentation">...</p>
+     </div>
     <a href="{{ url_for('auth.logout') }}" id="logout-btn" role="button" aria-label="Déconnexion">Déconnexion</a>
   </header>
 
