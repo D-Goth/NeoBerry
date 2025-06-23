@@ -42,15 +42,19 @@
    text-shadow: 0 0 2px #ff2e63cc;
 }
 
-.network-field-0 {
-   background: rgba(255, 46, 99, 0.12);
+.network-field-0,
+.network-field {
+   background: rgba(255, 255, 255, 0.08);
    border-radius: 14px;
-   padding: 20px 24px;
-   box-shadow: 0 6px 20px rgba(255, 46, 99, 0.12);
+   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.4);
+   padding: 16px 14px;
+   width: 100%;
    color: white;
+   text-align: center;
+   user-select: none;
 }
 
-.network-field {
+.network-field-0 {
    background: rgba(255, 46, 99, 0.12);
    border-radius: 14px;
    padding: 20px 24px;
@@ -62,6 +66,14 @@
    width: 100%;
    max-width: 800px;
    margin: 0 auto 22px auto;
+}
+
+.network-field {
+   background: rgba(255, 46, 99, 0.12);
+   border-radius: 14px;
+   padding: 20px 24px;
+   box-shadow: 0 6px 20px rgba(255, 46, 99, 0.12);
+   color: white;
 }
 
 .network-field {
@@ -84,6 +96,20 @@
    color: #ccc;
    margin: 4px 0 20px 0;
    user-select: none;
+}
+
+.wifi-section {
+   background: rgba(255, 46, 99, 0.15);
+   border-radius: 14px;
+   padding: 20px 24px;
+   box-shadow: 0 6px 20px rgba(255, 46, 99, 0.12);
+   color: white;
+}
+
+.wifi-secion {
+   flex: 1 1 48%;
+   max-width: 360px;
+   margin-bottom: 22px;
 }
 
 #action-buttons {

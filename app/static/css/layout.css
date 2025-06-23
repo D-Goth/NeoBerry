@@ -100,30 +100,6 @@ section {
   margin-bottom: 32px;
 }
 
-.section-content-sys {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  align-items: stretch;
-  gap: 32px;
-  padding: 0 28px;
-  max-width: 960px;
-  margin: 0 auto;
-  margin-bottom: 32px;
-}
-
-.section-content-svc {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  align-items: stretch;
-  gap: 32px;
-  padding: 0 28px;
-  max-width: 960px;
-  margin: 0 auto;
-  margin-bottom: 32px;
-}
-
 
 #refresh-container {
    max-width: 960px;
