@@ -4,8 +4,9 @@
   padding: 1.5rem;
   color: white;
   margin-bottom: 2rem;
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+   backdrop-filter: blur(6px);
+   -webkit-backdrop-filter: blur(6px);
+  box-shadow: 0 6px 22px rgba(0, 0, 0, 0.4);
 }
 
 #info-sys h2 {
@@ -68,7 +69,8 @@
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 14px;
   backdrop-filter: blur(6px);
-  box-shadow: 0 6px 22px rgba(255, 46, 99, 0.12);
+  -webkit-backdrop-filter: blur(6px);
+  box-shadow: 0 6px 22px rgba(0, 0, 0, 0.4);
 }
 
 /* === CONTENU LISTE === */
@@ -98,7 +100,6 @@
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.4);
   border-radius: 14px;
   padding: 20px 24px;
-  box-shadow: 0 6px 20px rgba(255, 46, 99, 0.12);
   color: white;
 }
 
@@ -112,7 +113,6 @@
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.4);
   border-radius: 14px;
   padding: 20px 24px;
-  box-shadow: 0 6px 20px rgba(255, 46, 99, 0.12);
   color: white;
 }
 
