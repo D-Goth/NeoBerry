@@ -2,11 +2,13 @@
   font-weight: 600;
   font-size: 1rem;
   text-align: center;
-  padding: 6px 10px;
-  border-radius: 8px;
-  display: inline-block;
-  margin-top: 6px;
+  border-radius: 16px;
   user-select: none;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;        
 }
 
 .voltage.ok {
@@ -38,6 +40,9 @@
   padding: 6px 10px;
   max-width: fit-content;
   margin: 6px 0;
+  height: 75px;
+  align-items: center;
+  justify-content: center;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
 }
 
