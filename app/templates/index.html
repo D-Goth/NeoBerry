@@ -157,26 +157,30 @@
             </div>
         </div>
                
-    <div class="section-content">
-        <div class="network-field-0" role="region" aria-label="État Ethernet et Wifi">
-            <div class="network-label">Type de Réseau</div>
-            <div id="network-type" style="font-weight: 700; font-size: 1.1rem; margin-bottom: 12px">Ethernet</div>
+<div class="section-content">
+	<div class="network-field-0" role="region" aria-label="État Ethernet">
+		<div class="network-label">Status</div>
+		<div id="network-type" style="font-weight: 700; font-size: 1.1rem; margin-bottom: 12px">Ethernet</div>
 
-            <div style="display: flex; gap: 24px; justify-content: center; margin-bottom: 20px">
-                <div style="flex: 1; max-width: 220px; text-align: center">
-                    <div class="network-label">Upload</div>
-                    <canvas id="network-up" aria-label="Jauge débit montant réseau" role="img"></canvas>
-                </div>
-                <div style="flex: 1; max-width: 220px; text-align: center">
-                    <div class="network-label">Download</div>
-                    <canvas id="network-down" aria-label="Jauge débit descendant réseau" role="img"></canvas>
-                </div>
-            </div>
-        </div>
-            <div class="wifi-section" id="wifi-section style="display: none;">
-  <div class="network-label">- Réception WiFi -</div>
-  <canvas id="wifi-strength-gauge" aria-label="Jauge puissance réseau WiFi" role="img"></canvas>
-  <div class="network-info" id="wifi-ssid">Nom réseau WiFi : Aucun</div>
+		<div style="display: flex; gap: 24px; justify-content: center; margin-bottom: 20px">
+			<div style="flex: 1; max-width: 220px; text-align: center">
+				<div class="network-label">Upload</div>
+				<canvas id="network-up" aria-label="Jauge débit montant réseau" role="img"></canvas>
+			</div>
+			<div style="flex: 1; max-width: 220px; text-align: center">
+				<div class="network-label">Download</div>
+				<canvas id="network-down" aria-label="Jauge débit descendant réseau" role="img"></canvas>
+			</div>
+		</div>
+	</div>
+		<div class="wifi-section" id="wifi-section style=">
+			<div class="network-label">Status</div>
+			<div id="network-type" style="font-weight: 180; font-size: 1.1rem; margin-bottom: 12px">Wi-Fi</div>
+
+			<canvas id="wifi-strength-gauge" aria-label="Jauge réception WiFi" role="img"></canvas>
+			<div class="network-info" id="wifi-ssid">Nom réseau WiFi : Aucun</div>
+		</div>
+	</div>
 </div>
 
         </div>
@@ -199,10 +203,19 @@
         </ul>
       </div>
     </div>
-      <div class="svc-panel" aria-label="Services actifs">
-        <h3>Services Actifs</h3>
-        <ul class="services-list" id="services-list">
-          <!-- Services injectés dynamiquement -->
+<div class="section-content-svc">
+    <div class="info-svc-content">
+<div class="graph-wrapper">
+	<div class="graph-block">
+		<h3>Connexion Internet</h3>
+		<canvas id="internet-graph" width="400" height="80"></canvas>
+	</div>
+
+	<div class="graph-block">
+		<h3>Stabilité Électrique</h3>
+		<canvas id="power-graph" width="400" height="80"></canvas>
+	</div>
+</div>
         </ul>
       </div>
     </div>

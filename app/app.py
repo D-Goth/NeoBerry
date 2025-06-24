@@ -24,24 +24,26 @@ logging.getLogger("werkzeug").setLevel(logging.WARNING)
 
 # Import des Blueprints
 from core.auth import auth_bp
-from core.gpio import gpio_bp
-from core.system import system_bp
-from core.network import network_bp
 from core.battery import battery_bp
 from core.bluetooth import bluetooth_bp
 from core.infosys import infosys_bp
+from core.graph import graph_bp
+from core.gpio import gpio_bp
+from core.network import network_bp
+from core.system import system_bp
 from core.voltage import voltage_bp
 
 
 
 # Enregistrement des Blueprints
 app.register_blueprint(auth_bp)
-app.register_blueprint(gpio_bp)
-app.register_blueprint(system_bp)
-app.register_blueprint(network_bp)
 app.register_blueprint(battery_bp)
 app.register_blueprint(bluetooth_bp)
 app.register_blueprint(infosys_bp)
+app.register_blueprint(graph_bp)
+app.register_blueprint(gpio_bp)
+app.register_blueprint(network_bp)
+app.register_blueprint(system_bp)
 app.register_blueprint(voltage_bp)
 
 # Route racine protégée
@@ -56,8 +58,5 @@ def index():
 # Lancement de l'application
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=False)
-
-
-
 
 

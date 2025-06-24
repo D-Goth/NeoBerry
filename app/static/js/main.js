@@ -16,6 +16,8 @@ import { setupSystemActionListeners } from './system.js';
 import { updateMiniClock } from './time.js';
 import { updateVoltage } from './voltage.js';
 import { waitForNeoBerryToRestart } from './watchdog.js';
+import './graph.js';
+
 
 let pendingAction = { value: null };
 
