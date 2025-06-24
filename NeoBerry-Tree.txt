@@ -28,6 +28,7 @@ NeoBerry/
     │  	│    ├── metrics.css
     │  	│    ├── reset.css
     │  	│    ├── terminal.css
+    │  	│    ├── time.css
     │   │    └── voltage.css   
     │   ├── img/
     │   └── js/
@@ -40,6 +41,7 @@ NeoBerry/
     │       ├── main.js
     │       ├── network.js
     │       ├── status.js
+    │       ├── time.js
     │       ├── utils.js
     │       ├── voltage.js
     │       └── watchdog.js

@@ -59,7 +59,8 @@ NeoBerry/
     │  	│    ├── metrics.css
     │  	│    ├── reset.css
     │  	│    ├── terminal.css
-    │   │    └── voltage.css 
+    │  	│    ├── time.css
+    │   │    └── voltage.css
     │   ├── img/
     │   └── js/
     │       ├── battery.js
@@ -71,6 +72,7 @@ NeoBerry/
     │       ├── main.js
     │       ├── network.js
     │       ├── status.js
+    │       ├── time.js
     │       ├── utils.js
     │       ├── voltage.js
     │       └── watchdog.js
@@ -80,8 +82,6 @@ NeoBerry/
     └── utils/
         ├── __init__.py
         └── gpio_helpers.py
-
-
 
 
 ---
@@ -285,6 +285,7 @@ NeoBerry/
     │  	│    ├── metrics.css
     │  	│    ├── reset.css
     │  	│    ├── terminal.css
+    │  	│    ├── time.css
     │   │    └── voltage.css
     │   ├── img/
     │   └── js/
@@ -297,6 +298,7 @@ NeoBerry/
     │       ├── main.js
     │       ├── network.js
     │       ├── status.js
+    │       ├── time.js
     │       ├── utils.js
     │       ├── voltage.js
     │       └── watchdog.js
@@ -306,8 +308,6 @@ NeoBerry/
     └── utils/
         ├── __init__.py
         └── gpio_helpers.py
-
-
 
 ---
 

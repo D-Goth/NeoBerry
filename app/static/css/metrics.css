@@ -1,0 +1,155 @@
+.system-metrics-0 {
+   display: grid;
+   grid-template-columns: repeat(2, 2fr);
+   gap: 28px;
+   justify-items: center;
+}
+
+.system-metrics {
+   display: grid;
+   align-content: start;
+   align-items: start;
+   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+   gap: 28px;
+   justify-items: center;
+}
+
+.metric-card-0,
+.metric-card {
+   background: rgba(255, 255, 255, 0.08);
+   border-radius: 14px;
+   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.4);
+   padding: 16px 14px;
+   width: 100%;
+   color: white;
+   text-align: center;
+   user-select: none;
+}
+
+.metric-card-0 {
+   max-width: 350px;
+}
+
+.metric-card {
+   max-width: 260px;
+}
+
+.metric-title {
+   font-weight: 700;
+   font-size: 1.1rem;
+   margin-bottom: 10px;
+   color: #ffa3bf;
+   text-shadow: 0 0 2px #ff2e63cc;
+}
+
+.network-field-0,
+.network-field {
+   background: rgba(255, 255, 255, 0.08);
+   border-radius: 14px;
+   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.4);
+   padding: 16px 14px;
+   width: 100%;
+   color: white;
+   text-align: center;
+   user-select: none;
+}
+
+.network-field-0 {
+   background: rgba(255, 46, 99, 0.12);
+   border-radius: 14px;
+   padding: 20px 24px;
+   box-shadow: 0 6px 20px rgba(255, 46, 99, 0.12);
+   color: white;
+}
+
+.network-field-0 {
+   width: 100%;
+   max-width: 800px;
+   margin: 0 auto 22px auto;
+}
+
+.network-field {
+   background: rgba(255, 46, 99, 0.12);
+   border-radius: 14px;
+   padding: 20px 24px;
+   box-shadow: 0 6px 20px rgba(255, 46, 99, 0.12);
+   color: white;
+}
+
+.network-field {
+   flex: 1 1 48%;
+   max-width: 360px;
+   margin-bottom: 22px;
+}
+
+.network-label {
+   font-weight: 600;
+   letter-spacing: 0.02em;
+   font-size: 1rem;
+   color: #ff6e92;
+   margin-bottom: 10px;
+   text-shadow: 0 0 5px #ff407e88;
+}
+
+.network-info {
+   font-size: 0.9rem;
+   color: #ccc;
+   margin: 4px 0 20px 0;
+   user-select: none;
+}
+
+.wifi-section {
+   background: rgba(255, 46, 99, 0.15);
+   border: 1px solid rgba(255, 255, 255, 0.08);
+   border-radius: 14px;
+   padding: 20px 24px;
+   backdrop-filter: blur(6px);
+   -webkit-backdrop-filter: blur(6px);
+   box-shadow: 0 6px 22px rgba(255, 46, 99, 0.12);
+   color: white;
+   margin: 0 auto 22px auto;
+}
+
+
+.wifi-secion {
+   flex: 1 1 48%;
+   max-width: 360px;
+   margin-bottom: 22px;
+   flex-shrink: 0;
+}
+
+#action-buttons {
+   display: flex;
+   flex-wrap: wrap;
+   gap: 16px;
+   justify-content: center;
+   margin-top: 32px;
+}
+
+#action-buttons button,
+#action-buttons a {
+   flex: 1 1 140px;
+   background: #ff2e63;
+   border: none;
+   padding: 14px 12px;
+   border-radius: 12px;
+   color: white;
+   font-weight: 700;
+   font-size: 1.2rem;
+   cursor: pointer;
+   transition: background-color 0.3s ease;
+   text-align: center;
+   text-decoration: none;
+   user-select: none;
+   box-shadow: 0 5px 15px rgba(255, 46, 99, 0.4);
+   white-space: nowrap;
+}
+
+#action-buttons button:hover,
+#action-buttons a:hover {
+   background-color: #ff5f93;
+   box-shadow: 0 5px 20px rgba(255, 46, 99, 0.7);
+   color: white;
+   text-decoration: none;
+}
+
