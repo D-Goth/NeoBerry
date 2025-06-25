@@ -43,6 +43,7 @@ NeoBerry/
     │   ├── battery.py
     │   ├── bluetooth.py
     │   ├── gpio.py
+    │   ├── graph.py
     │   ├── infosys.py
     │   ├── network.py
     │   ├── system.py
@@ -67,6 +68,7 @@ NeoBerry/
     │       ├── bluetooth.js
     │       ├── gauges.js
     │       ├── gpio.js
+    │       ├── graph.js
     │       ├── infosys.js
     │       ├── list.js
     │       ├── main.js
@@ -269,6 +271,7 @@ NeoBerry/
     │   ├── battery.py
     │   ├── bluetooth.py
     │   ├── gpio.py
+    │   ├── graph.py
     │   ├── infosys.py
     │   ├── network.py
     │   ├── system.py
@@ -293,6 +296,7 @@ NeoBerry/
     │       ├── bluetooth.js
     │       ├── gauges.js
     │       ├── gpio.js
+    │       ├── graph.js
     │       ├── infosys.js
     │       ├── list.js
     │       ├── main.js
@@ -436,4 +440,3 @@ See the `LICENSE` file.
 * [Black-Lab](https://www.black-lab.fr)  
 
 ---
-
