@@ -29,11 +29,13 @@ from core.bluetooth import bluetooth_bp
 from core.infosys import infosys_bp
 from core.graph import graph_bp
 from core.gpio import gpio_bp
-from core.network import network_bp
+from core.network import network_bp, start_network_logger
 from core.system import system_bp
-from core.voltage import voltage_bp
+from core.voltage import voltage_bp, start_voltage_logger
 
-
+# 💡 Lancement des threads auto-collecteurs
+start_network_logger()
+start_voltage_logger()
 
 # Enregistrement des Blueprints
 app.register_blueprint(auth_bp)

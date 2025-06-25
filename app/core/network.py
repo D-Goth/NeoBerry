@@ -1,9 +1,19 @@
+import os
+import time
+import psutil
+import threading
+from datetime import datetime
 from flask import Blueprint, jsonify, session
 from functools import wraps
-import psutil
-import time
 
 network_bp = Blueprint("network", __name__)
+
+# 📁 Chemin relatif vers logs/neoberry.log
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+LOG_PATH = os.path.join(BASE_DIR, '..', '..', 'logs', 'neoberry.log')
+
+last_counters = psutil.net_io_counters()
+last_time = time.time()
 
 def login_required(f):
     @wraps(f)
@@ -12,10 +22,6 @@ def login_required(f):
             return jsonify({"error": "Authentification requise"}), 401
         return f(*args, **kwargs)
     return decorated
-
-# Mémoire locale pour débit
-last_counters = psutil.net_io_counters()
-last_time = time.time()
 
 def convert_bytes(bytes_val):
     if bytes_val < 1:
@@ -47,12 +53,34 @@ def get_network_metrics():
         "network_down": convert_bytes(download) + "/s",
     }
 
+def log_network_metrics():
+    metrics = get_network_metrics()
+    try:
+        down_val = float(metrics["network_down"].split()[0])
+        up_val = float(metrics["network_up"].split()[0])
+        now = datetime.now().strftime('%Y-%m-%d %H:%M')
+
+        with open(LOG_PATH, 'a') as f:
+            f.write(f"[{now}] net_down: {down_val}\n")
+            f.write(f"[{now}] net_up: {up_val}\n")
+    except Exception as e:
+        print(f"⚠️ Erreur de log réseau : {e}")
+
+def auto_log_loop():
+    while True:
+        log_network_metrics()
+        time.sleep(60)
+
+def start_network_logger():
+    thread = threading.Thread(target=auto_log_loop, daemon=True)
+    thread.start()
+
 @network_bp.route("/api/network", methods=["GET"])
 @login_required
 def api_network():
     try:
         metrics = get_network_metrics()
         return jsonify({"metrics": metrics})
-    except Exception as e:
+    except Exception:
         return jsonify({"error": "Erreur lors de la récupération réseau"}), 500
 
