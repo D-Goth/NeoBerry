@@ -131,6 +131,8 @@ document.getElementById('toggle-password')?.addEventListener('click', () => {
   input.type = input.type === 'password' ? 'text' : 'password';
 });
 
+window.closeConfirmModal = closeConfirmModal;
+window.closeAuthModal = closeAuthModal;
 
 
 
