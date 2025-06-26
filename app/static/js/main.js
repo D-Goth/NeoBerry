@@ -133,6 +133,10 @@ document.getElementById('toggle-password')?.addEventListener('click', () => {
   input.type = input.type === 'password' ? 'text' : 'password';
 });
 
+document.getElementById('update-button')?.addEventListener('click', () => {
+  showUpdateSystemModal();
+});
+
 window.closeConfirmModal = closeConfirmModal;
 window.closeAuthModal = closeAuthModal;
 

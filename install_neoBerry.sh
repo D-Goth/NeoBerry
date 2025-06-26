@@ -37,6 +37,15 @@ echo "📦 Installation dans : $INSTALL_DIR"
 
 echo "🚀 Installation de NeoBerry (dépendances globales pour Raspberry Pi)…"
 
+# 🚧 Mise à jour système via le script dédié (si présent)
+UPDATE_SCRIPT="$(dirname "$0")/update_neoBerry.sh"
+if [ -x "$UPDATE_SCRIPT" ]; then
+  echo "🔄 Lancement de : $UPDATE_SCRIPT"
+  "$UPDATE_SCRIPT"
+else
+  echo "⚠️ Script de mise à jour non trouvé à $UPDATE_SCRIPT — étape ignorée"
+fi
+
 # Vérifie les droits
 if [ "$EUID" -ne 0 ]; then
   echo "❌ Ce script doit être exécuté avec sudo."
@@ -102,6 +111,19 @@ if ! sudo grep -qF "$SUDO_LINE" /etc/sudoers; then
   echo "✅ Règle ajoutée à /etc/sudoers"
 else
   echo "ℹ️ Règle sudoers déjà présente"
+fi
+
+# ✅ Ajout sudoers pour le script de mise à jour
+UPDATE_SCRIPT="$INSTALL_DIR/update_neoBerry.sh"
+if [ -x "$UPDATE_SCRIPT" ]; then
+  if sudo grep -qF "$USERNAME ALL=(ALL) NOPASSWD: $UPDATE_SCRIPT" /etc/sudoers; then
+    echo "✓ Règle sudo déjà présente pour $UPDATE_SCRIPT"
+  else
+    echo "➕ Ajout de la règle sudoers pour update_neoBerry.sh"
+    echo "$USERNAME ALL=(ALL) NOPASSWD: $UPDATE_SCRIPT" | sudo EDITOR="tee -a" visudo
+  fi
+else
+  echo "⚠️ Script $UPDATE_SCRIPT introuvable ou non exécutable — saut de l'étape sudoers"
 fi
 
 echo "🧹 Nettoyage éventuel des .pyc..."

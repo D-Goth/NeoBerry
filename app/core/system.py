@@ -193,4 +193,15 @@ def api_shutdown():
         logging.error(f"[SHUTDOWN] Erreur commande : {e.stderr}")
         return jsonify(success=False, error="Échec de l'arrêt."), 500
 
+@system_bp.route("/api/update", methods=["POST"])
+@login_required
+def api_update():
+    try:
+        script_path = Path.home() / "NeoBerry" / "update_neoBerry.sh"
+        subprocess.run(["/bin/bash", str(script_path)], check=True)
+        return jsonify(success=True)
+    except subprocess.CalledProcessError as e:
+        logging.error(f"[UPDATE] Erreur update_neoBerry.sh : {e}")
+        return jsonify(success=False, error="Erreur durant la mise à jour via le script."), 500
+
 

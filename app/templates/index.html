@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>NeoBerry - Black-Lab</title>
-<link rel="icon" href="{{ url_for('static', filename='img/rbw-bl_circle_400x400.png') }}" type="image/png">
+<link rel="icon" href="{{ url_for('static', filename='img/website.png') }}" type="image/png">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/novabar.css') }}">
 
@@ -285,6 +285,19 @@
 </div>
 
 
+<!-- Modale de confirmation -->
+<div id="confirm-container" class="modal-container" style="display: none">
+  <div id="confirm-modal" class="modal">
+    <h3 id="confirm-title">Confirmation</h3>
+    <p id="confirm-text">Souhaitez-vous vraiment effectuer cette action&nbsp;?</p>
+    <div class="auth-actions">
+      <button id="confirm-yes" class="btn-confirm">✔ Oui</button>
+      <button onclick="closeConfirmModal()" class="btn-cancel">✖ Non</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modale d’authentification -->
 <div id="auth-container" class="modal-container" style="display: none">
   <div id="auth-modal" class="modal">
     <h3 id="auth-title">Confirmation système</h3>
@@ -298,8 +311,20 @@
       <button onclick="closeAuthModal()" class="btn-cancel">✖ Annuler</button>
     </div>
     <p id="auth-error" class="error-msg" style="display: none;"></p>
+  </div>
+</div>
 
- </--🚦-->
+<!-- Modale dédiée à la mise à jour -->
+<div id="update-modal" class="modal-container hidden">
+  <div class="modal">
+    <h2>Mise à jour du système</h2>
+    <p id="update-status">Vérification et préparation en cours…</p>
+    <div id="progress-bar" class="scanner"></div>
+  </div>
+</div>
+
+
+ <!--🚦-->
     <div id="progress-bar" class="scanner hidden"></div>
   </div>
 </div>

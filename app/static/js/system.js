@@ -1,5 +1,8 @@
 // system.js
 
+// ─────────────────────────────────────────────────────────────
+// 🔧 Gestion des actions système avec mot de passe (reboot/shutdown)
+// ─────────────────────────────────────────────────────────────
 export function handleSystemAction(pendingAction, password) {
   const url = `/api/${pendingAction}`;
   const progress = document.getElementById('progress-bar');
@@ -22,6 +25,9 @@ export function handleSystemAction(pendingAction, password) {
     });
 }
 
+// ─────────────────────────────────────────────────────────────
+// 🔁 Redémarrage direct de NeoBerry (pas d’authentification requise)
+// ─────────────────────────────────────────────────────────────
 export function restartNeoBerryDirect() {
   const progress = document.getElementById('progress-bar');
   progress?.classList.remove('hidden');
@@ -40,6 +46,9 @@ export function restartNeoBerryDirect() {
     });
 }
 
+// ─────────────────────────────────────────────────────────────
+// ⚙️ Initialisation des listeners des boutons système
+// ─────────────────────────────────────────────────────────────
 export function setupSystemActionListeners(pendingActionRef, openConfirmModal, openAuthModal, closeConfirmModal, closeAuthModal) {
   document.getElementById('reboot-button')?.addEventListener('click', () => {
     pendingActionRef.value = 'reboot';
@@ -56,20 +65,8 @@ export function setupSystemActionListeners(pendingActionRef, openConfirmModal, o
     openConfirmModal('restart-neoberry');
   });
 
-  document.getElementById('confirm-yes')?.addEventListener('click', () => {
-    if (!pendingActionRef.value) {
-      console.error("⛔ pendingAction est null — aucune action définie");
-      closeConfirmModal();
-      return;
-    }
-
-    if (pendingActionRef.value === 'restart-neoberry') {
-      closeConfirmModal();
-      restartNeoBerryDirect();
-    } else {
-      closeConfirmModal();
-      openAuthModal();
-    }
+  document.getElementById('update-button')?.addEventListener('click', () => {
+    showUpdateSystemModal();
   });
 
   document.getElementById('auth-submit')?.addEventListener('click', async () => {
@@ -90,4 +87,35 @@ export function setupSystemActionListeners(pendingActionRef, openConfirmModal, o
   });
 }
 
+// ─────────────────────────────────────────────────────────────
+// 🟢 Modale dédiée à la mise à jour système (sans mot de passe)
+// ─────────────────────────────────────────────────────────────
+export function showUpdateSystemModal() {
+  const modal = document.getElementById('update-modal');
+  const status = document.getElementById('update-status');
+  const progress = document.getElementById('progress-bar');
+
+  modal.classList.remove('hidden');
+  progress?.classList.remove('hidden');
+  status.textContent = "🔄 Mise à jour du système en cours…";
+
+  fetch('/api/update', { method: 'POST' })
+    .then(res => res.json())
+    .then(json => {
+      if (json.success) {
+        status.textContent = "✅ Mise à jour terminée avec succès.";
+      } else {
+        status.textContent = "❌ Échec : " + (json.error || "Erreur inconnue.");
+      }
+    })
+    .catch(() => {
+      status.textContent = "❌ Erreur réseau ou serveur.";
+    })
+    .finally(() => {
+      progress?.classList.add('hidden');
+      setTimeout(() => {
+        modal.classList.add('hidden');
+      }, 3000);
+    });
+}
 
