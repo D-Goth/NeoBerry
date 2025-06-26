@@ -26,11 +26,13 @@ NeoBerry/
     │  	│    ├── index.css
     │  	│    ├── layout.css
     │  	│    ├── metrics.css
+    │  	│    ├── novabar.css
     │  	│    ├── reset.css
     │  	│    ├── terminal.css
     │  	│    ├── time.css
-    │   │    └── voltage.css   
+    │   │    └── voltage.css 
     │   ├── img/
+    │   │    └── icons
     │   └── js/
     │       ├── battery.js
     │       ├── bluetooth.js
@@ -40,6 +42,7 @@ NeoBerry/
     │       ├── list.js
     │       ├── main.js
     │       ├── network.js
+    │       ├── novabar.js
     │       ├── status.js
     │       ├── time.js
     │       ├── utils.js
@@ -51,4 +54,3 @@ NeoBerry/
     └── utils/
         ├── __init__.py
         └── gpio_helpers.py
-

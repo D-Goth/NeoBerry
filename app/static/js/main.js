@@ -11,6 +11,7 @@ import { initGauges } from './gauges.js';
 import { updateGPIOControl } from './gpio.js';
 import { loadSystemInfo } from './infosys.js';
 import { fetchNetworkStats } from './network.js';
+import { initNovaBar } from './novabar.js';
 import { fetchStatus } from './status.js';
 import { setupSystemActionListeners } from './system.js';
 import { updateMiniClock } from './time.js';
@@ -64,6 +65,7 @@ document.addEventListener('DOMContentLoaded', () => {
   fetchNetworkStats();
   initBatteryModule();
   loadPairedDevices();
+  initNovaBar();
   
   updateVoltage();
   setInterval(updateVoltage, 15000);
@@ -133,7 +135,4 @@ document.getElementById('toggle-password')?.addEventListener('click', () => {
 
 window.closeConfirmModal = closeConfirmModal;
 window.closeAuthModal = closeAuthModal;
-
-
-
 

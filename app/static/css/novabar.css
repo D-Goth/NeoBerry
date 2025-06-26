@@ -1,0 +1,137 @@
+:root {
+  --nova-fg:     #aaa;
+  --nova-bg:     #191919;
+  --nova-light:  #ffffff;
+  --nova-size:   2.75em;
+
+  /* Couleurs spécifiques par section */
+  --color-home:     #00f7ff;
+  --color-gpio:     #ff0000;
+  --color-temp:     #adff2f;
+  --color-storage:  #f5a623;
+  --color-bt:       #ee82ee;
+  --color-network:  #00ced1;
+  --color-info:     #00ff7f;
+  --color-actions:  #f01f3b;
+}
+
+/* ─── CONTAINER PRINCIPAL ───────────────────────────── */
+.nova-sidebar {
+  position: fixed;
+  top: 50%;
+  left: calc(50% - 615px);
+  transform: translateY(-50%);
+  z-index: 9999;
+  width: 8em;
+  background-color: rgba(25, 25, 25, 0.6);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 1.6em;
+  padding: 0.8em 0;
+  box-shadow: 0 0.6em 1.2em rgba(0, 0, 0, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+/* ─── LISTE VERTICALE ──────────────────────────────── */
+.nova-menu {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6em;
+  width: 100%;
+  pointer-events: auto;
+  position: relative;
+}
+
+/* ─── TUILE ICÔNE ───────────────────────────────────── */
+.nova-item {
+  width: var(--nova-size);
+  height: var(--nova-size);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--nova-fg);
+  opacity: 0.6;
+  transition: 0.3s ease;
+  position: relative;
+  z-index: 1;
+  cursor: pointer;
+  background: transparent;
+}
+
+.nova-item.active {
+  opacity: 1;
+}
+
+/* ─── ICÔNE SVG ─────────────────────────────────────── */
+@keyframes nova-pulse {
+  0%, 100% {
+    filter:
+      drop-shadow(0 0 4px currentColor)
+      drop-shadow(0 0 12px currentColor)
+      drop-shadow(0 0 24px currentColor)
+      brightness(1.2);
+    transform: scale(1.05);
+  }
+  50% {
+    filter:
+      drop-shadow(0 0 6px currentColor)
+      drop-shadow(0 0 20px currentColor)
+      drop-shadow(0 0 40px currentColor)
+      brightness(1.6);
+    transform: scale(1.1);
+  }
+}
+
+.nova-icon {
+  width: 2em;
+  height: 2em;
+  pointer-events: none;
+  opacity: 0.7;
+  transition: filter 0.3s ease, opacity 0.3s ease, transform 0.3s ease;
+  filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.08));
+}
+
+.nova-item.active .nova-icon {
+  opacity: 1;
+  animation: nova-pulse 2s infinite ease-in-out;
+}
+
+.nova-item:not(.active):hover .nova-icon {
+  opacity: 0.85;
+  filter: drop-shadow(0 0 6px currentColor);
+}
+
+/* ─── COULEURS PAR SECTION ─────────────────────────── */
+.nova-item[data-section="home"].active       { color: var(--color-home); }
+.nova-item[data-section="gpio"].active       { color: var(--color-gpio); }
+.nova-item[data-section="temp"].active       { color: var(--color-temp); }
+.nova-item[data-section="storage"].active    { color: var(--color-storage); }
+.nova-item[data-section="bt"].active         { color: var(--color-bt); }
+.nova-item[data-section="network"].active    { color: var(--color-network); }
+.nova-item[data-section="info-sys"].active   { color: var(--color-info); }
+.nova-item[data-section="actions"].active    { color: var(--color-actions); }
+
+/* ─── LASER GLISSANT ────────────────────────────────── */
+.nova-laser {
+  position: absolute;
+  left: 0;
+  width: 5px;
+  height: var(--nova-size);
+  top: 0;
+  background-color: var(--nova-light);
+  border-radius: 2px;
+  box-shadow:
+    0 0 10px var(--nova-light),
+    0 0 20px var(--nova-light),
+    0 0 30px var(--nova-light);
+  transition: top 0.3s ease;
+  z-index: 0;
+}
+

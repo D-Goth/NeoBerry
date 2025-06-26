@@ -6,14 +6,45 @@
 <title>NeoBerry - Black-Lab</title>
 <link rel="icon" href="{{ url_for('static', filename='img/rbw-bl_circle_400x400.png') }}" type="image/png">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/novabar.css') }}">
+
 </head>
 
 <body>
+  <nav class="nova-sidebar">
+    <ul class="nova-menu">
+      <li class="nova-item" data-section="home" aria-label="Accueil">
+        <img src="{{ url_for('static', filename='icons/home.svg') }}" alt="Accueil" class="nova-icon" />
+      </li>
+      <li class="nova-item" data-section="gpio" aria-label="Contrôle GPIO">
+       <img src="{{ url_for('static', filename='icons/microchip.svg') }}" alt="GPIO" class="nova-icon" />
+      </li>
+      <li class="nova-item" data-section="temp" aria-label="Températures CPU / RAM">
+       <img src="{{ url_for('static', filename='icons/temp.svg') }}" alt="Température" class="nova-icon" />
+      </li>
+      <li class="nova-item" data-section="storage" aria-label="Stockage Disque">
+       <img src="{{ url_for('static', filename='icons/storage.svg') }}" alt="Stockage" class="nova-icon" />
+      </li>
+      <li class="nova-item" data-section="bt" aria-label="Bluetooth">
+       <img src="{{ url_for('static', filename='icons/bt.svg') }}" alt="Bluetooth" class="nova-icon" />
+      </li>
+      <li class="nova-item" data-section="network" aria-label="Réseau">
+        <img src="{{ url_for('static', filename='icons/settings.svg') }}" alt="Réseau" class="nova-icon" />
+      </li>
+      <li class="nova-item" data-section="info-sys" aria-label="Infos Système">
+       <img src="{{ url_for('static', filename='icons/info-sys.svg') }}" alt="Infos Système" class="nova-icon" />
+      </li>
+      <li class="nova-item" data-section="actions" aria-label="Actions Système">
+       <img src="{{ url_for('static', filename='icons/raspberrypi.svg') }}" alt="Actions" class="nova-icon" />
+      </li>
+    <div class="nova-laser" aria-hidden="true"></div>
+  </ul>
+</nav>
+<section id="home" aria-labelledby="home-title">
   <header>
-    <a href="/" aria-label="Accueil">
+      <a href="/" aria-label="Accueil">
       <img src="{{ url_for('static', filename='img/website.png') }}" alt="Logo NeoBerry - By Black-Lab" id="logo" />
     </a>
-    
     <div class="mini-clock-container">
   <div class="mini-clock-time" id="mini-clock">
     --<span class="colon">:</span>--<span class="colon">:</span>--
@@ -44,6 +75,7 @@
      </div>
     <a href="{{ url_for('auth.logout') }}" id="logout-btn" role="button" aria-label="Déconnexion">Déconnexion</a>
   </header>
+</section>
 
   <h1>
     <span class="title-empty" data-text="NeoBerry - Black-Lab">NeoBerry - Black-Lab</span>
@@ -61,13 +93,13 @@
     </select>
   </div>
 
-<section aria-labelledby="gpio-title" class="gpio-section" data-expanded="true">
+<section id="gpio" aria-labelledby="gpio-title" class="gpio-section" data-expanded="true">
     <h2 id="gpio-title">Contrôle GPIO</h2>
   <div id="gpio-controls" class="gpio-content" role="grid" aria-label="Contrôle des ports GPIO"></div>
 </section>
 
 
-  <section aria-labelledby="system-title">
+  <section id="temp" aria-labelledby="system-title">
     <h2 id="system-title">Surveillance Système</h2>
     <div class="section-content"></div>
       <div class="system-metrics-0" aria-label="Charge CPU, RAM et Températures">
@@ -88,7 +120,7 @@
           <canvas id="board-temp-gauge" aria-label="Jauge de température carte" role="img"></canvas>
         </div>
       </section>
-      <section aria-labelledby="system-title">
+      <section id="storage" aria-labelledby="system-title">
     <h2 id="system-title">Surveillance Stockage</h2>
       <div class="system-metrics" aria-label="Surveillance stockage disque">
         <div class="metric-card">
@@ -107,12 +139,12 @@
     </div>
   </section>
 
-<section aria-labelledby="network-title">
-    <h2 id="network-title">État du Réseau</h2>
+<section id="bt" aria-labelledby="network-title">
+    <h2 id="network-title">Bluetooth</h2>
     <div class="section-content-bt">
             <div class="bluetooth-status-panel" aria-label="Statut Bluetooth">
                 <div style="display: flex; align-items: center; justify-content: space-between">
-                    <span class="network-label">Bluetooth</span>
+                    <span class="network-label">Bluetooth ON/OFF</span>
                     <label class="bt">
                         <input type="checkbox" id="bluetooth-toggle" />
                         <span class="slider-2"></span>
@@ -156,33 +188,33 @@
                 </div>
             </div>
         </div>
-               
-<div class="section-content">
-	<div class="network-field-0" role="region" aria-label="État Ethernet">
-		<div class="network-label">Status</div>
-		<div id="network-type" style="font-weight: 700; font-size: 1.1rem; margin-bottom: 12px">Ethernet</div>
+     </section>   
+     <section> <div id="network" class="section-content"></div>
+     <h2 id="network-title">État du Réseau</h2>
+	      <div class="network-field-0" role="region" aria-label="État Ethernet">
+	        	<div class="network-label">Status</div>
+	        	   <div id="network-type" style="font-weight: 700; font-size: 1.1rem; margin-bottom: 12px">Ethernet</div>
 
-		<div style="display: flex; gap: 24px; justify-content: center; margin-bottom: 20px">
-			<div style="flex: 1; max-width: 220px; text-align: center">
-				<div class="network-label">Upload</div>
-				<canvas id="network-up" aria-label="Jauge débit montant réseau" role="img"></canvas>
-			</div>
-			<div style="flex: 1; max-width: 220px; text-align: center">
-				<div class="network-label">Download</div>
-				<canvas id="network-down" aria-label="Jauge débit descendant réseau" role="img"></canvas>
-			</div>
-		</div>
-	</div>
-		<div class="wifi-section" id="wifi-section style=">
-			<div class="network-label">Status</div>
-			<div id="network-type" style="font-weight: 180; font-size: 1.1rem; margin-bottom: 12px">Wi-Fi</div>
+	        	<div style="display: flex; gap: 24px; justify-content: center; margin-bottom: 20px">
+	        		<div style="flex: 1; max-width: 220px; text-align: center">
+		        		<div class="network-label">Upload</div>
+		        		<canvas id="network-up" aria-label="Jauge débit montant réseau" role="img"></canvas>
+		       	</div>
+		        	<div style="flex: 1; max-width: 220px; text-align: center">
+		        		<div class="network-label">Download</div>
+		        		<canvas id="network-down" aria-label="Jauge débit descendant réseau" role="img"></canvas>
+	          		</div>
+	          	</div>
+          	</div>
+	          	<div class="wifi-section" id="wifi-section style=">
+	          		<div class="network-label">Status</div>
+	          		<div id="network-type" style="font-weight: 180; font-size: 1.1rem; margin-bottom: 12px">Wi-Fi</div>
 
-			<canvas id="wifi-strength-gauge" aria-label="Jauge réception WiFi" role="img"></canvas>
-			<div class="network-info" id="wifi-ssid">Nom réseau WiFi : Aucun</div>
-		</div>
-	</div>
-</div>
-
+		          	<canvas id="wifi-strength-gauge" aria-label="Jauge réception WiFi" role="img"></canvas>
+	          		<div class="network-info" id="wifi-ssid">Nom réseau WiFi : Aucun</div>
+	          	</div>
+	          </div>
+          </div>
         </div>
       </div>
     </div>
@@ -221,23 +253,18 @@
     </div>
 </section>
 
-<section aria-labelledby="actions-title">
-  <h2 id="actions-title">Actions</h2>
+<section id="actions" aria-labelledby="actions-title">
+<h2 id="actions-title">Contrôles</h2>
 
-  <div id="action-icons" class="grouped-actions">
-    <button id="restart-neoberry-button" class="dot-btn green">
-      <span class="dot"></span> Redémarrer NeoBerry
-    </button>
+<div id="action-icons" class="grouped-actions">
+	<button id="update-button" class="dot-btn green"><span class="dot"></span> Update Raspberry Pi</button>
 
-    <button id="reboot-button" class="dot-btn orange">
-      <span class="dot"></span> Reboot Raspberry Pi
-    </button>
+	<button id="reboot-button" class="dot-btn orange"><span class="dot"></span> Reboot Raspberry Pi</button>
 
-    <button id="shutdown-button" class="dot-btn red">
-      <span class="dot"></span> Shutdown Raspberry Pi
-    </button>
-  </div>
+	<button id="shutdown-button" class="dot-btn red"><span class="dot"></span> Shutdown Raspberry Pi</button>
 
+	<button id="restart-neoberry-button" class="dot-btn blue"><span class="dot"></span> Redémarrer NeoBerry</button>
+</div>
   <hr class="action-separator" />
   <div id="action-buttons">
   
@@ -276,8 +303,6 @@
     <div id="progress-bar" class="scanner hidden"></div>
   </div>
 </div>
-
-
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.1"></script>
 <script type="module" src="{{ url_for('static', filename='js/main.js') }}"></script>

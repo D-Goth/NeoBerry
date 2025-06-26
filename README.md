@@ -7,6 +7,7 @@
 ## ✨ Fonctionnalités
 
 - Interface web intuitive et responsive  
+- Barre de menu "Nova" : flottante et intuitive  
 - Affichage et contrôle des broches GPIO  
 - Surveillance des performances système (CPU, RAM, température, réseau)  
 - Gestion sécurisée via login avec authentification PAM  
@@ -43,7 +44,6 @@ NeoBerry/
     │   ├── battery.py
     │   ├── bluetooth.py
     │   ├── gpio.py
-    │   ├── graph.py
     │   ├── infosys.py
     │   ├── network.py
     │   ├── system.py
@@ -58,21 +58,23 @@ NeoBerry/
     │  	│    ├── index.css
     │  	│    ├── layout.css
     │  	│    ├── metrics.css
+    │  	│    ├── novabar.css
     │  	│    ├── reset.css
     │  	│    ├── terminal.css
     │  	│    ├── time.css
-    │   │    └── voltage.css
+    │   │    └── voltage.css 
     │   ├── img/
+    │   │    └── icons
     │   └── js/
     │       ├── battery.js
     │       ├── bluetooth.js
     │       ├── gauges.js
     │       ├── gpio.js
-    │       ├── graph.js
     │       ├── infosys.js
     │       ├── list.js
     │       ├── main.js
     │       ├── network.js
+    │       ├── novabar.js
     │       ├── status.js
     │       ├── time.js
     │       ├── utils.js
@@ -84,6 +86,7 @@ NeoBerry/
     └── utils/
         ├── __init__.py
         └── gpio_helpers.py
+
 
 
 ---
@@ -234,7 +237,8 @@ Voir le fichier `LICENSE`.
 
 ## ✨ Features
 
-- Intuitive and responsive web interface  
+- Intuitive and responsive web interface 
+- “Nova” menu bar: floating and intuitive
 - Display and control of GPIO pins  
 - System performance monitoring (CPU, RAM, temperature, network)  
 - Secure management via login with PAM authentication  
@@ -271,7 +275,6 @@ NeoBerry/
     │   ├── battery.py
     │   ├── bluetooth.py
     │   ├── gpio.py
-    │   ├── graph.py
     │   ├── infosys.py
     │   ├── network.py
     │   ├── system.py
@@ -286,21 +289,23 @@ NeoBerry/
     │  	│    ├── index.css
     │  	│    ├── layout.css
     │  	│    ├── metrics.css
+    │  	│    ├── novabar.css
     │  	│    ├── reset.css
     │  	│    ├── terminal.css
     │  	│    ├── time.css
-    │   │    └── voltage.css
+    │   │    └── voltage.css 
     │   ├── img/
+    │   │    └── icons
     │   └── js/
     │       ├── battery.js
     │       ├── bluetooth.js
     │       ├── gauges.js
     │       ├── gpio.js
-    │       ├── graph.js
     │       ├── infosys.js
     │       ├── list.js
     │       ├── main.js
     │       ├── network.js
+    │       ├── novabar.js
     │       ├── status.js
     │       ├── time.js
     │       ├── utils.js
@@ -440,3 +445,4 @@ See the `LICENSE` file.
 * [Black-Lab](https://www.black-lab.fr)  
 
 ---
+

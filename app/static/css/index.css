@@ -16,19 +16,30 @@
    time.css → Micro Horloge et Jour de la semaine
 */
 
-
-@import url("reset.css");
-@import url("layout.css");
-@import url("gpio.css");
-@import url("infosys.css");
-@import url("metrics.css");
+@import url("animations.css");
 @import url("battery.css");
 @import url("bluetooth.css");
-@import url("terminal.css");
-@import url("animations.css");
+@import url("gpio.css");
+@import url("infosys.css");
+@import url("layout.css");
+@import url("metrics.css");
+@import url("reset.css");
 @import url("responsive.css");
+@import url("terminal.css");
 @import url("time.css");
 @import url("voltage.css");
+
+
+section#home {
+  background: transparent !important;
+  border: none;
+  box-shadow: 0 0px 0px rgba(0, 0, 0, 0.0);
+     backdrop-filter: blur(0px);
+   -webkit-backdrop-filter: blur(0px);
+}
+section#home header {
+  margin-bottom: 0;
+}
 
 /* 🔳 Conteneur sombre flouté pour modale */
 .modal-container {
@@ -161,15 +172,6 @@
   border-radius: 2px;
 }
 
-@keyframes scanner-bar {
-  0% {
-    background-position: 200% 0;
-  }
-  100% {
-    background-position: -200% 0;
-  }
-}
-
 .hidden {
   display: none;
 }
@@ -205,15 +207,19 @@
 }
 
 .green .dot {
-  color: #2ecc71;
+  color: #00ff00;
 }
 
 .orange .dot {
-  color: #f39c12;
+  color: #ff4500;
 }
 
 .red .dot {
-  color: #e74c3c;
+  color: #ff0000;
+}
+
+.blue .dot {
+  color: #00ced1;
 }
 
 .action-separator {

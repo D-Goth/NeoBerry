@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+  <!-- Fond lumineux -->
+  <rect x="7" y="7" width="10" height="10" rx="2" fill="currentColor" opacity="0.3"/>
+  <!-- Traits qui réagissent aussi à currentColor -->
+  <rect x="7" y="7" width="10" height="10" rx="2" fill="none" stroke="currentColor" stroke-width="2"/>
+  <path d="M9 2V5M15 2V5M9 19V22M15 19V22M2 9H5M2 15H5M19 9H22M19 15H22"
+        stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+</svg>
+
