@@ -4,9 +4,9 @@
   padding: 1.5rem;
   color: white;
   margin-bottom: 2rem;
-   backdrop-filter: blur(6px);
-   -webkit-backdrop-filter: blur(6px);
-  box-shadow: 0 6px 22px rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 8px 32px 0 rgba(255, 46, 99, 0.25);
 }
 
 #info-sys h2 {
