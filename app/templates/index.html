@@ -140,55 +140,55 @@
   </section>
 
 <section id="bt" aria-labelledby="network-title">
-    <h2 id="network-title">Bluetooth</h2>
-    <div class="section-content-bt">
-            <div class="bluetooth-status-panel" aria-label="Statut Bluetooth">
-                <div style="display: flex; align-items: center; justify-content: space-between">
-                    <span class="network-label">Bluetooth ON/OFF</span>
-                    <label class="bt">
-                        <input type="checkbox" id="bluetooth-toggle" />
-                        <span class="slider-2"></span>
-                    </label>
-                </div>
+	<h2 id="network-title">Bluetooth</h2>
+	<div class="section-content-bt">
+		<div class="bluetooth-status-panel" aria-label="Statut Bluetooth">
+			<div style="display: flex; align-items: center; justify-content: space-between">
+				<span class="network-label">Bluetooth ON/OFF</span>
+				<label class="bt">
+					<input type="checkbox" id="bluetooth-toggle" />
+					<span class="slider-2"></span>
+				</label>
+			</div>
 
-                <div class="network-info" id="bluetooth-device">Périphérique connecté : Aucun</div>
+			<div class="network-info" id="bluetooth-device">Périphérique connecté : Aucun</div>
 
-                <div style="text-align: center">
-                    <div class="network-label">Réception Bluetooth</div>
-                    <canvas id="bluetooth-quality-gauge" aria-label="Jauge qualité réception Bluetooth" role="img"></canvas>
-                </div>
-            </div>
+			<div style="text-align: center">
+				<div class="network-label">Réception Bluetooth</div>
+				<canvas id="bluetooth-quality-gauge" aria-label="Jauge qualité réception Bluetooth" role="img"></canvas>
+			</div>
+		</div>
 
-            <div class="bluetooth-terminal-wrapper">
-                <div class="bluetooth-terminal-panel" aria-label="Terminal Bluetooth">
-                    <div class="terminal-actions">
-                        <button onclick="scanDevices()">🔍 Scanner les périphériques</button>
-                    </div>
-                </div>
+		<div class="bluetooth-terminal-wrapper">
+			<div class="bluetooth-terminal-panel" aria-label="Terminal Bluetooth">
+				<div class="terminal-actions">
+					<button onclick="scanDevices()">🔍 Scanner</button>
+					<button id="setup-button" onclick="setupSelectedDevice()" disabled>⚙️ Configurer</button>
+				</div>
+				<div class="scan-progress" id="scan-progress-container" style="display: none">
+					<div class="scan-bar-wrapper">
+						<div id="scan-progress-bar" class="scan-bar-fill"></div>
+					</div>
+				</div>
 
-                <ul id="devices-list" class="device-list"></ul>
+				<ul id="devices-list" class="device-list"></ul>
 
-                <div class="paired-devices" aria-label="Périphériques appairés">
-                    <ul id="paired-devices-list"></ul>
-                    <div class="terminal-cursor">▮</div>
-                </div>
+				<div class="paired-devices" aria-label="Périphériques appairés">
+					<ul id="paired-devices-list"></ul>
+					<div class="terminal-cursor">▮</div>
+				</div>
 
-                <div class="pin-section">
-                    <label for="pin-input" class="pin-label">Saisir Code</label>
-                    <input id="pin-input" type="text" placeholder="Validez code" />
-                    <div class="terminal-actions">
-                        <button id="validate-pin-btn">Valider</button>
-                    </div>
-                </div>
-
-                <div class="scan-progress" id="scan-progress-container" style="display: none">
-                    <div class="scan-bar-wrapper">
-                        <div id="scan-progress-bar" class="scan-bar-fill"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-     </section>   
+				<div class="pin-section">
+					<label for="pin-input" class="pin-label">Saisir Code</label>
+					<input id="pin-input" type="text" placeholder="Validez code" />
+					<div class="terminal-actions">
+						<button id="validate-pin-btn">Valider</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</section>  
      <section> <div id="network" class="section-content"></div>
      <h2 id="network-title">État du Réseau</h2>
 	      <div class="network-field-0" role="region" aria-label="État Ethernet">
