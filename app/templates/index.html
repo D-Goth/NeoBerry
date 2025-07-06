@@ -165,7 +165,7 @@
 					<button onclick="scanDevices()">🔍 Scanner</button>
 					<button id="setup-button" onclick="setupSelectedDevice()" disabled>⚙️ Configurer</button>
 				</div>
-				<div class="scan-progress" id="scan-progress-container" style="display: none">
+				<div class="scan-progress" id="scan-progress-container" style="display">
 					<div class="scan-bar-wrapper">
 						<div id="scan-progress-bar" class="scan-bar-fill"></div>
 					</div>
@@ -188,7 +188,8 @@
 			</div>
 		</div>
 	</div>
-</section>  
+</section>
+
      <section> <div id="network" class="section-content"></div>
      <h2 id="network-title">État du Réseau</h2>
 	      <div class="network-field-0" role="region" aria-label="État Ethernet">
@@ -222,7 +223,7 @@
 </section>
 
 <section id="info-sys" aria-labelledby="system-info-title">
-  <h2 id="system-info-title">Informations Système</h2>
+  <h2 id="system-info-title">Informations Globales</h2>
 
   <div class="section-content-sys">
     <div class="info-sys-content">
@@ -231,7 +232,12 @@
         <ul class="system-info-list">
           <li><strong>OS :</strong> <span id="sys-os">⏳</span></li>
           <li><strong>Nom :</strong> <span id="sys-hostname">⏳</span></li>
-          <li><strong>Uptime :</strong> <span id="sys-uptime">⏳</span></li>
+          <li><strong>En ligne :</strong> <span id="sys-uptime">⏳</span></li>
+          <li>
+  <strong>Dernière MàJ :</strong>
+  <span id="last-update-dot" class="dot"></span>
+  <span id="last-update">—</span>
+</li>
         </ul>
       </div>
     </div>
@@ -272,7 +278,8 @@
       <a href="https://www.Black-Lab.fr" target="_blank" rel="noopener" role="button" tabindex="0">Site Web Black-Lab</a>
   </div>
 </section>
-  
+
+<!-- Modale de confirmation -->
 <div id="confirm-container" class="modal-container" style="display: none">
   <div id="confirm-modal" class="modal">
     <h3 id="confirm-title">Confirmation</h3>

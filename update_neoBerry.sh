@@ -28,4 +28,3 @@ sudo apt autoclean >> "$LOG_FILE" 2>&1
 
 END="$(date '+%Y-%m-%d %H:%M:%S')"
 echo "[$END] ✅ Mise à jour complète terminée" | tee -a "$LOG_FILE"
-

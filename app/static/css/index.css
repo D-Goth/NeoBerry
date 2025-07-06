@@ -206,21 +206,11 @@ section#home header {
   background-color: currentColor;
 }
 
-.green .dot {
-  color: #00ff00;
-}
+.green .dot { color: #00ff00; }
+.orange .dot { color: #ff4500; }
+.red .dot    { color: #ff0000; }
+.blue .dot   { color: #00ced1; }
 
-.orange .dot {
-  color: #ff4500;
-}
-
-.red .dot {
-  color: #ff0000;
-}
-
-.blue .dot {
-  color: #00ced1;
-}
 
 .action-separator {
   width: 100%;

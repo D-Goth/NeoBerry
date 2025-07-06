@@ -59,6 +59,43 @@ function closeAuthModal() {
   pendingAction.value = null;
 }
 
+function parseDateTime(str) {
+  const [datePart, timePart] = str.split(" ");
+  const [dd, mm, yyyy]    = datePart.split("/");
+  const [hh, min]         = timePart.split(":");
+  return new Date(+yyyy, mm - 1, +dd, +hh, +min);
+}
+
+async function displayLastUpdate() {
+  try {
+    const res  = await fetch("/api/infosys");
+    if (!res.ok) throw new Error(res.statusText);
+    const { last_update } = await res.json();
+
+    const dotEl  = document.getElementById("last-update-dot");
+    const txtEl  = document.getElementById("last-update");
+    if (!dotEl || !txtEl) return;
+
+    if (!last_update) {
+      txtEl.textContent = "—";
+      dotEl.className   = "dot";
+      return;
+    }
+
+    txtEl.textContent = last_update;
+    const dt       = parseDateTime(last_update);
+    const diffDays = (new Date() - dt) / (1000 * 60 * 60 * 24);
+
+    let color = "green";
+    if (diffDays > 7)      color = "red";
+    else if (diffDays > 3) color = "orange";
+
+    dotEl.className = `dot ${color}`;
+  } catch (err) {
+    console.error("Erreur displayLastUpdate:", err);
+  }
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   initGauges();
   fetchStatus();
@@ -66,6 +103,9 @@ document.addEventListener('DOMContentLoaded', () => {
   initBatteryModule();
   loadPairedDevices();
   initNovaBar();
+  
+  displayLastUpdate();
+  setInterval(displayLastUpdate, 5 * 60 * 1000);
   
   updateVoltage();
   setInterval(updateVoltage, 15000);
@@ -139,4 +179,3 @@ document.getElementById('update-button')?.addEventListener('click', () => {
 
 window.closeConfirmModal = closeConfirmModal;
 window.closeAuthModal = closeAuthModal;
-

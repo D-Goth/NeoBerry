@@ -120,4 +120,3 @@ def get_bluetooth_status():
     except Exception as e:
         logging.error(f"Erreur statut Bluetooth : {e}")
         return jsonify({"device": None, "quality": 0})
-
