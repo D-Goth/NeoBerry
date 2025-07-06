@@ -1,0 +1,12 @@
+Flask>=2.3
+gunicorn
+python-dotenv
+RPi.GPIO; platform_system == "Linux"
+psutil
+requests
+pam
+werkzeug
+click
+itsdangerous
+markupsafe
+
