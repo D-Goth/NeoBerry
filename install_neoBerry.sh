@@ -68,6 +68,8 @@ apt install -y \
   python3-jinja2 \
   python3-markupsafe \
   python3-click \
+  python3-pam\
+  python3-venv\
   python3-itsdangerous \
   git \
   curl
