@@ -55,7 +55,7 @@ def battery_status():
                 secsleft = None
 
         return jsonify({
-            "percent": percent,
+            "percent": round(percent, 2) if percent is not None else None,
             "power_plugged": power_plugged,
             "secsleft": secsleft,
             "no_battery_detected": percent == 100 and battery is None
