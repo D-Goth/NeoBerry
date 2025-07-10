@@ -4,7 +4,7 @@ let batteryChart = null;
  * Met à jour visuellement le niveau de batterie dans l'interface.
  */
 export function updateBatteryGauge(data) {
-   const percent = data.percent;
+   const percent = Math.round(data.percent * 10) / 10;
    const fill = document.getElementById('battery-fill');
    const percentDisplay = document.getElementById('battery-percent');
    let color = '#39d353'; // Vert (par défaut)
