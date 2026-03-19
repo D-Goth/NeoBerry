@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>NeoBerry v2 — Connexion</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+</head>
+<body>
+  <main class="login-page">
+    <div class="login-card">
+
+      <div class="login-card__logo">
+        <div class="login-card__logotext">NeoBerry</div>
+        <div class="login-card__subtitle">Raspberry Pi Dashboard v2</div>
+      </div>
+
+      {% if error %}
+      <div class="login-error">{{ error }}</div>
+      {% endif %}
+
+      <form method="POST" action="{{ url_for('login') }}">
+        <div class="login-field">
+          <label class="login-field__label" for="username">Nom d'utilisateur</label>
+          <input
+            class="login-field__input"
+            type="text"
+            id="username"
+            name="username"
+            placeholder="Entrez votre nom d'utilisateur"
+            autocomplete="username"
+            autofocus
+            required
+          >
+        </div>
+
+        <div class="login-field">
+          <label class="login-field__label" for="password">Mot de passe</label>
+          <input
+            class="login-field__input"
+            type="password"
+            id="password"
+            name="password"
+            placeholder="Entrez votre mot de passe"
+            autocomplete="current-password"
+            required
+          >
+        </div>
+
+        <button class="login-btn" type="submit">Se connecter</button>
+      </form>
+
+      <div class="login-mode-badge" id="auth-mode">
+        <!-- Filled by JS -->
+      </div>
+    </div>
+  </main>
+
+  <script>
+    // Show dev mode hint if PAM is unavailable
+    fetch("/api/system/info").catch(() => {
+      document.getElementById("auth-mode").textContent =
+        "Mode dev · admin / neoberry";
+    });
+  </script>
+</body>
+</html>
