@@ -4,278 +4,257 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>NeoBerry v2</title>
-
-  <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap">
-
-  <!-- GridStack -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gridstack@10/dist/gridstack.min.css">
-
-  <!-- App CSS -->
   <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
 </head>
 <body>
 
-  <!-- ── Topbar ──────────────────────────────────────────────────────────── -->
-  <header class="topbar">
-    <span class="topbar__logo">NeoBerry</span>
+<!-- ── Topbar ──────────────────────────────────────────────────────────── -->
+<header class="topbar">
+  <span class="topbar__logo">NeoBerry</span>
 
-    <div class="topbar__badge" id="ws-badge">
-      <span class="dot"></span>
-      <span id="ws-label">Connexion…</span>
-    </div>
-
-    <div class="topbar__badge" id="net-badge">
-      <span class="dot"></span>
-      <span id="net-label">Réseau…</span>
-    </div>
-
-    <div class="topbar__spacer"></div>
-
-    <span class="topbar__time mono" id="topbar-time"></span>
-
-    <span class="muted mono" style="font-size:0.82rem">{{ username }}</span>
-
-    <button class="topbar__btn" onclick="openBluetooth()">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6.5 6.5l11 11L12 23V1l5.5 5.5-11 11"/></svg>
-      Bluetooth
-    </button>
-
-    <a class="topbar__btn topbar__btn--danger" href="{{ url_for('logout') }}">
-      Déconnexion
-    </a>
-  </header>
-
-  <!-- ── Dashboard ──────────────────────────────────────────────────────── -->
-  <main class="dashboard">
-    <div class="grid-stack" id="dashboard-grid">
-
-      <!-- Widget: GPIO -->
-      <div class="grid-stack-item" gs-x="0" gs-y="0" gs-w="6" gs-h="4" gs-id="gpio">
-        <div class="grid-stack-item-content">
-          <div class="widget">
-            <div class="widget__header">
-              <div class="widget__icon widget__icon--green">⚡</div>
-              <span class="widget__title">Contrôle GPIO</span>
-              <span id="gpio-sim-badge" class="pin-sim-badge" style="display:none">⚠ Simulation</span>
-              <svg class="widget__drag-handle" viewBox="0 0 16 16" fill="currentColor">
-                <circle cx="5" cy="4" r="1.5"/><circle cx="11" cy="4" r="1.5"/>
-                <circle cx="5" cy="8" r="1.5"/><circle cx="11" cy="8" r="1.5"/>
-                <circle cx="5" cy="12" r="1.5"/><circle cx="11" cy="12" r="1.5"/>
-              </svg>
-            </div>
-            <div class="widget__body">
-              <div class="gpio-grid" id="gpio-grid">
-                <!-- Pins rendered by gpio.js -->
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Widget: System metrics -->
-      <div class="grid-stack-item" gs-x="6" gs-y="0" gs-w="6" gs-h="4" gs-id="system">
-        <div class="grid-stack-item-content">
-          <div class="widget">
-            <div class="widget__header">
-              <div class="widget__icon widget__icon--cyan">📊</div>
-              <span class="widget__title">Surveillance Système</span>
-              <svg class="widget__drag-handle" viewBox="0 0 16 16" fill="currentColor">
-                <circle cx="5" cy="4" r="1.5"/><circle cx="11" cy="4" r="1.5"/>
-                <circle cx="5" cy="8" r="1.5"/><circle cx="11" cy="8" r="1.5"/>
-                <circle cx="5" cy="12" r="1.5"/><circle cx="11" cy="12" r="1.5"/>
-              </svg>
-            </div>
-            <div class="widget__body">
-              <div class="gauge-grid" id="system-gauges">
-                <!-- Gauges rendered by system.js -->
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Widget: Network -->
-      <div class="grid-stack-item" gs-x="0" gs-y="4" gs-w="4" gs-h="3" gs-id="network">
-        <div class="grid-stack-item-content">
-          <div class="widget">
-            <div class="widget__header">
-              <div class="widget__icon widget__icon--cyan">🌐</div>
-              <span class="widget__title">Réseau</span>
-              <svg class="widget__drag-handle" viewBox="0 0 16 16" fill="currentColor">
-                <circle cx="5" cy="4" r="1.5"/><circle cx="11" cy="4" r="1.5"/>
-                <circle cx="5" cy="8" r="1.5"/><circle cx="11" cy="8" r="1.5"/>
-                <circle cx="5" cy="12" r="1.5"/><circle cx="11" cy="12" r="1.5"/>
-              </svg>
-            </div>
-            <div class="widget__body" id="network-body">
-              <!-- Rendered by network.js -->
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Widget: Storage -->
-      <div class="grid-stack-item" gs-x="4" gs-y="4" gs-w="4" gs-h="3" gs-id="storage">
-        <div class="grid-stack-item-content">
-          <div class="widget">
-            <div class="widget__header">
-              <div class="widget__icon widget__icon--amber">💾</div>
-              <span class="widget__title">Stockage</span>
-              <svg class="widget__drag-handle" viewBox="0 0 16 16" fill="currentColor">
-                <circle cx="5" cy="4" r="1.5"/><circle cx="11" cy="4" r="1.5"/>
-                <circle cx="5" cy="8" r="1.5"/><circle cx="11" cy="8" r="1.5"/>
-                <circle cx="5" cy="12" r="1.5"/><circle cx="11" cy="12" r="1.5"/>
-              </svg>
-            </div>
-            <div class="widget__body">
-              <div class="gauge-grid" id="storage-gauges">
-                <!-- Rendered by storage.js -->
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Widget: System info -->
-      <div class="grid-stack-item" gs-x="8" gs-y="4" gs-w="4" gs-h="3" gs-id="info">
-        <div class="grid-stack-item-content">
-          <div class="widget">
-            <div class="widget__header">
-              <div class="widget__icon widget__icon--magenta">🖥</div>
-              <span class="widget__title">Informations</span>
-              <svg class="widget__drag-handle" viewBox="0 0 16 16" fill="currentColor">
-                <circle cx="5" cy="4" r="1.5"/><circle cx="11" cy="4" r="1.5"/>
-                <circle cx="5" cy="8" r="1.5"/><circle cx="11" cy="8" r="1.5"/>
-                <circle cx="5" cy="12" r="1.5"/><circle cx="11" cy="12" r="1.5"/>
-              </svg>
-            </div>
-            <div class="widget__body" id="info-body">
-              <!-- Rendered by info.js -->
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Widget: Controls -->
-      <div class="grid-stack-item" gs-x="0" gs-y="7" gs-w="12" gs-h="2" gs-id="controls">
-        <div class="grid-stack-item-content">
-          <div class="widget">
-            <div class="widget__header">
-              <div class="widget__icon widget__icon--red">⚙️</div>
-              <span class="widget__title">Contrôles</span>
-              <svg class="widget__drag-handle" viewBox="0 0 16 16" fill="currentColor">
-                <circle cx="5" cy="4" r="1.5"/><circle cx="11" cy="4" r="1.5"/>
-                <circle cx="5" cy="8" r="1.5"/><circle cx="11" cy="8" r="1.5"/>
-                <circle cx="5" cy="12" r="1.5"/><circle cx="11" cy="12" r="1.5"/>
-              </svg>
-            </div>
-            <div class="widget__body">
-              <div class="ctrl-grid">
-                <button class="ctrl-btn ctrl-btn--primary" onclick="App.sysAction('reboot')">
-                  🔄 Reboot
-                </button>
-                <button class="ctrl-btn ctrl-btn--danger" onclick="App.sysAction('shutdown')">
-                  ⏻ Shutdown
-                </button>
-                <button class="ctrl-btn" onclick="openBluetooth()">
-                  ⎆ Bluetooth
-                </button>
-                <a class="ctrl-btn" href="https://github.com/D-Goth/NeoBerry" target="_blank">
-                  ⤴ GitHub
-                </a>
-                <button class="ctrl-btn" onclick="App.resetLayout()">
-                  ⊞ Reset layout
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-    </div><!-- /grid-stack -->
-  </main>
-
-  <!-- ── Bluetooth modal ────────────────────────────────────────────────── -->
-  <div class="modal-overlay" id="bt-modal-overlay" onclick="closeBluetooth(event)">
-    <div class="modal" id="bt-modal">
-      <div class="modal__header">
-        <div class="widget__icon widget__icon--cyan">⎆</div>
-        <span class="modal__title">Gestionnaire Bluetooth</span>
-
-        <!-- Power toggle -->
-        <div class="flex items-center gap-8" style="margin-left: auto; margin-right: 12px;">
-          <span class="muted" style="font-size:0.8rem">Activé</span>
-          <label class="toggle">
-            <input type="checkbox" id="bt-power-toggle" onchange="BT.setPower(this.checked)">
-            <div class="toggle__track"></div>
-            <div class="toggle__thumb"></div>
-          </label>
-        </div>
-
-        <button class="modal__close" onclick="closeBluetooth()">✕</button>
-      </div>
-
-      <div class="modal__body">
-
-        <!-- Left pane: scan + discovered -->
-        <div class="modal__pane">
-          <div class="flex items-center gap-8">
-            <span class="modal__pane-title" style="flex:1">Appareils détectés</span>
-            <button class="bt-action bt-action--cyan" id="bt-scan-btn" onclick="BT.toggleScan()">
-              Démarrer le scan
-            </button>
-          </div>
-          <div id="bt-discovered-list">
-            <!-- Populated by bluetooth.js -->
-          </div>
-        </div>
-
-        <!-- Right pane: paired + send data -->
-        <div class="modal__pane">
-          <span class="modal__pane-title">Appareils jumelés</span>
-          <div id="bt-paired-list">
-            <!-- Populated by bluetooth.js -->
-          </div>
-
-          <hr class="separator">
-
-          <span class="modal__pane-title">Envoi de données</span>
-          <div class="bt-send-area">
-            <div class="bt-send-area__label" id="bt-send-target">
-              Sélectionnez un appareil connecté
-            </div>
-            <textarea class="bt-input" id="bt-send-input" placeholder="Message à envoyer…"></textarea>
-            <button class="ctrl-btn ctrl-btn--primary" onclick="BT.sendData()" style="align-self:flex-end">
-              Envoyer ↗
-            </button>
-          </div>
-
-          <div id="bt-send-log" style="font-family:var(--font-mono);font-size:0.72rem;color:var(--txt-muted);max-height:80px;overflow-y:auto;"></div>
-        </div>
-      </div>
-
-      <div class="modal__footer">
-        <span class="muted" style="font-size:0.75rem" id="bt-status-text">Prêt</span>
-      </div>
-    </div>
+  <div class="topbar__badge topbar__badge--off" id="ws-badge">
+    <span class="dot"></span>
+    <span id="ws-label">Connexion…</span>
   </div>
 
-  <!-- ── Scripts ────────────────────────────────────────────────────────── -->
-  <!-- GridStack -->
-  <script src="https://cdn.jsdelivr.net/npm/gridstack@10/dist/gridstack-all.js"></script>
-  <!-- Socket.io -->
-  <script src="https://cdn.jsdelivr.net/npm/socket.io-client@4/dist/socket.io.min.js"></script>
+  <div class="topbar__badge" id="net-badge">
+    <span class="dot"></span>
+    <span id="net-label">Réseau…</span>
+  </div>
 
-  <!-- App modules -->
-  <script src="{{ url_for('static', filename='js/app.js') }}"></script>
-  <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
-  <script src="{{ url_for('static', filename='js/widgets/gpio.js') }}"></script>
-  <script src="{{ url_for('static', filename='js/widgets/system.js') }}"></script>
-  <script src="{{ url_for('static', filename='js/widgets/network.js') }}"></script>
-  <script src="{{ url_for('static', filename='js/widgets/storage.js') }}"></script>
-  <script src="{{ url_for('static', filename='js/widgets/info.js') }}"></script>
-  <script src="{{ url_for('static', filename='js/bluetooth.js') }}"></script>
+  <div class="topbar__spacer"></div>
+
+  <div class="topbar__clock">
+    <span class="topbar__clock-time" id="topbar-time">--:--:--</span>
+    <span class="topbar__clock-date" id="topbar-date"></span>
+  </div>
+
+  <span class="muted mono" style="font-size:.8rem">{{ username }}</span>
+
+  <button class="topbar__btn" onclick="openBluetooth()">
+    ⎆ Bluetooth
+  </button>
+  <a class="topbar__btn topbar__btn--ghost" href="{{ url_for('logout') }}">
+    Déconnexion
+  </a>
+</header>
+
+<!-- ── Dashboard ───────────────────────────────────────────────────────── -->
+<main class="dashboard">
+  <div class="grid-stack" id="dashboard-grid">
+
+    <!-- GPIO -->
+    <div class="grid-stack-item" gs-x="0" gs-y="0" gs-w="6" gs-h="4" gs-id="gpio">
+      <div class="grid-stack-item-content"><div class="widget">
+        <div class="widget__header">
+          <div class="widget__icon">⚡</div>
+          <span class="widget__title">Contrôle GPIO</span>
+          <span id="gpio-sim-badge" class="sim-badge" style="display:none">⚠ Simulation</span>
+          <svg class="widget__drag-handle" viewBox="0 0 16 16" fill="currentColor">
+            <circle cx="5" cy="4" r="1.4"/><circle cx="11" cy="4" r="1.4"/>
+            <circle cx="5" cy="8" r="1.4"/><circle cx="11" cy="8" r="1.4"/>
+            <circle cx="5" cy="12" r="1.4"/><circle cx="11" cy="12" r="1.4"/>
+          </svg>
+        </div>
+        <div class="widget__body">
+          <div class="gpio-grid" id="gpio-grid"></div>
+        </div>
+      </div></div>
+    </div>
+
+    <!-- Surveillance système -->
+    <div class="grid-stack-item" gs-x="6" gs-y="0" gs-w="6" gs-h="4" gs-id="system">
+      <div class="grid-stack-item-content"><div class="widget">
+        <div class="widget__header">
+          <div class="widget__icon">📊</div>
+          <span class="widget__title">Surveillance Système</span>
+          <svg class="widget__drag-handle" viewBox="0 0 16 16" fill="currentColor">
+            <circle cx="5" cy="4" r="1.4"/><circle cx="11" cy="4" r="1.4"/>
+            <circle cx="5" cy="8" r="1.4"/><circle cx="11" cy="8" r="1.4"/>
+            <circle cx="5" cy="12" r="1.4"/><circle cx="11" cy="12" r="1.4"/>
+          </svg>
+        </div>
+        <div class="widget__body">
+          <div class="gauge-grid" id="system-gauges"></div>
+        </div>
+      </div></div>
+    </div>
+
+    <!-- Réseau -->
+    <div class="grid-stack-item" gs-x="0" gs-y="4" gs-w="4" gs-h="3" gs-id="network">
+      <div class="grid-stack-item-content"><div class="widget">
+        <div class="widget__header">
+          <div class="widget__icon">🌐</div>
+          <span class="widget__title">Réseau</span>
+          <svg class="widget__drag-handle" viewBox="0 0 16 16" fill="currentColor">
+            <circle cx="5" cy="4" r="1.4"/><circle cx="11" cy="4" r="1.4"/>
+            <circle cx="5" cy="8" r="1.4"/><circle cx="11" cy="8" r="1.4"/>
+            <circle cx="5" cy="12" r="1.4"/><circle cx="11" cy="12" r="1.4"/>
+          </svg>
+        </div>
+        <div class="widget__body" id="network-body"></div>
+      </div></div>
+    </div>
+
+    <!-- Stockage -->
+    <div class="grid-stack-item" gs-x="4" gs-y="4" gs-w="3" gs-h="3" gs-id="storage">
+      <div class="grid-stack-item-content"><div class="widget">
+        <div class="widget__header">
+          <div class="widget__icon">💾</div>
+          <span class="widget__title">Stockage</span>
+          <svg class="widget__drag-handle" viewBox="0 0 16 16" fill="currentColor">
+            <circle cx="5" cy="4" r="1.4"/><circle cx="11" cy="4" r="1.4"/>
+            <circle cx="5" cy="8" r="1.4"/><circle cx="11" cy="8" r="1.4"/>
+            <circle cx="5" cy="12" r="1.4"/><circle cx="11" cy="12" r="1.4"/>
+          </svg>
+        </div>
+        <div class="widget__body">
+          <div class="gauge-grid" id="storage-gauges"></div>
+        </div>
+      </div></div>
+    </div>
+
+    <!-- Batterie -->
+    <div class="grid-stack-item" gs-x="7" gs-y="4" gs-w="5" gs-h="3" gs-id="battery">
+      <div class="grid-stack-item-content"><div class="widget">
+        <div class="widget__header">
+          <div class="widget__icon">🔋</div>
+          <span class="widget__title">Alimentation / Batterie</span>
+          <svg class="widget__drag-handle" viewBox="0 0 16 16" fill="currentColor">
+            <circle cx="5" cy="4" r="1.4"/><circle cx="11" cy="4" r="1.4"/>
+            <circle cx="5" cy="8" r="1.4"/><circle cx="11" cy="8" r="1.4"/>
+            <circle cx="5" cy="12" r="1.4"/><circle cx="11" cy="12" r="1.4"/>
+          </svg>
+        </div>
+        <div class="widget__body" id="battery-body"></div>
+      </div></div>
+    </div>
+
+    <!-- Horloge -->
+    <div class="grid-stack-item" gs-x="0" gs-y="7" gs-w="3" gs-h="3" gs-id="clock">
+      <div class="grid-stack-item-content"><div class="widget">
+        <div class="widget__header">
+          <div class="widget__icon">🕐</div>
+          <span class="widget__title">Horloge</span>
+          <svg class="widget__drag-handle" viewBox="0 0 16 16" fill="currentColor">
+            <circle cx="5" cy="4" r="1.4"/><circle cx="11" cy="4" r="1.4"/>
+            <circle cx="5" cy="8" r="1.4"/><circle cx="11" cy="8" r="1.4"/>
+            <circle cx="5" cy="12" r="1.4"/><circle cx="11" cy="12" r="1.4"/>
+          </svg>
+        </div>
+        <div class="widget__body" style="justify-content:center">
+          <div class="clock-widget">
+            <div class="clock-time" id="clock-time">--:--</div>
+            <div class="clock-date" id="clock-date"></div>
+            <div class="clock-week" id="clock-week"></div>
+            <div class="clock-days" id="clock-days"></div>
+          </div>
+        </div>
+      </div></div>
+    </div>
+
+    <!-- Informations -->
+    <div class="grid-stack-item" gs-x="3" gs-y="7" gs-w="4" gs-h="3" gs-id="info">
+      <div class="grid-stack-item-content"><div class="widget">
+        <div class="widget__header">
+          <div class="widget__icon">🖥</div>
+          <span class="widget__title">Informations</span>
+          <svg class="widget__drag-handle" viewBox="0 0 16 16" fill="currentColor">
+            <circle cx="5" cy="4" r="1.4"/><circle cx="11" cy="4" r="1.4"/>
+            <circle cx="5" cy="8" r="1.4"/><circle cx="11" cy="8" r="1.4"/>
+            <circle cx="5" cy="12" r="1.4"/><circle cx="11" cy="12" r="1.4"/>
+          </svg>
+        </div>
+        <div class="widget__body" id="info-body"></div>
+      </div></div>
+    </div>
+
+    <!-- Contrôles -->
+    <div class="grid-stack-item" gs-x="7" gs-y="7" gs-w="5" gs-h="3" gs-id="controls">
+      <div class="grid-stack-item-content"><div class="widget">
+        <div class="widget__header">
+          <div class="widget__icon">⚙️</div>
+          <span class="widget__title">Contrôles</span>
+          <svg class="widget__drag-handle" viewBox="0 0 16 16" fill="currentColor">
+            <circle cx="5" cy="4" r="1.4"/><circle cx="11" cy="4" r="1.4"/>
+            <circle cx="5" cy="8" r="1.4"/><circle cx="11" cy="8" r="1.4"/>
+            <circle cx="5" cy="12" r="1.4"/><circle cx="11" cy="12" r="1.4"/>
+          </svg>
+        </div>
+        <div class="widget__body">
+          <div class="ctrl-grid">
+            <button class="ctrl-btn ctrl-btn--reboot"   onclick="App.sysAction('reboot')">🔄 Reboot</button>
+            <button class="ctrl-btn ctrl-btn--shutdown" onclick="App.sysAction('shutdown')">⏻ Shutdown</button>
+            <button class="ctrl-btn ctrl-btn--bt"       onclick="openBluetooth()">⎆ Bluetooth</button>
+            <a      class="ctrl-btn ctrl-btn--git"      href="https://github.com/D-Goth/NeoBerry" target="_blank">⤴ GitHub</a>
+            <button class="ctrl-btn ctrl-btn--reset"    onclick="App.resetLayout()">⊞ Reset layout</button>
+          </div>
+        </div>
+      </div></div>
+    </div>
+
+  </div>
+</main>
+
+<!-- ── Modal Bluetooth ──────────────────────────────────────────────────── -->
+<div class="modal-overlay" id="bt-modal-overlay" onclick="closeBluetooth(event)">
+  <div class="modal" id="bt-modal">
+    <div class="modal__header">
+      <div class="widget__icon">⎆</div>
+      <span class="modal__title">Gestionnaire Bluetooth</span>
+      <div class="flex items-center gap-8" style="margin-left:auto;margin-right:10px;">
+        <span class="muted" style="font-size:.78rem">Activé</span>
+        <label class="toggle">
+          <input type="checkbox" id="bt-power-toggle" onchange="BT.setPower(this.checked)">
+          <div class="toggle__track"></div>
+          <div class="toggle__thumb"></div>
+        </label>
+      </div>
+      <button class="modal__close" onclick="closeBluetooth()">✕</button>
+    </div>
+    <div class="modal__body">
+      <div class="modal__pane">
+        <div class="flex items-center gap-8">
+          <span class="modal__pane-title" style="flex:1">Appareils détectés</span>
+          <button class="bt-action bt-action--blue" id="bt-scan-btn" onclick="BT.toggleScan()">Démarrer le scan</button>
+        </div>
+        <div id="bt-discovered-list"></div>
+      </div>
+      <div class="modal__pane">
+        <span class="modal__pane-title">Appareils jumelés</span>
+        <div id="bt-paired-list"></div>
+        <hr class="sep">
+        <span class="modal__pane-title">Envoi de données</span>
+        <div style="background:rgba(0,0,0,.3);border:1px solid var(--glass-border);border-radius:var(--r-md);padding:10px;display:flex;flex-direction:column;gap:7px;">
+          <div style="font-size:.72rem;color:var(--txt-2)" id="bt-send-target">Sélectionnez un appareil connecté</div>
+          <textarea class="bt-input" id="bt-send-input" placeholder="Message à envoyer…"></textarea>
+          <button class="ctrl-btn ctrl-btn--bt" onclick="BT.sendData()" style="align-self:flex-end">Envoyer ↗</button>
+        </div>
+        <div id="bt-send-log" style="font-family:var(--mono);font-size:.7rem;color:var(--txt-3);max-height:70px;overflow-y:auto;"></div>
+      </div>
+    </div>
+    <div class="modal__footer">
+      <span class="muted" style="font-size:.73rem" id="bt-status-text">Prêt</span>
+    </div>
+  </div>
+</div>
+
+<!-- ── Scripts ──────────────────────────────────────────────────────────── -->
+<script src="https://cdn.jsdelivr.net/npm/gridstack@10/dist/gridstack-all.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/socket.io-client@4/dist/socket.io.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
+
+<script src="{{ url_for('static', filename='js/app.js') }}"></script>
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+<script src="{{ url_for('static', filename='js/widgets/gpio.js') }}"></script>
+<script src="{{ url_for('static', filename='js/widgets/system.js') }}"></script>
+<script src="{{ url_for('static', filename='js/widgets/network.js') }}"></script>
+<script src="{{ url_for('static', filename='js/widgets/storage.js') }}"></script>
+<script src="{{ url_for('static', filename='js/widgets/battery.js') }}"></script>
+<script src="{{ url_for('static', filename='js/widgets/info.js') }}"></script>
+<script src="{{ url_for('static', filename='js/bluetooth.js') }}"></script>
 </body>
 </html>

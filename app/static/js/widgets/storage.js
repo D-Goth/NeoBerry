@@ -22,10 +22,10 @@ const StorageWidget = (() => {
         <div class="gauge">
           <svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
             <circle class="gauge__track" cx="60" cy="60" r="46"
-              stroke-dasharray="${CIRC}" stroke-dashoffset="0"/>
+              stroke-dasharray="${CIRC} 73.3" stroke-dashoffset="0"/>
             <circle class="gauge__arc gauge__arc--amber" id="disk-arc"
               cx="60" cy="60" r="46"
-              stroke-dasharray="${CIRC}" stroke-dashoffset="${CIRC}"/>
+              stroke-dasharray="${CIRC} 73.3" stroke-dashoffset="${CIRC}"/>
           </svg>
           <div class="gauge__center">
             <span class="gauge__value" id="disk-val">—</span>
