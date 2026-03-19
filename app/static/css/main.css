@@ -203,19 +203,24 @@ body::before {
 
 .gauge { position: relative; width: 110px; height: 110px; }
 .gauge svg { width: 100%; height: 100%; transform: rotate(-210deg); }
-.gauge__track {
-  fill: none; stroke: rgba(255,255,255,.07); stroke-width: 8; stroke-linecap: round;
-  /* 270° arc : 219.91 visible + 73.3 gap (90°) */
-  stroke-dasharray: 219.91 73.3;
+/* Les jauges sont Chart.js doughnut (comme v1) — plus de SVG */
+.gauge-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 12px;
+  align-items: start;
+  justify-items: center;
 }
-.gauge__arc {
-  fill: none; stroke-width: 8; stroke-linecap: round;
-  /* même fenêtre 270° */
-  stroke-dasharray: 219.91 73.3;
-  stroke-dashoffset: 219.91;
-  transition: stroke-dashoffset .6s var(--ease), stroke .4s;
-  filter: drop-shadow(0 0 5px currentColor);
+
+.gauge-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  width: 100%;
 }
+
+.gauge__arc { transition: stroke-dashoffset .6s var(--ease), stroke .4s; }
 .gauge__center {
   position: absolute; inset: 0;
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px;
@@ -225,34 +230,58 @@ body::before {
 .gauge__label { font-size: .72rem; color: var(--txt-2); text-align: center; }
 
 /* ─── GPIO ───────────────────────────────────────────────────────────────── */
-.gpio-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(48px, 1fr)); gap: 7px; }
+.gpio-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(64px, 1fr));
+  gap: 8px;
+}
 
 .pin-btn {
-  display: flex; flex-direction: column; align-items: center; gap: 4px;
-  padding: 7px 3px; border-radius: var(--r-md);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 6px;
+  padding: 12px 6px;
+  min-height: 68px;
+  border-radius: var(--r-md);
   border: 1px solid var(--glass-border);
-  background: rgba(0,0,0,.3);
-  cursor: pointer; transition: all var(--t-f);
+  background: rgba(0,0,0,.35);
+  cursor: pointer;
+  transition: all var(--t-f);
+  /* Zone tactile confortable */
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
 }
-.pin-btn:hover { border-color: rgba(255,255,255,.12); background: rgba(255,255,255,.04); }
+.pin-btn:hover  { border-color: rgba(255,255,255,.14); background: rgba(255,255,255,.05); }
+.pin-btn:active { transform: scale(.93); }
 .pin-btn.active {
-  border-color: rgba(0,232,135,.5);
-  background: rgba(0,232,135,.08);
+  border-color: rgba(0,232,135,.55);
+  background: rgba(0,232,135,.1);
   box-shadow: var(--pin-on-glow);
 }
-.pin-btn.input-mode { border-color: rgba(255,22,84,.2); opacity: .65; cursor: default; }
+.pin-btn.input-mode { border-color: rgba(255,22,84,.2); opacity: .6; cursor: default; }
 
 .pin-btn__dot {
-  width: 9px; height: 9px; border-radius: 50%;
-  background: var(--bg-3); border: 1.5px solid var(--txt-3);
-  transition: all var(--t-f);
+  width: 14px; height: 14px; border-radius: 50%;
+  background: var(--bg-3); border: 2px solid var(--txt-3);
+  transition: all var(--t-f); flex-shrink: 0;
 }
 .pin-btn.active .pin-btn__dot {
   background: var(--pin-on); border-color: var(--pin-on);
   box-shadow: var(--pin-on-glow);
 }
-.pin-btn__num { font-family: var(--mono); font-size: .62rem; color: var(--txt-3); line-height: 1; }
+.pin-btn__num {
+  font-family: var(--mono); font-size: .75rem; font-weight: 600;
+  color: var(--txt-3); line-height: 1;
+}
 .pin-btn.active .pin-btn__num { color: var(--pin-on); }
+
+/* Responsive : encore plus grands sur mobile */
+@media (max-width: 600px) {
+  .gpio-grid { grid-template-columns: repeat(auto-fill, minmax(72px, 1fr)); gap: 10px; }
+  .pin-btn   { min-height: 80px; padding: 14px 6px; }
+  .pin-btn__dot { width: 18px; height: 18px; }
+  .pin-btn__num { font-size: .85rem; }
+}
 
 .sim-badge {
   display: inline-flex; align-items: center; gap: 4px;

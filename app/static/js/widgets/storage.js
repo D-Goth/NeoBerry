@@ -1,11 +1,9 @@
 /**
  * NeoBerry v2 — widgets/storage.js
- * Disk usage gauge + read/write throughput.
+ * 3 jauges doughnut (v1-style) : capacité, lecture, écriture + débit texte.
  */
 
 const StorageWidget = (() => {
-  const CIRC = 219.91;
-  let _init = false;
 
   function _fmt(bytes) {
     if (bytes < 1024)    return `${bytes.toFixed(0)} B/s`;
@@ -13,60 +11,99 @@ const StorageWidget = (() => {
     return `${(bytes / 1048576).toFixed(2)} MB/s`;
   }
 
+  const GAUGES = [
+    { id: 'gauge-disk',  label: 'Capacité Stockage', unit: '%',   max: 100 },
+    { id: 'gauge-write', label: 'Écriture Disque',    unit: '%',   max: 100 },
+    { id: 'gauge-read',  label: 'Lecture Disque',     unit: '%',   max: 100 },
+  ];
+
+  const _charts = {};
+  let   _ready  = false;
+
+  function _makeChart(canvasId, cfg) {
+    const canvas = document.getElementById(canvasId);
+    if (!canvas || !window.Chart) return null;
+    const chart = new Chart(canvas.getContext('2d'), {
+      type: 'doughnut',
+      data: {
+        labels:   [cfg.label, ''],
+        datasets: [{
+          data:            [0, 100],
+          backgroundColor: ['rgba(0,0,0,0)', 'rgba(44,44,44,0.75)'],
+          borderColor:     'transparent',
+          borderWidth:     0,
+          cutout:          '75%',
+        }],
+      },
+      options: {
+        responsive:    true,
+        aspectRatio:   1,
+        rotation:      -108,
+        circumference: 216,
+        animation:     { duration: 600 },
+        plugins: {
+          tooltip: { enabled: false },
+          legend:  { display: false },
+        },
+      },
+      plugins: ['nbGradArc', 'nbLabel'],
+    });
+    chart._nbConfig = cfg;
+    chart._nbRaw    = '0';
+    return chart;
+  }
+
   function _setup() {
-    if (_init) return;
+    if (_ready) return;
     const c = document.getElementById('storage-gauges');
-    if (!c) return;
-    c.innerHTML = `
+    if (!c || !window.Chart) return;
+
+    c.innerHTML = GAUGES.map(g => `
       <div class="gauge-wrap">
-        <div class="gauge">
-          <svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
-            <circle class="gauge__track" cx="60" cy="60" r="46"
-              stroke-dasharray="${CIRC} 73.3" stroke-dashoffset="0"/>
-            <circle class="gauge__arc gauge__arc--amber" id="disk-arc"
-              cx="60" cy="60" r="46"
-              stroke-dasharray="${CIRC} 73.3" stroke-dashoffset="${CIRC}"/>
-          </svg>
-          <div class="gauge__center">
-            <span class="gauge__value" id="disk-val">—</span>
-            <span class="gauge__unit">%</span>
-          </div>
-        </div>
-        <span class="gauge__label">Disque utilisé</span>
-      </div>
-      <div style="flex:1;display:flex;flex-direction:column;gap:8px;justify-content:center;">
-        <div class="net-stat">
-          <span class="net-stat__label">📖 Lecture</span>
-          <span class="net-stat__value" id="disk-read">—</span>
-        </div>
-        <div class="net-stat">
-          <span class="net-stat__label">✏ Écriture</span>
-          <span class="net-stat__value" id="disk-write">—</span>
-        </div>
-      </div>
-    `;
-    _init = true;
+        <canvas id="${g.id}" style="max-width:150px;max-height:150px;"></canvas>
+      </div>`).join('');
+
+    GAUGES.forEach(g => { _charts[g.id] = _makeChart(g.id, g); });
+    _ready = true;
   }
 
   function update(data) {
     _setup();
-
-    const disk = data.disk || {};
+    const disk = data.disk       || {};
     const io   = data.throughput || {};
-    const pct  = disk.percent || 0;
-    const off  = CIRC - (CIRC * pct / 100);
 
-    const arc = document.getElementById('disk-arc');
-    const val = document.getElementById('disk-val');
-    if (arc) {
-      arc.style.strokeDashoffset = off;
-      arc.className = 'gauge__arc gauge__arc--' + (pct > 85 ? 'red' : pct > 70 ? 'amber' : 'green');
+    // Capacité disque
+    const pctDisk = disk.percent || 0;
+    if (_charts['gauge-disk']) {
+      _charts['gauge-disk'].data.datasets[0].data = [pctDisk, 100 - pctDisk];
+      _charts['gauge-disk']._nbRaw = pctDisk.toFixed(1);
+      _charts['gauge-disk'].update('active');
     }
-    if (val) val.textContent = pct.toFixed(1);
 
-    const r = id => document.getElementById(id);
-    if (r('disk-read'))  r('disk-read').textContent  = _fmt(io.read  || 0);
-    if (r('disk-write')) r('disk-write').textContent = _fmt(io.write || 0);
+    // Écriture / lecture : on affiche en KB/s via le label custom
+    // On normalise sur 100 MB/s max pour la jauge visuelle
+    const MAX_IO = 100 * 1024 * 1024;
+    const writePct = Math.min(100, ((io.write || 0) / MAX_IO) * 100);
+    const readPct  = Math.min(100, ((io.read  || 0) / MAX_IO) * 100);
+
+    if (_charts['gauge-write']) {
+      _charts['gauge-write'].data.datasets[0].data = [writePct, 100 - writePct];
+      _charts['gauge-write']._nbRaw = _fmtShort(io.write || 0);
+      _charts['gauge-write']._nbConfig.unit = '';
+      _charts['gauge-write'].update('active');
+    }
+    if (_charts['gauge-read']) {
+      _charts['gauge-read'].data.datasets[0].data = [readPct, 100 - readPct];
+      _charts['gauge-read']._nbRaw = _fmtShort(io.read || 0);
+      _charts['gauge-read']._nbConfig.unit = '';
+      _charts['gauge-read'].update('active');
+    }
+  }
+
+  function _fmtShort(bytes) {
+    if (bytes < 1024)    return `${bytes.toFixed(0)}B`;
+    if (bytes < 1048576) return `${(bytes/1024).toFixed(0)}K`;
+    return `${(bytes/1048576).toFixed(1)}M`;
   }
 
   return { update };
