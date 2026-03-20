@@ -1,76 +1,114 @@
 #!/usr/bin/env bash
-# NeoBerry v2 — install_neoberry.sh
-# Full installation on a Raspberry Pi (Raspberry Pi OS / Debian-based).
-# Run as root: sudo ./install_neoberry.sh
+# ═══════════════════════════════════════════════════════════════
+#  NeoBerry v2 — install_neoberry.sh
+#  Installation complète sur Raspberry Pi / Debian / Ubuntu
+#
+#  Usage :
+#    bash install_neoberry.sh          ← se ré-élève en sudo seul
+#    sudo bash install_neoberry.sh     ← appel direct en root
+# ═══════════════════════════════════════════════════════════════
 
 set -euo pipefail
 
+# ── Auto-élévation sudo ───────────────────────────────────────
+if [[ $EUID -ne 0 ]]; then
+  echo "[NeoBerry] Élévation des privilèges nécessaire..."
+  exec sudo bash "$0" "$@"
+fi
+
+# ── Variables ─────────────────────────────────────────────────
 NEOBERRY_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SERVICE_NAME="neoberry"
 SERVICE_FILE="/etc/systemd/system/${SERVICE_NAME}.service"
 VENV_DIR="${NEOBERRY_DIR}/venv"
-APP_USER="${SUDO_USER:-pi}"
+APP_USER="${SUDO_USER:-$(logname 2>/dev/null || echo pi)}"
 
-RED='\033[0;31m'; GREEN='\033[0;32m'; CYAN='\033[0;36m'; NC='\033[0m'
-
+RED='\033[0;31m'; GREEN='\033[0;32m'; CYAN='\033[0;36m'; YELLOW='\033[1;33m'; NC='\033[0m'
 info()    { echo -e "${CYAN}[NeoBerry]${NC} $*"; }
 success() { echo -e "${GREEN}[NeoBerry]${NC} $*"; }
-error()   { echo -e "${RED}[NeoBerry] ERROR:${NC} $*"; exit 1; }
+warn()    { echo -e "${YELLOW}[NeoBerry]${NC} $*"; }
+error()   { echo -e "${RED}[NeoBerry] ERREUR :${NC} $*"; exit 1; }
 
-# ── Root check ────────────────────────────────────────────────────────────────
-[[ $EUID -ne 0 ]] && error "Ce script doit être exécuté en root (sudo)."
+echo ""
+echo -e "${RED}  ███╗   ██╗███████╗ ██████╗ ${NC}"
+echo -e "${RED}  ████╗  ██║██╔════╝██╔═══██╗${NC}"
+echo -e "${RED}  ██╔██╗ ██║█████╗  ██║   ██║${NC}"
+echo -e "${RED}  ██║╚██╗██║██╔══╝  ██║   ██║${NC}"
+echo -e "${RED}  ██║ ╚████║███████╗╚██████╔╝${NC}"
+echo -e "${RED}  ╚═╝  ╚═══╝╚══════╝ ╚═════╝ ${NC}"
+echo -e "  ${CYAN}NeoBerry v2 — Installateur${NC}"
+echo ""
+info "Répertoire : ${NEOBERRY_DIR}"
+info "Utilisateur : ${APP_USER}"
+echo ""
 
-info "Démarrage de l'installation NeoBerry v2..."
-
-# ── System packages ───────────────────────────────────────────────────────────
-info "Mise à jour des paquets système..."
+# ── Paquets système ────────────────────────────────────────────
+info "Mise à jour des paquets..."
 apt-get update -qq
 
 info "Installation des dépendances système..."
 apt-get install -y \
   python3 python3-pip python3-venv \
   python3-dbus python3-gi \
-  libpam0g-dev libpam-python \
+  libpam0g-dev python3-pam \
   bluetooth bluez bluez-tools \
   python3-gpiozero \
-  libglib2.0-dev
+  libglib2.0-dev \
+  git curl 2>/dev/null || warn "Certains paquets optionnels non disponibles (normal hors RPi)"
 
-# ── Virtual environment ───────────────────────────────────────────────────────
+# ── Virtualenv ─────────────────────────────────────────────────
 info "Création de l'environnement virtuel Python..."
+# --system-site-packages = accès à dbus/gi installés via apt
 python3 -m venv "${VENV_DIR}" --system-site-packages
-# --system-site-packages allows access to dbus/gi installed via apt
+
+info "Mise à jour de pip..."
+"${VENV_DIR}/bin/pip" install --upgrade pip -q
 
 info "Installation des dépendances Python..."
-"${VENV_DIR}/bin/pip" install --upgrade pip -q
-"${VENV_DIR}/bin/pip" install -r "${NEOBERRY_DIR}/requirements.txt" -q
+# Exclure eventlet — incompatible avec le mode threading de Flask-SocketIO
+"${VENV_DIR}/bin/pip" install \
+  flask flask-login flask-socketio \
+  gunicorn \
+  psutil python-dotenv requests \
+  -q
+# python-pam en option (pas dispo partout via pip)
+"${VENV_DIR}/bin/pip" install python-pam -q 2>/dev/null \
+  || warn "python-pam non installé via pip — PAM système sera utilisé si disponible"
 
-# ── .env file ─────────────────────────────────────────────────────────────────
+# ── Fichier .env ───────────────────────────────────────────────
 ENV_FILE="${NEOBERRY_DIR}/app/.env"
 if [[ ! -f "${ENV_FILE}" ]]; then
-  info "Création du fichier .env..."
+  info "Génération du fichier .env..."
   SECRET=$(python3 -c "import secrets; print(secrets.token_hex(32))")
-  cat > "${ENV_FILE}" << EOF
+  cat > "${ENV_FILE}" << ENVEOF
 NEOBERRY_SECRET=${SECRET}
 FLASK_ENV=production
-EOF
+ENVEOF
   chmod 600 "${ENV_FILE}"
+  chown "${APP_USER}:${APP_USER}" "${ENV_FILE}" 2>/dev/null || true
   success ".env créé avec une clé secrète aléatoire."
 else
-  info ".env déjà présent, aucune modification."
+  info ".env déjà présent, ignoré."
 fi
 
-# ── sudoers for reboot/shutdown ───────────────────────────────────────────────
+# ── Sudoers ────────────────────────────────────────────────────
 SUDOERS_FILE="/etc/sudoers.d/neoberry"
-info "Configuration sudoers pour reboot/shutdown..."
-cat > "${SUDOERS_FILE}" << EOF
-# NeoBerry v2 — allow Flask user to reboot/shutdown
-${APP_USER} ALL=(ALL) NOPASSWD: /sbin/reboot, /sbin/shutdown, /usr/bin/apt-get update, /usr/bin/apt-get upgrade
-EOF
+info "Configuration sudoers..."
+cat > "${SUDOERS_FILE}" << SUDOEOF
+# NeoBerry v2 — actions système sans mot de passe
+${APP_USER} ALL=(ALL) NOPASSWD: /sbin/reboot, /sbin/shutdown, /usr/sbin/shutdown
+${APP_USER} ALL=(ALL) NOPASSWD: /usr/bin/apt-get update, /usr/bin/apt-get upgrade -y
+SUDOEOF
 chmod 0440 "${SUDOERS_FILE}"
+# Valider la syntaxe sudoers
+visudo -c -f "${SUDOERS_FILE}" > /dev/null 2>&1 || {
+  warn "Sudoers invalide, suppression pour éviter de bloquer sudo"
+  rm -f "${SUDOERS_FILE}"
+}
 
-# ── Systemd service ───────────────────────────────────────────────────────────
-info "Installation du service systemd..."
-cat > "${SERVICE_FILE}" << EOF
+# ── Service systemd ────────────────────────────────────────────
+info "Création du service systemd..."
+cat > "${SERVICE_FILE}" << SVCEOF
 [Unit]
 Description=NeoBerry v2 — Raspberry Pi Dashboard
 After=network.target bluetooth.target
@@ -81,47 +119,53 @@ Type=simple
 User=${APP_USER}
 WorkingDirectory=${NEOBERRY_DIR}/app
 EnvironmentFile=${NEOBERRY_DIR}/app/.env
-ExecStart=${VENV_DIR}/bin/gunicorn \
-    --worker-class eventlet \
-    -w 1 \
-    --bind 0.0.0.0:5000 \
-    --timeout 120 \
-    --log-level info \
+# Mode threading — PAS d'eventlet
+ExecStart=${VENV_DIR}/bin/gunicorn \\
+    --worker-class gthread \\
+    --workers 1 \\
+    --threads 4 \\
+    --bind 0.0.0.0:5000 \\
+    --timeout 120 \\
+    --log-level warning \\
     app:app
 Restart=on-failure
 RestartSec=5
 StandardOutput=journal
 StandardError=journal
+SyslogIdentifier=neoberry
 
 [Install]
 WantedBy=multi-user.target
-EOF
+SVCEOF
 
 systemctl daemon-reload
 systemctl enable "${SERVICE_NAME}"
+success "Service systemd configuré."
 
-# ── Bluetooth setup ───────────────────────────────────────────────────────────
-info "Configuration Bluetooth..."
+# ── Permissions groupes ────────────────────────────────────────
+info "Ajout de ${APP_USER} aux groupes bluetooth/gpio..."
 usermod -aG bluetooth "${APP_USER}" 2>/dev/null || true
-systemctl enable bluetooth
-systemctl start  bluetooth || true
+usermod -aG gpio      "${APP_USER}" 2>/dev/null || true
+usermod -aG dialout   "${APP_USER}" 2>/dev/null || true
 
-# ── GPIO setup ────────────────────────────────────────────────────────────────
-info "Configuration GPIO..."
-usermod -aG gpio "${APP_USER}" 2>/dev/null || true
+# ── Bluetooth ──────────────────────────────────────────────────
+systemctl enable bluetooth 2>/dev/null || true
+systemctl start  bluetooth 2>/dev/null || true
 
-# ── Done ──────────────────────────────────────────────────────────────────────
+# ── Permissions fichiers ───────────────────────────────────────
+chown -R "${APP_USER}:${APP_USER}" "${NEOBERRY_DIR}" 2>/dev/null || true
+chmod +x "${NEOBERRY_DIR}/run_neoberry.sh"
+
+# ── Résumé ─────────────────────────────────────────────────────
+IP=$(hostname -I 2>/dev/null | awk '{print $1}' || echo "localhost")
 echo ""
-success "═══════════════════════════════════════════════"
-success " NeoBerry v2 installé avec succès !"
-success "═══════════════════════════════════════════════"
+echo -e "${GREEN}══════════════════════════════════════════════${NC}"
+echo -e "${GREEN}  NeoBerry v2 installé avec succès ! 🍓${NC}"
+echo -e "${GREEN}══════════════════════════════════════════════${NC}"
 echo ""
-info "Pour démarrer maintenant :"
-echo "  sudo systemctl start ${SERVICE_NAME}"
+echo -e "  Démarrer :  ${CYAN}bash ${NEOBERRY_DIR}/run_neoberry.sh --start${NC}"
+echo -e "  Logs :      ${CYAN}bash ${NEOBERRY_DIR}/run_neoberry.sh --logs${NC}"
+echo -e "  Accès :     ${CYAN}http://${IP}:5000${NC}"
 echo ""
-info "Pour voir les logs :"
-echo "  journalctl -u ${SERVICE_NAME} -f"
+warn "Reconnectez-vous ou redémarrez pour activer les groupes bluetooth/gpio."
 echo ""
-info "Accès : http://$(hostname -I | awk '{print $1}'):5000"
-echo ""
-info "Note : Redémarrez la session ou le Pi pour que les groupes GPIO/bluetooth soient actifs."
