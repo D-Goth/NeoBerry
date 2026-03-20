@@ -1,448 +1,320 @@
-# NeoBerry GPIO Control - 🇫🇷
+# NeoBerry v2 — Dashboard Raspberry Pi
 
-**NeoBerry GPIO Control** est une application web permettant de surveiller et contrôler les GPIO d'un Raspberry Pi via une interface moderne et responsive.
+[![NeoBerry](https://img.shields.io/badge/🍓-NeoBerry_v2-red)](https://github.com/D-Goth/NeoBerry)
+[![Python](https://img.shields.io/badge/python-3.11+-blue)](https://python.org)
+[![Flask](https://img.shields.io/badge/flask-3.1+-lightgrey)](https://flask.palletsprojects.com)
+[![SocketIO](https://img.shields.io/badge/flask--socketio-5.3+-yellow)](https://flask-socketio.readthedocs.io)
+[![Bluetooth](https://img.shields.io/badge/Bluetooth-BlueZ%2FdBus-0059cc)](https://www.bluez.org)
+[![GPIO](https://img.shields.io/badge/RPi-GPIO-brightgreen)](https://pypi.org/project/RPi.GPIO)
+[![Licence](https://img.shields.io/badge/licence-MIT-green)](LICENSE)
+
+> Interface web pour surveiller et contrôler un Raspberry Pi en temps réel.
+> Dashboard drag-and-drop · Bluetooth complet · WebSocket natif · Mode simulation intégré.
+
+---
+
+## 🚀 Installation rapide
+
+```bash
+git clone -b v2-dev https://github.com/D-Goth/NeoBerry.git
+cd NeoBerry
+bash install_neoberry.sh
+```
+
+Le script se ré-élève seul en `sudo` — pas besoin de le préfixer. Il installe les dépendances système, crée le virtualenv, génère le `.env` et configure le service systemd.
+
+```bash
+# Démarrer
+bash run_neoberry.sh --start
+
+# Accès
+http://<IP_DU_PI>:5000
+```
+
+Connexion avec votre **compte Linux** (authentification PAM).
+
+---
+
+## 🧪 Mode développement (VM / hors Raspberry Pi)
+
+```bash
+git clone -b v2-dev https://github.com/D-Goth/NeoBerry.git
+cd NeoBerry
+
+python3 -m venv venv
+source venv/bin/activate
+pip install flask flask-login flask-socketio gunicorn psutil python-dotenv requests
+
+bash run_neoberry.sh --dev
+```
+
+Accès : `http://localhost:5000`  
+Identifiants dev : **admin / neoberry**
+
+> GPIO, Bluetooth et PAM sont automatiquement simulés si non disponibles.  
+> Aucune erreur — le mode simulation s'active seul à la détection.
+
+---
+
+## 🔧 Gestion du service
+
+Toutes les commandes utilisent `bash script.sh` — le script se ré-élève en `sudo` automatiquement pour les actions qui en ont besoin.
+
+```bash
+bash run_neoberry.sh --start     # Démarrer
+bash run_neoberry.sh --stop      # Arrêter
+bash run_neoberry.sh --restart   # Redémarrer
+bash run_neoberry.sh --status    # État du service
+bash run_neoberry.sh --logs      # Logs en direct (Ctrl+C pour quitter)
+bash run_neoberry.sh --update    # git pull + redémarrage automatique
+bash run_neoberry.sh --dev       # Mode développement (sans root)
+bash run_neoberry.sh --help      # Aide
+```
 
 ---
 
 ## ✨ Fonctionnalités
 
-- Interface web intuitive et responsive  
-- Barre de menu "Nova" : flottante et intuitive  
-- Affichage et contrôle des broches GPIO  
-- Surveillance des performances système (CPU, RAM, température, réseau)  
-- Gestion sécurisée via login avec authentification PAM  
-- Boutons de reboot et shutdown (protégés)  
-- Mode test hors Raspberry Pi avec simulation GPIO  
+### Dashboard
+- Widgets **drag-and-drop** et redimensionnables (GridStack.js)
+- Layout sauvegardé dans `localStorage`, restauré au rechargement
+- Bouton "Reset layout" pour revenir à la disposition par défaut
 
----
-![NeoBerry](https://img.shields.io/badge/🍓-NeoBerry-red)
-![Python](https://img.shields.io/badge/python-3.13-blue)
-![JavaScript](https://img.shields.io/badge/javascript-ES6-yellow)
-![HTML](https://img.shields.io/badge/html-5-orange)
-![CSS](https://img.shields.io/badge/css-3-blueviolet)
-![Flask](https://img.shields.io/badge/flask-2.3-lightgrey)
-![PAM](https://img.shields.io/badge/authentication-PAM-critical)
-![GPIO](https://img.shields.io/badge/RPi-GPIO-brightgreen)
-![BLE](https://img.shields.io/badge/Bluetooth-LE-00599e)
-![Licence](https://img.shields.io/badge/licence-MIT-green)
+### GPIO
+- Contrôle des **26 pins BCM** (GPIO 2–27)
+- **Clic gauche** → bascule HIGH / LOW
+- **Clic droit** → bascule mode output / input
+- Pins optimisés pour usage **tactile** (tablette, téléphone)
+- Badge simulation si RPi.GPIO absent
 
----
+### Surveillance système
+- **4 jauges** doughnut animées — Charge CPU, T° CPU, Charge RAM, T° Carte
+- Gradient dynamique : bleu (0%) → vert → jaune → orange → rouge → violet (100%)
+- **Fréquence CPU** en MHz (psutil / vcgencmd / sysfs)
+- **Swap** utilisé/total avec barre de progression
+- **Détection throttling** et sous-tension (vcgencmd, RPi uniquement)
+- **Top 5 processus** CPU + RAM avec barres visuelles
 
-## Structure
+### Réseau
+- Upload / Download en temps réel
+- Liste des interfaces réseau avec IP
+- Statut connexion internet
 
-NeoBerry/
-├── LICENSE
-├── NeoBerryTree.txt
-├── README.txt
-├── run_neoBerry.sh
-├── install_neoBerry.sh
-└── app/
-    ├── app.py
-    ├── core/
-    │   ├── __init__.py
-    │   ├── auth.py
-    │   ├── battery.py
-    │   ├── bluetooth.py
-    │   ├── gpio.py
-    │   ├── infosys.py
-    │   ├── network.py
-    │   ├── system.py
-    │   └── voltage.py
-    ├── static/
-    │   ├── css/
-    │  	│    ├── animations.css
-    │  	│    ├── battery.css
-    │  	│    ├── bluetooth.css
-    │  	│    ├── gpio.css
-    │  	│    ├── infosys.css
-    │  	│    ├── index.css
-    │  	│    ├── layout.css
-    │  	│    ├── metrics.css
-    │  	│    ├── novabar.css
-    │  	│    ├── reset.css
-    │  	│    ├── terminal.css
-    │  	│    ├── time.css
-    │   │    └── voltage.css 
-    │   ├── img/
-    │   │    └── icons
-    │   └── js/
-    │       ├── battery.js
-    │       ├── bluetooth.js
-    │       ├── gauges.js
-    │       ├── gpio.js
-    │       ├── infosys.js
-    │       ├── list.js
-    │       ├── main.js
-    │       ├── network.js
-    │       ├── novabar.js
-    │       ├── status.js
-    │       ├── time.js
-    │       ├── utils.js
-    │       ├── voltage.js
-    │       └── watchdog.js
-    ├── templates/
-    │   ├── index.html
-    │   └── login.html
-    └── utils/
-        ├── __init__.py
-        └── gpio_helpers.py
+### Stockage
+- 3 jauges : capacité disque %, débit écriture, débit lecture
+- Même gradient que les jauges système
 
+### Alimentation / Batterie
+- Détection automatique : sysfs (UPS HAT) → INA219 (I2C) → PoE HAT → simulation
+- Niveau %, tension, courant, puissance
+- Icône batterie animée (charge en cours)
+- Graphique historique de tension (Chart.js)
 
+### Bluetooth
+- Modale dédiée, accessible depuis la topbar
+- **Scan** des appareils proches en temps réel (push WebSocket)
+- **Pairing** avec trust automatique
+- **Connexion / déconnexion**
+- **Gestion** de la liste des appareils jumelés
+- **Envoi de données** via RFCOMM (Serial Port Profile)
+- Indicateur RSSI, icônes par type d'appareil
+- Mode simulation avec appareils fictifs
+
+### Contrôles
+- **Update RPi** — lance `apt-get upgrade` en arrière-plan (pastille verte)
+- **Reboot RPi** — redémarre le Pi (pastille orange)
+- **Shutdown RPi** — éteint le Pi (pastille rouge)
+- **Restart NeoBerry** — redémarre uniquement le service (pastille cyan)
+- Liens **GitHub** et **Black-Lab.fr** avec effet rainbow
+
+### Informations système
+- OS, hostname, architecture, uptime, date dernière MAJ
+
+### Authentification
+- **PAM** — comptes Linux système (production)
+- **Fallback dev** — `admin / neoberry` si PAM indisponible
 
 ---
 
-## 📦 Dépendances
+## 🆚 Changements v1 → v2
 
-* NeoBerry s'appuie sur les bibliothèques Python suivantes :
-
-- Flask — Framework web léger pour créer l’interface et les endpoints backend (+ flask-login)
-
-- RPi.GPIO — Contrôle bas niveau des broches GPIO du Raspberry Pi (utilisé dans le cœur du projet)
-
-- psutil — Surveillance des ressources système : CPU, RAM, température, réseau
-
-- requests — Requêtes HTTP simples pour interroger des APIs ou des services externes
-
-- gunicorn — Serveur WSGI rapide et robuste, utilisé en production avec Flask
-
-- python-dotenv — Chargement des variables d’environnement depuis un fichier .env (clé secrète, config)
-
-- Werkzeug — Outils de routage et session utilisés par Flask
-
-- Click / ItsDangerous / MarkupSafe — Dépendances indirectes de Flask, utiles pour les CLI, la sécurité et le templating
+| | v1 | v2 |
+|---|---|---|
+| Temps réel | Polling HTTP toutes les 3s | WebSocket push toutes les 2s |
+| CSS | 13 fichiers séparés | 1 fichier `main.css` unifié |
+| Navigation | Scroll infini | Dashboard drag-and-drop |
+| Bluetooth | Toggle + jauge vide | Module complet BlueZ/dbus |
+| Stockage | Absent | 3 jauges + débit I/O |
+| Surveillance | CPU/RAM/Temp | + Fréquence, Swap, Throttling, Top procs |
+| Batterie | Basique | Auto-détection multi-sources + graphique |
+| Scripts | `sudo ./script.sh` | `bash script.sh` (auto-sudo) |
+| Serveur | Werkzeug / eventlet | Gunicorn gthread (stable) |
+| Horloge | Widget page | Topbar avec jours de la semaine |
 
 ---
 
-## 🚀 Installation
+## 📦 Dépendances Python
 
-### 🔧 1.1 Installation manuelle (Environnement hors Raspberry Pi - mode DEV)
+| Paquet | Rôle |
+|---|---|
+| Flask | Framework web |
+| Flask-SocketIO | WebSocket temps réel |
+| flask-login | Gestion sessions |
+| gunicorn | Serveur WSGI production (worker: gthread) |
+| psutil | Métriques système |
+| python-pam | Authentification PAM (optionnel via pip, disponible via apt) |
+| python-dotenv | Variables d'environnement |
+| RPi.GPIO | GPIO (RPi uniquement, ignoré sinon) |
+| requests | Requêtes HTTP |
 
-```bash
-git clone https://github.com/D-Goth/NeoBerry.git
-cd NeoBerry
-sudo apt install python3-flask python3-gpiozero python3-psutil python3-requests python3-werkzeug python3-gunicorn 
-python3.13 app/app.py
+> ⚠️ **Pas d'eventlet.** NeoBerry v2 utilise le mode `threading` de Flask-SocketIO avec Gunicorn `gthread`. Eventlet cause des erreurs `AssertionError: write() before start_response` — ne pas l'installer.
 
-````
----
-
-> Accédez ensuite à l'interface via :
-> [http://localhost:5000](http://localhost:5000)
-
-### 🔧 1.2 Installation manuelle (Environnement Raspberry Pi - mode PROD)
-
-```bash
-git clone https://github.com/D-Goth/NeoBerry.git
-cd NeoBerry
-chmod +x install_neoBerry.sh
-sudo ./install_neoBerry.sh
-chmod +x run_neoBerry.sh
-sudo ./run_neoBerry.sh [--start, --stop, --restart, --status]
-
-````
-
-* ✅ Test lancement avec Gunicorn [Optionnel]
-```bash
-cd app
-gunicorn --bind 0.0.0.0:5000 app:app
-
-````
-* Utilisation du script run_neoBerry.sh
-
-### Démarrer NeoBerry
-```bash
-./run_neoBerry.sh --start
-
-````
-
-### Arrêter NeoBerry
-```bash
-./run_neoBerry.sh --stop
-
-````
-
-### Redémarrer NeoBerry
-```bash
-./run_neoBerry.sh --restart
-
-````
-
-### Vérifier l'état de l'application
-```bash
-./run_neoBerry.sh --status
-
-````
-
-* Créer un service systemd → auto au démarrage
+### Dépendances système (apt)
 
 ```bash
-sudo cp neoBerry.service /etc/systemd/system/flask-dashboard.service
-sudo systemctl enable flask-dashboard
-sudo systemctl start flask-dashboard
+# Base
+python3 python3-pip python3-venv git
 
-````
+# Bluetooth (BlueZ dbus — non installable via pip)
+python3-dbus python3-gi bluetooth bluez bluez-tools
 
+# GPIO
+python3-gpiozero
 
-> Accédez ensuite à l'interface via :
-> [http://localhost:5000](http://localhost:5000)
-
----
-
-### 🧪 2. Mode Test (hors Raspberry Pi)
-
-NeoBerry peut être exécuté sur un environnement de test sans Raspberry Pi en activant le mode simulation des GPIO.
-
-* : Créer et activer un environnement virtuel
-
-```bash
-sudo apt install python3.13-venv
-python3.13 -m venv venv
-source venv/bin/activate
-pip install -r requirements.txt
-python app/app.py
-
+# PAM
+libpam0g-dev python3-pam
 ```
 
-> L'application détectera automatiquement qu'elle ne tourne pas sur un Raspberry Pi et activera le mode simulation sur les broches GPIO.
+---
+
+## 📁 Structure
+
+```
+NeoBerry/
+├── install_neoberry.sh     ← Installateur (auto-sudo, systemd, groupes)
+├── run_neoberry.sh         ← Gestionnaire service (start/stop/dev/logs…)
+├── requirements.txt
+├── DEV_READ.md             ← Guide développeur
+└── app/
+    ├── app.py              ← Flask + SocketIO + routes REST
+    ├── .env.example
+    ├── core/
+    │   ├── auth.py         ← PAM + fallback dev
+    │   ├── battery.py      ← Multi-sources : sysfs / INA219 / PoE / sim
+    │   ├── bluetooth.py    ← BlueZ/dbus + simulation
+    │   ├── gpio.py         ← RPi.GPIO + simulation
+    │   ├── network.py      ← Bande passante + interfaces
+    │   ├── storage.py      ← Disque + I/O
+    │   └── system.py       ← CPU, RAM, temp, freq, swap, throttling, procs
+    ├── static/
+    │   ├── css/main.css    ← Design system (#FF1654, glassmorphisme, tokens)
+    │   └── js/
+    │       ├── app.js      ← WebSocket, horloge topbar, toasts, actions
+    │       ├── dashboard.js← GridStack + persistance layout
+    │       ├── bluetooth.js← Modale Bluetooth complète
+    │       └── widgets/
+    │           ├── gpio.js
+    │           ├── system.js
+    │           ├── network.js
+    │           ├── storage.js
+    │           ├── battery.js
+    │           └── info.js
+    └── templates/
+        ├── login.html
+        └── index.html
+```
 
 ---
 
-## 🧰 Utilisation
+## 🔌 WebSocket — Événements
 
-* Se connecter avec un login Linux via l'interface web
-* Visualiser et contrôler les GPIO du Raspberry Pi (ou en mode simulation)
-* Surveiller les métriques système et réseau
-* Redémarrer ou éteindre le Raspberry Pi via les boutons sécurisés
+| Événement | Sens | Déclencheur | Contenu |
+|---|---|---|---|
+| `system_snapshot` | Serveur → Client | Connexion | État complet initial |
+| `metrics` | Serveur → Client | Toutes les 2s | CPU, RAM, temp, réseau, disque, batterie |
+| `gpio_state` | Serveur → Client | Après toggle | `{ pin, state }` broadcast |
+| `bt_device_found` | Serveur → Client | Scan actif | Appareil détecté |
+| `bt_connection_change` | Serveur → Client | Événement BT | `{ address, connected }` |
+| `gpio_toggle` | Client → Serveur | Clic pin | `{ pin, state }` |
+
+---
+
+## 🔐 Variables d'environnement
+
+Fichier `app/.env` (généré automatiquement par `install_neoberry.sh`) :
+
+```env
+# Clé secrète Flask — générée aléatoirement à l'installation
+NEOBERRY_SECRET=xxxxx
+
+# Environnement
+FLASK_ENV=production
+
+# Credentials fallback dev (PAM indisponible uniquement)
+# NEOBERRY_DEV_USER=admin
+# NEOBERRY_DEV_PASS=neoberry
+```
+
+---
+
+## 🐛 Dépannage
+
+**`sudo: ./run_neoberry.sh: commande introuvable`**
+```bash
+# Utiliser bash, pas ./
+bash run_neoberry.sh --start
+```
+
+**Logs d'erreur `AssertionError: write() before start_response`**
+```bash
+# Eventlet installé par erreur — le désinstaller
+source venv/bin/activate
+pip uninstall eventlet -y
+bash run_neoberry.sh --restart
+```
+
+**Badge WebSocket rouge / "Déconnecté"**
+```bash
+bash run_neoberry.sh --logs
+# Chercher la cause dans les logs, souvent lié à eventlet (voir ci-dessus)
+```
+
+**Bluetooth inaccessible**
+```bash
+sudo systemctl status bluetooth
+sudo usermod -aG bluetooth $USER
+# Reconnexion de session nécessaire
+```
+
+**GPIO : permission refusée**
+```bash
+sudo usermod -aG gpio $USER
+# Redémarrage nécessaire
+```
+
+**PAM refuse la connexion**
+```bash
+# Vérifier que l'utilisateur existe bien sur le système Linux
+id $USER
+# En mode dev (sans PAM) : utiliser admin / neoberry
+```
+
+**Température affiche `0°C` ou `—`**
+```bash
+# Normal sur VM — vcgencmd n'existe que sur RPi
+# Sur le Pi, vérifier :
+vcgencmd measure_temp
+```
 
 ---
 
 ## 📄 Licence
 
-Voir le fichier `LICENSE`.
+MIT — voir [LICENSE](LICENSE)
 
 ---
 
-## 🔗 Liens utiles
+## 🔗 Liens
 
-* [Page GitHub](https://github.com/D-Goth/NeoBerry)
-* [Black-Lab](https://www.black-lab.fr)
-
----
-
-# NeoBerry GPIO Control - 🇬🇧
-
-**NeoBerry GPIO Control** is a web application that allows monitoring and controlling a Raspberry Pi's GPIO pins through a modern and responsive interface.
-
----
-
-## ✨ Features
-
-- Intuitive and responsive web interface 
-- “Nova” menu bar: floating and intuitive
-- Display and control of GPIO pins  
-- System performance monitoring (CPU, RAM, temperature, network)  
-- Secure management via login with PAM authentication  
-- Reboot and shutdown buttons (protected)  
-- Test mode without Raspberry Pi with GPIO simulation  
-
----
-![NeoBerry](https://img.shields.io/badge/🍓-NeoBerry-red)
-![Python](https://img.shields.io/badge/python-3.13-blue)
-![JavaScript](https://img.shields.io/badge/javascript-ES6-yellow)
-![HTML](https://img.shields.io/badge/html-5-orange)
-![CSS](https://img.shields.io/badge/css-3-blueviolet)
-![Flask](https://img.shields.io/badge/flask-2.3-lightgrey)
-![PAM](https://img.shields.io/badge/authentication-PAM-critical)
-![GPIO](https://img.shields.io/badge/RPi-GPIO-brightgreen)
-![BLE](https://img.shields.io/badge/Bluetooth-LE-00599e)
-![Licence](https://img.shields.io/badge/licence-MIT-green)
-
----
-
-## Structure
-
-NeoBerry/
-├── LICENSE
-├── NeoBerryTree.txt
-├── README.txt
-├── run_neoBerry.sh
-├── install_neoBerry.sh
-└── app/
-    ├── app.py
-    ├── core/
-    │   ├── __init__.py
-    │   ├── auth.py
-    │   ├── battery.py
-    │   ├── bluetooth.py
-    │   ├── gpio.py
-    │   ├── infosys.py
-    │   ├── network.py
-    │   ├── system.py
-    │   └── voltage.py
-    ├── static/
-    │   ├── css/
-    │  	│    ├── animations.css
-    │  	│    ├── battery.css
-    │  	│    ├── bluetooth.css
-    │  	│    ├── gpio.css
-    │  	│    ├── infosys.css
-    │  	│    ├── index.css
-    │  	│    ├── layout.css
-    │  	│    ├── metrics.css
-    │  	│    ├── novabar.css
-    │  	│    ├── reset.css
-    │  	│    ├── terminal.css
-    │  	│    ├── time.css
-    │   │    └── voltage.css 
-    │   ├── img/
-    │   │    └── icons
-    │   └── js/
-    │       ├── battery.js
-    │       ├── bluetooth.js
-    │       ├── gauges.js
-    │       ├── gpio.js
-    │       ├── infosys.js
-    │       ├── list.js
-    │       ├── main.js
-    │       ├── network.js
-    │       ├── novabar.js
-    │       ├── status.js
-    │       ├── time.js
-    │       ├── utils.js
-    │       ├── voltage.js
-    │       └── watchdog.js
-    ├── templates/
-    │   ├── index.html
-    │   └── login.html
-    └── utils/
-        ├── __init__.py
-        └── gpio_helpers.py
-
----
-
-## 📦 Dependencies
-
-* NeoBerry relies on the following Python libraries:
-
-- Flask — Lightweight web framework for creating the interface and backend endpoints  
-- RPi.GPIO — Low-level control of Raspberry Pi GPIO pins (used in the project core)  
-- psutil — System resource monitoring: CPU, RAM, temperature, network  
-- requests — Simple HTTP requests to query APIs or external services  
-- gunicorn — Fast and robust WSGI server, used in production with Flask  
-- python-dotenv — Loading environment variables from a .env file (secret key, config)  
-- Werkzeug — Routing and session tools used by Flask  
-- Click / ItsDangerous / MarkupSafe — Indirect Flask dependencies, useful for CLI, security, and templating  
-
----
-
-## 🚀 Installation
-
-### 🔧 1.1 Manual Installation (Non-Raspberry Pi Environment - DEV Mode)
-
-```bash
-git clone https://github.com/D-Goth/NeoBerry.git
-cd NeoBerry
-sudo apt install python3-flask python3-gpiozero python3-psutil python3-requests python3-werkzeug python3-gunicorn 
-python3.13 app/app.py
-```
-
-> Then access the interface at:  
-> [http://localhost:5000](http://localhost:5000)
-
-### 🔧 1.2 Manual Installation (Raspberry Pi Environment - PROD Mode)
-
-```bash
-git clone https://github.com/D-Goth/NeoBerry.git
-cd NeoBerry
-chmod +x install_neoBerry.sh
-sudo ./install_neoBerry.sh
-chmod +x run_neoBerry.sh 
-sudo ./run_neoBerry.sh [--start, --stop, --restart, --status]
-
-```
-
-* ✅ Test launch with Gunicorn [Optional]
-```bash 
-  cd app  
-  gunicorn --bind 0.0.0.0:5000 app:app  
-```
-
-* Using the run_neoBerry.sh script  
-
-### Start NeoBerry  
-```bash
-./run_neoBerry.sh --start
-
-````
-
-### Stop NeoBerry  
-```bash
-./run_neoBerry.sh --stop
-
-```` 
-
-### Restart NeoBerry  
-```bash
-./run_neoBerry.sh --restart
-
-````  
-
-### Check application status  
-```bash
-./run_neoBerry.sh --status
-
-````  
-
-* Create a systemd service → auto-start at boot  
-```bash
-sudo cp neoBerry.service /etc/systemd/system/flask-dashboard.service
-sudo systemctl enable flask-dashboard
-sudo systemctl start flask-dashboard
-
-````
-
-> Then access the interface at:  
-> [http://localhost:5000](http://localhost:5000)
-
----
-
-### 🧪 2. Test Mode (Without Raspberry Pi)
-
-NeoBerry can be run in a test environment without a Raspberry Pi by enabling GPIO simulation mode.
-
-* Create and activate a virtual environment  
-
-```bash
-sudo apt install python3.13-venv
-python3.13 -m venv venv
-source venv/bin/activate
-pip install -r requirements.txt
-python app/app.py
-```
-
-> The application will automatically detect it’s not running on a Raspberry Pi and enable GPIO simulation mode.
-
----
-
-## 🧰 Usage
-
-* Log in with a Linux account via the web interface  
-* View and control the Raspberry Pi’s GPIO pins (or in simulation mode)  
-* Monitor system and network metrics  
-* Reboot or shut down the Raspberry Pi using the secured buttons  
-
----
-
-## 📄 License
-
-See the `LICENSE` file.
-
----
-
-## 🔗 Useful Links
-
-* [GitHub Page](https://github.com/D-Goth/NeoBerry)  
-* [Black-Lab](https://www.black-lab.fr)  
-
----
-
+- [GitHub — NeoBerry](https://github.com/D-Goth/NeoBerry)
+- [Black-Lab.fr](https://www.black-lab.fr)

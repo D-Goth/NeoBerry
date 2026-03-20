@@ -1,345 +1,216 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>NeoBerry - Black-Lab</title>
-<link rel="icon" href="{{ url_for('static', filename='img/website.png') }}" type="image/png">
-<link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
-<link rel="stylesheet" href="{{ url_for('static', filename='css/novabar.css') }}">
-
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>NeoBerry v2</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/gridstack@10/dist/gridstack.min.css">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
 </head>
-
 <body>
-  <nav class="nova-sidebar">
-    <ul class="nova-menu">
-      <li class="nova-item" data-section="home" aria-label="Accueil">
-        <img src="{{ url_for('static', filename='icons/home.svg') }}" alt="Accueil" class="nova-icon" />
-      </li>
-      <li class="nova-item" data-section="gpio" aria-label="Contrôle GPIO">
-       <img src="{{ url_for('static', filename='icons/microchip.svg') }}" alt="GPIO" class="nova-icon" />
-      </li>
-      <li class="nova-item" data-section="temp" aria-label="Températures CPU / RAM">
-       <img src="{{ url_for('static', filename='icons/temp.svg') }}" alt="Température" class="nova-icon" />
-      </li>
-      <li class="nova-item" data-section="storage" aria-label="Stockage Disque">
-       <img src="{{ url_for('static', filename='icons/storage.svg') }}" alt="Stockage" class="nova-icon" />
-      </li>
-      <li class="nova-item" data-section="bt" aria-label="Bluetooth">
-       <img src="{{ url_for('static', filename='icons/bt.svg') }}" alt="Bluetooth" class="nova-icon" />
-      </li>
-      <li class="nova-item" data-section="network" aria-label="Réseau">
-        <img src="{{ url_for('static', filename='icons/settings.svg') }}" alt="Réseau" class="nova-icon" />
-      </li>
-      <li class="nova-item" data-section="info-sys" aria-label="Infos Système">
-       <img src="{{ url_for('static', filename='icons/info-sys.svg') }}" alt="Infos Système" class="nova-icon" />
-      </li>
-      <li class="nova-item" data-section="actions" aria-label="Actions Système">
-       <img src="{{ url_for('static', filename='icons/raspberrypi.svg') }}" alt="Actions" class="nova-icon" />
-      </li>
-    <div class="nova-laser" aria-hidden="true"></div>
-  </ul>
-</nav>
-<section id="home" aria-labelledby="home-title">
-  <header>
-      <a href="/" aria-label="Accueil">
-      <img src="{{ url_for('static', filename='img/website.png') }}" alt="Logo NeoBerry - By Black-Lab" id="logo" />
-    </a>
-    <div class="mini-clock-container">
-  <div class="mini-clock-time" id="mini-clock">
-    --<span class="colon">:</span>--<span class="colon">:</span>--
+
+<!-- ── Topbar ──────────────────────────────────────────────────────────── -->
+<header class="topbar">
+  <span class="topbar__logo">NeoBerry</span>
+
+  <div class="topbar__badge topbar__badge--off" id="ws-badge">
+    <span class="dot"></span>
+    <span id="ws-label">Connexion…</span>
   </div>
-    <div class="clock-days-horizontal">
-    <span data-day="0">DIM</span>
-    <span data-day="1">LUN</span>
-    <span data-day="2">MAR</span>
-    <span data-day="3">MER</span>
-    <span data-day="4">JEU</span>
-    <span data-day="5">VEN</span>
-    <span data-day="6">SAM</span>
+
+  <div class="topbar__badge" id="net-badge">
+    <span class="dot"></span>
+    <span id="net-label">Réseau…</span>
   </div>
-</div>
-    
-    <div class="battery-wrapper">
-      <div id="battery-gauge">
-       <div id="battery-level">
-         <div id="battery-fill"></div>
-         <div id="battery-percent">--%</div>
-        </div>
-       <div id="battery-tip"></div>
-     </div>
+
+  <div class="topbar__spacer"></div>
+
+  <div class="topbar__clock">
+    <div class="topbar__clock-time">
+      <span id="topbar-h">--</span><span class="topbar__colon">:</span><span id="topbar-m">--</span><span class="topbar__colon">:</span><span id="topbar-s" style="color:var(--txt-2);font-size:.85rem">--</span>
     </div>
-    
-    <div class="voltage-wrapper">
-     <p id="voltage-status" class="voltage" title="État de l'alimentation">...</p>
-     </div>
-    <a href="{{ url_for('auth.logout') }}" id="logout-btn" role="button" aria-label="Déconnexion">Déconnexion</a>
-  </header>
-</section>
-
-  <h1>
-    <span class="title-empty" data-text="NeoBerry - Black-Lab">NeoBerry - Black-Lab</span>
-  </h1>
-
-  <div id="refresh-container">
-    <label for="refresh-interval">Intervalle de rafraîchissement :</label>
-    <select id="refresh-interval">
-      <option value="1000">1 seconde</option>
-      <option value="3000" selected>3 secondes</option>
-      <option value="5000">5 secondes</option>
-      <option value="10000">10 secondes</option>
-      <option value="30000">30 secondes</option>
-      <option value="60000">60 secondes</option>
-    </select>
+    <div class="topbar__clock-days">
+      <span data-day="1">LUN</span><span data-day="2">MAR</span><span data-day="3">MER</span>
+      <span data-day="4">JEU</span><span data-day="5">VEN</span><span data-day="6">SAM</span><span data-day="0">DIM</span>
+    </div>
   </div>
 
-<section id="gpio" aria-labelledby="gpio-title" class="gpio-section" data-expanded="true">
-    <h2 id="gpio-title">Contrôle GPIO</h2>
-  <div id="gpio-controls" class="gpio-content" role="grid" aria-label="Contrôle des ports GPIO"></div>
-</section>
+  <span class="muted mono" style="font-size:.8rem">{{ username }}</span>
 
+  <button class="topbar__btn" onclick="openBluetooth()">
+    ⎆ Bluetooth
+  </button>
+  <a class="topbar__btn topbar__btn--ghost" href="{{ url_for('logout') }}">
+    Déconnexion
+  </a>
+</header>
 
-  <section id="temp" aria-labelledby="system-title">
-    <h2 id="system-title">Surveillance Système</h2>
-    <div class="section-content"></div>
-      <div class="system-metrics-0" aria-label="Charge CPU, RAM et Températures">
-        <div class="metric-card-0">
-          <div class="metric-title">Charge CPU</div>
-          <canvas id="cpu-load-gauge" aria-label="Jauge de charge CPU" role="img"></canvas>
+<!-- ── Dashboard ───────────────────────────────────────────────────────── -->
+<main class="dashboard">
+  <div class="grid-stack" id="dashboard-grid">
+
+    <!-- GPIO -->
+    <div class="grid-stack-item" gs-x="0" gs-y="0" gs-w="6" gs-h="6" gs-id="gpio">
+      <div class="grid-stack-item-content"><div class="widget">
+        <div class="widget__header">
+          <div class="widget__icon">⚡</div>
+          <span class="widget__title">Contrôle GPIO</span>
+          <span id="gpio-sim-badge" class="sim-badge" style="display:none">⚠ Simulation</span>
+          <svg class="widget__drag-handle" viewBox="0 0 16 16" fill="currentColor"><circle cx="5" cy="4" r="1.4"/><circle cx="11" cy="4" r="1.4"/><circle cx="5" cy="8" r="1.4"/><circle cx="11" cy="8" r="1.4"/><circle cx="5" cy="12" r="1.4"/><circle cx="11" cy="12" r="1.4"/></svg>
         </div>
-        <div class="metric-card-0">
-          <div class="metric-title">Température CPU</div>
-          <canvas id="cpu-temp-gauge" aria-label="Jauge de température CPU" role="img"></canvas>
+        <div class="widget__body">
+          <div class="gpio-grid" id="gpio-grid"></div>
         </div>
-        <div class="metric-card-0">
-          <div class="metric-title">Charge RAM</div>
-          <canvas id="ram-load-gauge" aria-label="Jauge de charge RAM" role="img"></canvas>
-        </div>
-        <div class="metric-card-0">
-          <div class="metric-title">Température Carte</div>
-          <canvas id="board-temp-gauge" aria-label="Jauge de température carte" role="img"></canvas>
-        </div>
-      </section>
-      <section id="storage" aria-labelledby="system-title">
-    <h2 id="system-title">Surveillance Stockage</h2>
-      <div class="system-metrics" aria-label="Surveillance stockage disque">
-        <div class="metric-card">
-          <div class="metric-title">Capacité Stockage (%)</div>
-          <canvas id="disk-capacity-gauge" aria-label="Jauge capacité stockage" role="img"></canvas>
-        </div>
-        <div class="metric-card">
-          <div class="metric-title">Usage Ecriture (%)</div>
-          <canvas id="disk-write-gauge" aria-label="Jauge usage écriture disque" role="img"></canvas>
-        </div>
-        <div class="metric-card">
-          <div class="metric-title">Usage Lecture (%)</div>
-          <canvas id="disk-read-gauge" aria-label="Jauge usage lecture disque" role="img"></canvas>
-        </div>
-      </div>
+      </div></div>
     </div>
-  </section>
 
-<section id="bt" aria-labelledby="network-title">
-	<h2 id="network-title">Bluetooth</h2>
-	<div class="section-content-bt">
-		<div class="bluetooth-status-panel" aria-label="Statut Bluetooth">
-			<div style="display: flex; align-items: center; justify-content: space-between">
-				<span class="network-label">Bluetooth ON/OFF</span>
-				<label class="bt">
-					<input type="checkbox" id="bluetooth-toggle" />
-					<span class="slider-2"></span>
-				</label>
-			</div>
+    <!-- Surveillance système -->
+    <div class="grid-stack-item" gs-x="6" gs-y="0" gs-w="6" gs-h="6" gs-id="system">
+      <div class="grid-stack-item-content"><div class="widget">
+        <div class="widget__header">
+          <div class="widget__icon">📊</div>
+          <span class="widget__title">Surveillance Système</span>
+          <svg class="widget__drag-handle" viewBox="0 0 16 16" fill="currentColor"><circle cx="5" cy="4" r="1.4"/><circle cx="11" cy="4" r="1.4"/><circle cx="5" cy="8" r="1.4"/><circle cx="11" cy="8" r="1.4"/><circle cx="5" cy="12" r="1.4"/><circle cx="11" cy="12" r="1.4"/></svg>
+        </div>
+        <div class="widget__body">
+          <div id="system-gauges"></div>
+        </div>
+      </div></div>
+    </div>
 
-			<div class="network-info" id="bluetooth-device">Périphérique connecté : Aucun</div>
+    <!-- Réseau -->
+    <div class="grid-stack-item" gs-x="0" gs-y="6" gs-w="4" gs-h="3" gs-id="network">
+      <div class="grid-stack-item-content"><div class="widget">
+        <div class="widget__header">
+          <div class="widget__icon">🌐</div>
+          <span class="widget__title">Réseau</span>
+          <svg class="widget__drag-handle" viewBox="0 0 16 16" fill="currentColor"><circle cx="5" cy="4" r="1.4"/><circle cx="11" cy="4" r="1.4"/><circle cx="5" cy="8" r="1.4"/><circle cx="11" cy="8" r="1.4"/><circle cx="5" cy="12" r="1.4"/><circle cx="11" cy="12" r="1.4"/></svg>
+        </div>
+        <div class="widget__body" id="network-body"></div>
+      </div></div>
+    </div>
 
-			<div style="text-align: center">
-				<div class="network-label">Réception Bluetooth</div>
-				<canvas id="bluetooth-quality-gauge" aria-label="Jauge qualité réception Bluetooth" role="img"></canvas>
-			</div>
-		</div>
+    <!-- Stockage -->
+    <div class="grid-stack-item" gs-x="4" gs-y="6" gs-w="4" gs-h="3" gs-id="storage">
+      <div class="grid-stack-item-content"><div class="widget">
+        <div class="widget__header">
+          <div class="widget__icon">💾</div>
+          <span class="widget__title">Stockage</span>
+          <svg class="widget__drag-handle" viewBox="0 0 16 16" fill="currentColor"><circle cx="5" cy="4" r="1.4"/><circle cx="11" cy="4" r="1.4"/><circle cx="5" cy="8" r="1.4"/><circle cx="11" cy="8" r="1.4"/><circle cx="5" cy="12" r="1.4"/><circle cx="11" cy="12" r="1.4"/></svg>
+        </div>
+        <div class="widget__body">
+          <div class="gauge-grid" id="storage-gauges"></div>
+        </div>
+      </div></div>
+    </div>
 
-		<div class="bluetooth-terminal-wrapper">
-			<div class="bluetooth-terminal-panel" aria-label="Terminal Bluetooth">
-				<div class="terminal-actions">
-					<button onclick="scanDevices()">🔍 Scanner</button>
-					<button id="setup-button" onclick="setupSelectedDevice()" disabled>⚙️ Configurer</button>
-				</div>
-				<div class="scan-progress" id="scan-progress-container" style="display">
-					<div class="scan-bar-wrapper">
-						<div id="scan-progress-bar" class="scan-bar-fill"></div>
-					</div>
-				</div>
+    <!-- Informations -->
+    <div class="grid-stack-item" gs-x="8" gs-y="6" gs-w="4" gs-h="3" gs-id="info">
+      <div class="grid-stack-item-content"><div class="widget">
+        <div class="widget__header">
+          <div class="widget__icon">🖥</div>
+          <span class="widget__title">Informations</span>
+          <svg class="widget__drag-handle" viewBox="0 0 16 16" fill="currentColor"><circle cx="5" cy="4" r="1.4"/><circle cx="11" cy="4" r="1.4"/><circle cx="5" cy="8" r="1.4"/><circle cx="11" cy="8" r="1.4"/><circle cx="5" cy="12" r="1.4"/><circle cx="11" cy="12" r="1.4"/></svg>
+        </div>
+        <div class="widget__body" id="info-body"></div>
+      </div></div>
+    </div>
 
-				<ul id="devices-list" class="device-list"></ul>
+    <!-- Batterie -->
+    <div class="grid-stack-item" gs-x="0" gs-y="9" gs-w="7" gs-h="3" gs-id="battery">
+      <div class="grid-stack-item-content"><div class="widget">
+        <div class="widget__header">
+          <div class="widget__icon">🔋</div>
+          <span class="widget__title">Alimentation / Batterie</span>
+          <svg class="widget__drag-handle" viewBox="0 0 16 16" fill="currentColor"><circle cx="5" cy="4" r="1.4"/><circle cx="11" cy="4" r="1.4"/><circle cx="5" cy="8" r="1.4"/><circle cx="11" cy="8" r="1.4"/><circle cx="5" cy="12" r="1.4"/><circle cx="11" cy="12" r="1.4"/></svg>
+        </div>
+        <div class="widget__body" id="battery-body"></div>
+      </div></div>
+    </div>
 
-				<div class="paired-devices" aria-label="Périphériques appairés">
-					<ul id="paired-devices-list"></ul>
-					<div class="terminal-cursor">▮</div>
-				</div>
-
-				<div class="pin-section">
-					<label for="pin-input" class="pin-label">Saisir Code</label>
-					<input id="pin-input" type="text" placeholder="Validez code" />
-					<div class="terminal-actions">
-						<button id="validate-pin-btn">Valider</button>
-					</div>
-				</div>
-			</div>
-		</div>
-	</div>
-</section>
-
-     <section> <div id="network" class="section-content"></div>
-     <h2 id="network-title">État du Réseau</h2>
-	      <div class="network-field-0" role="region" aria-label="État Ethernet">
-	        	<div class="network-label">Status</div>
-	        	   <div id="network-type" style="font-weight: 700; font-size: 1.1rem; margin-bottom: 12px">Ethernet</div>
-
-	        	<div style="display: flex; gap: 24px; justify-content: center; margin-bottom: 20px">
-	        		<div style="flex: 1; max-width: 220px; text-align: center">
-		        		<div class="network-label">Upload</div>
-		        		<canvas id="network-up" aria-label="Jauge débit montant réseau" role="img"></canvas>
-		       	</div>
-		        	<div style="flex: 1; max-width: 220px; text-align: center">
-		        		<div class="network-label">Download</div>
-		        		<canvas id="network-down" aria-label="Jauge débit descendant réseau" role="img"></canvas>
-	          		</div>
-	          	</div>
-          	</div>
-	          	<div class="wifi-section" id="wifi-section style=">
-	          		<div class="network-label">Status</div>
-	          		<div id="network-type" style="font-weight: 180; font-size: 1.1rem; margin-bottom: 12px">Wi-Fi</div>
-
-		          	<canvas id="wifi-strength-gauge" aria-label="Jauge réception WiFi" role="img"></canvas>
-	          		<div class="network-info" id="wifi-ssid">Nom réseau WiFi : Aucun</div>
-	          	</div>
-	          </div>
+    <!-- Contrôles -->
+    <div class="grid-stack-item" gs-x="7" gs-y="9" gs-w="5" gs-h="3" gs-id="controls">
+      <div class="grid-stack-item-content"><div class="widget">
+        <div class="widget__header">
+          <div class="widget__icon">⚙️</div>
+          <span class="widget__title">Contrôles</span>
+          <svg class="widget__drag-handle" viewBox="0 0 16 16" fill="currentColor"><circle cx="5" cy="4" r="1.4"/><circle cx="11" cy="4" r="1.4"/><circle cx="5" cy="8" r="1.4"/><circle cx="11" cy="8" r="1.4"/><circle cx="5" cy="12" r="1.4"/><circle cx="11" cy="12" r="1.4"/></svg>
+        </div>
+        <div class="widget__body">
+          <div class="ctrl-grid">
+            <button class="ctrl-btn ctrl-btn--update"   onclick="App.sysAction('update')"><span class="ctrl-btn__dot"></span>Update RPi</button>
+            <button class="ctrl-btn ctrl-btn--reboot"   onclick="App.sysAction('reboot')"><span class="ctrl-btn__dot"></span>Reboot RPi</button>
+            <button class="ctrl-btn ctrl-btn--shutdown" onclick="App.sysAction('shutdown')"><span class="ctrl-btn__dot"></span>Shutdown RPi</button>
+            <button class="ctrl-btn ctrl-btn--restart"  onclick="App.sysAction('restart')"><span class="ctrl-btn__dot"></span>Restart NeoBerry</button>
+            <a class="ctrl-btn ctrl-btn--rainbow" href="https://github.com/D-Goth/NeoBerry" target="_blank">⤴ GitHub</a>
+            <a class="ctrl-btn ctrl-btn--rainbow" href="https://www.black-lab.fr" target="_blank">⤴ Black-Lab.fr</a>
+            <button class="ctrl-btn" onclick="App.resetLayout()" style="font-size:.72rem;color:var(--txt-3);border-color:transparent;background:transparent;">⊞ Reset layout</button>
           </div>
         </div>
+      </div></div>
+    </div>
+
+  </div>
+</main>
+
+<!-- ── Modal Bluetooth ──────────────────────────────────────────────────── -->
+<div class="modal-overlay" id="bt-modal-overlay" onclick="closeBluetooth(event)">
+  <div class="modal" id="bt-modal">
+    <div class="modal__header">
+      <div class="widget__icon">⎆</div>
+      <span class="modal__title">Gestionnaire Bluetooth</span>
+      <div class="flex items-center gap-8" style="margin-left:auto;margin-right:10px;">
+        <span class="muted" style="font-size:.78rem">Activé</span>
+        <label class="toggle">
+          <input type="checkbox" id="bt-power-toggle" onchange="BT.setPower(this.checked)">
+          <div class="toggle__track"></div>
+          <div class="toggle__thumb"></div>
+        </label>
+      </div>
+      <button class="modal__close" onclick="closeBluetooth()">✕</button>
+    </div>
+    <div class="modal__body">
+      <div class="modal__pane">
+        <div class="flex items-center gap-8">
+          <span class="modal__pane-title" style="flex:1">Appareils détectés</span>
+          <button class="bt-action bt-action--blue" id="bt-scan-btn" onclick="BT.toggleScan()">Démarrer le scan</button>
+        </div>
+        <div id="bt-discovered-list"></div>
+      </div>
+      <div class="modal__pane">
+        <span class="modal__pane-title">Appareils jumelés</span>
+        <div id="bt-paired-list"></div>
+        <hr class="sep">
+        <span class="modal__pane-title">Envoi de données</span>
+        <div style="background:rgba(0,0,0,.3);border:1px solid var(--glass-border);border-radius:var(--r-md);padding:10px;display:flex;flex-direction:column;gap:7px;">
+          <div style="font-size:.72rem;color:var(--txt-2)" id="bt-send-target">Sélectionnez un appareil connecté</div>
+          <textarea class="bt-input" id="bt-send-input" placeholder="Message à envoyer…"></textarea>
+          <button class="ctrl-btn ctrl-btn--bt" onclick="BT.sendData()" style="align-self:flex-end">Envoyer ↗</button>
+        </div>
+        <div id="bt-send-log" style="font-family:var(--mono);font-size:.7rem;color:var(--txt-3);max-height:70px;overflow-y:auto;"></div>
       </div>
     </div>
-  </div>
-</section>
-
-<section id="info-sys" aria-labelledby="system-info-title">
-  <h2 id="system-info-title">Informations Globales</h2>
-
-  <div class="section-content-sys">
-    <div class="info-sys-content">
-      <div class="sys-panel" aria-label="Informations système">
-        <h3>Système</h3>
-        <ul class="system-info-list">
-          <li><strong>OS :</strong> <span id="sys-os">⏳</span></li>
-          <li><strong>Nom :</strong> <span id="sys-hostname">⏳</span></li>
-          <li><strong>En ligne :</strong> <span id="sys-uptime">⏳</span></li>
-          <li>
-  <strong>Dernière MàJ :</strong>
-  <span id="last-update-dot" class="dot"></span>
-  <span id="last-update">—</span>
-</li>
-        </ul>
-      </div>
-    </div>
-<div class="section-content-svc">
-    <div class="info-svc-content">
-<div class="graph-wrapper">
-	<div class="graph-block">
-		<h3>Connexion Internet</h3>
-		<canvas id="internet-graph" width="400" height="80"></canvas>
-	</div>
-
-	<div class="graph-block">
-		<h3>Stabilité Électrique</h3>
-		<canvas id="power-graph" width="400" height="80"></canvas>
-	</div>
-</div>
-        </ul>
-      </div>
-    </div>
-</section>
-
-<section id="actions" aria-labelledby="actions-title">
-<h2 id="actions-title">Contrôles</h2>
-
-<div id="action-icons" class="grouped-actions">
-	<button id="update-button" class="dot-btn green"><span class="dot"></span> Update Raspberry Pi</button>
-
-	<button id="reboot-button" class="dot-btn orange"><span class="dot"></span> Reboot Raspberry Pi</button>
-
-	<button id="shutdown-button" class="dot-btn red"><span class="dot"></span> Shutdown Raspberry Pi</button>
-
-	<button id="restart-neoberry-button" class="dot-btn blue"><span class="dot"></span> Redémarrer NeoBerry</button>
-</div>
-  <hr class="action-separator" />
-  <div id="action-buttons">
-  
-      <a href="https://github.com/D-Goth/NeoBerry" target="_blank" rel="noopener" role="button" tabindex="0">Projet GitHub</a>
-      <a href="https://www.Black-Lab.fr" target="_blank" rel="noopener" role="button" tabindex="0">Site Web Black-Lab</a>
-  </div>
-</section>
-
-<!-- Modale de confirmation -->
-<div id="confirm-container" class="modal-container" style="display: none">
-  <div id="confirm-modal" class="modal">
-    <h3 id="confirm-title">Confirmation</h3>
-    <p id="confirm-text">Souhaitez-vous vraiment effectuer cette action&nbsp;?</p>
-    <div class="auth-actions">
-      <button id="confirm-yes" class="btn-confirm">✔ Oui</button>
-      <button onclick="closeConfirmModal()" class="btn-cancel">✖ Non</button>
+    <div class="modal__footer">
+      <span class="muted" style="font-size:.73rem" id="bt-status-text">Prêt</span>
     </div>
   </div>
 </div>
 
+<!-- ── Scripts ──────────────────────────────────────────────────────────── -->
+<script src="https://cdn.jsdelivr.net/npm/gridstack@10/dist/gridstack-all.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/socket.io-client@4/dist/socket.io.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
 
-<!-- Modale de confirmation -->
-<div id="confirm-container" class="modal-container" style="display: none">
-  <div id="confirm-modal" class="modal">
-    <h3 id="confirm-title">Confirmation</h3>
-    <p id="confirm-text">Souhaitez-vous vraiment effectuer cette action&nbsp;?</p>
-    <div class="auth-actions">
-      <button id="confirm-yes" class="btn-confirm">✔ Oui</button>
-      <button onclick="closeConfirmModal()" class="btn-cancel">✖ Non</button>
-    </div>
-  </div>
-</div>
-
-<!-- Modale d’authentification -->
-<div id="auth-container" class="modal-container" style="display: none">
-  <div id="auth-modal" class="modal">
-    <h3 id="auth-title">Confirmation système</h3>
-    <p>Saisissez à nouveau votre mot de passe système&nbsp;:</p>
-    <div class="input-with-eye">
-      <input type="password" id="auth-password" />
-      <span id="toggle-password" class="eye-icon">👁</span>
-    </div>
-    <div class="auth-actions">
-      <button id="auth-submit" class="btn-confirm">✔ Valider</button>
-      <button onclick="closeAuthModal()" class="btn-cancel">✖ Annuler</button>
-    </div>
-    <p id="auth-error" class="error-msg" style="display: none;"></p>
-  </div>
-</div>
-
-<!-- Modale dédiée à la mise à jour -->
-<div id="update-modal" class="modal-container hidden">
-  <div class="modal">
-    <h2>Mise à jour du système</h2>
-    <p id="update-status">Vérification et préparation en cours…</p>
-    <div id="progress-bar" class="scanner"></div>
-  </div>
-</div>
-
-
- <!--🚦-->
-    <div id="progress-bar" class="scanner hidden"></div>
-  </div>
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.1"></script>
-<script type="module" src="{{ url_for('static', filename='js/main.js') }}"></script>
-<script type="module" src="{{ url_for('static', filename='js/list.js') }}"></script>
-
+<script src="{{ url_for('static', filename='js/app.js') }}"></script>
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+<script src="{{ url_for('static', filename='js/widgets/gpio.js') }}"></script>
+<script src="{{ url_for('static', filename='js/widgets/system.js') }}"></script>
+<script src="{{ url_for('static', filename='js/widgets/network.js') }}"></script>
+<script src="{{ url_for('static', filename='js/widgets/storage.js') }}"></script>
+<script src="{{ url_for('static', filename='js/widgets/battery.js') }}"></script>
+<script src="{{ url_for('static', filename='js/widgets/info.js') }}"></script>
+<script src="{{ url_for('static', filename='js/bluetooth.js') }}"></script>
 </body>
-
 </html>

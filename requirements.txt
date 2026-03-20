@@ -1,12 +1,26 @@
-Flask>=2.3
-gunicorn
-python-dotenv
-RPi.GPIO; platform_system == "Linux"
-psutil
-requests
-pam
-werkzeug
-click
-itsdangerous
-markupsafe
+# NeoBerry v2 — Python dependencies
 
+# Web framework + WebSocket
+Flask==3.1.0
+flask-login==0.6.3
+Flask-SocketIO==5.3.7
+gunicorn==23.0.0
+eventlet==0.37.0        # async driver for Flask-SocketIO (production)
+
+# System monitoring
+psutil==6.1.1
+
+# GPIO (Raspberry Pi only — silently ignored on other platforms)
+RPi.GPIO==0.7.1 ; platform_machine == "armv7l" or platform_machine == "aarch64"
+
+# Authentication
+python-pam==2.0.2       # PAM auth (Linux only)
+python-dotenv==1.0.1
+
+# Utilities
+requests==2.32.3
+
+# Bluetooth via dbus (Raspberry Pi / Linux only)
+# dbus-python and PyGObject are installed via system packages on RPi:
+#   sudo apt install python3-dbus python3-gi
+# They are NOT installable via pip in most environments.

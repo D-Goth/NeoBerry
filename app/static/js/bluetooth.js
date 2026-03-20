@@ -1,235 +1,339 @@
-let selectedDevice = null;
-let scannedDevices = [];
-let selectedDeviceIndex = null;
+/**
+ * NeoBerry v2 — bluetooth.js
+ * Bluetooth modal: power toggle, scan, pair, connect/disconnect, send data.
+ */
 
-export function updateBluetoothUI(data) {
-   const bluetoothToggleBtn = document.getElementById('bluetooth-toggle');
-   const bluetoothDeviceInfo = document.getElementById('bluetooth-device');
-   bluetoothToggleBtn.classList.toggle('on', data.bluetooth.enabled);
-   bluetoothToggleBtn.textContent = data.bluetooth.enabled ? 'ON' : 'OFF';
-   bluetoothToggleBtn.setAttribute('aria-pressed', data.bluetooth.enabled);
-   bluetoothDeviceInfo.textContent = `Périphérique connecté : ${data.bluetooth.device || 'Aucun'}`;
-}
+const BT = (() => {
 
-export function scanDevices() {
-   const list = document.getElementById('paired-devices-list');
-   if (!list) return;
+  let _scanning       = false;
+  let _paired         = [];          // array of device dicts
+  let _discovered     = [];          // devices found during scan
+  let _selectedTarget = null;        // selected device for data send
 
-   list.innerHTML = '';
+  // ── Icons by device class / icon hint ─────────────────────────────────────
 
-   const scanning = document.createElement('li');
-   scanning.textContent = '[ SCANNING... ]';
-   scanning.classList.add('scanning-line');
-   list.appendChild(scanning);
+  const ICONS = {
+    'audio-headphones': '🎧',
+    'audio-speakers':   '🔊',
+    'audio-headset':    '🎤',
+    'input-mouse':      '🖱',
+    'input-keyboard':   '⌨',
+    'input-gaming':     '🎮',
+    'phone':            '📱',
+    'computer':         '💻',
+    'default':          '📡',
+  };
 
-   fetch('/bluetooth/scan')
-      .then((res) => res.json())
-      .then((data) => {
-         scannedDevices = data;
-         list.innerHTML = '';
+  function _icon(dev) {
+    return ICONS[dev.icon] || ICONS.default;
+  }
 
-         if (scannedDevices.length === 0) {
-            const none = document.createElement('li');
-            none.textContent = '[ Aucun périphérique trouvé ]';
-            none.classList.add('scanning-line');
-            list.appendChild(none);
-            return;
-         }
+  function _rssiBar(rssi) {
+    if (!rssi || rssi <= -100) return '▁▁▁';
+    if (rssi >= -50) return '▇▇▇';
+    if (rssi >= -70) return '▇▇▁';
+    return '▇▁▁';
+  }
 
-         scannedDevices.forEach((device, index) => {
-            const li = document.createElement('li');
-            li.textContent = `${device.name} (${device.address})`;
-            li.classList.add('device-line');
+  // ── Power ─────────────────────────────────────────────────────────────────
 
-            li.addEventListener('click', () => {
-               selectedDeviceIndex = index;
-               updateSelectedDeviceUI(list);
-            });
+  async function setPower(on) {
+    _setStatus(on ? 'Activation…' : 'Désactivation…');
+    try {
+      const r = await App.api('/api/bluetooth/power', 'POST', { on });
+      _setStatus(r.ok ? (on ? 'Bluetooth activé' : 'Bluetooth désactivé') : (r.error || 'Erreur'));
+    } catch {
+      _setStatus('Erreur réseau');
+    }
+  }
 
-            list.appendChild(li);
-         });
-      });
-}
+  // ── Scan ──────────────────────────────────────────────────────────────────
 
-export function updateSelectedDeviceUI(list) {
-   const items = list.querySelectorAll('.device-line');
-   items.forEach((item, i) => {
-      if (i === selectedDeviceIndex) item.classList.add('selected');
-      else item.classList.remove('selected');
-   });
-}
+  async function toggleScan() {
+    if (_scanning) {
+      await stopScan();
+    } else {
+      await startScan();
+    }
+  }
 
-export function getSelectedDeviceAddress() {
-   if (selectedDeviceIndex !== null && scannedDevices[selectedDeviceIndex]) {
-      return scannedDevices[selectedDeviceIndex].address;
-   }
-   return null;
-}
+  async function startScan() {
+    _discovered = [];
+    _renderDiscovered();
+    _scanning = true;
+    _updateScanBtn();
+    _setStatus('Scan en cours…');
 
-export function loadPairedDevices() {
-   fetch('/api/bluetooth/paired')
-      .then((res) => res.json())
-      .then((devices) => {
-         const list = document.getElementById('paired-devices-list');
-         if (!list) return;
+    try {
+      const r = await App.api('/api/bluetooth/scan/start', 'POST');
+      if (!r.ok) {
+        _scanning = false;
+        _updateScanBtn();
+        _setStatus(r.error || 'Erreur au démarrage du scan');
+      }
+    } catch {
+      _scanning = false;
+      _updateScanBtn();
+      _setStatus('Erreur réseau');
+    }
+  }
 
-         list.innerHTML = '';
+  async function stopScan() {
+    try {
+      await App.api('/api/bluetooth/scan/stop', 'POST');
+    } catch {}
+    _scanning = false;
+    _updateScanBtn();
+    _setStatus(`Scan terminé — ${_discovered.length} appareil(s) trouvé(s)`);
+  }
 
-         devices.forEach((dev) => {
-            const li = document.createElement('li');
-            li.textContent = dev.name || dev.mac;
+  // Called by WS event 'bt_device_found'
+  function onDeviceFound(dev) {
+    const exists = _discovered.find(d => d.address === dev.address);
+    if (!exists) {
+      _discovered.push(dev);
+      _renderDiscovered();
+    }
+  }
 
-            if (dev.connected) li.classList.add('connected');
+  function _updateScanBtn() {
+    const btn = document.getElementById('bt-scan-btn');
+    if (!btn) return;
+    if (_scanning) {
+      btn.innerHTML = '<span class="bt-scan-ring"></span> Arrêter';
+    } else {
+      btn.textContent = 'Démarrer le scan';
+    }
+  }
 
-            const forgetBtn = document.createElement('button');
-            forgetBtn.textContent = 'Oublier';
-            forgetBtn.onclick = () => forgetDevice(dev.mac);
-            li.appendChild(forgetBtn);
-            list.appendChild(li);
-         });
+  // ── Pair ──────────────────────────────────────────────────────────────────
 
-         renderPairedDevices(devices);
-      });
-}
-
-export function forgetDevice(mac) {
-   fetch('/api/bluetooth/forget', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ mac }),
-   }).then(loadPairedDevices);
-}
-
-export function renderPairedDevices(devices) {
-   const list = document.getElementById('paired-devices-list');
-   if (!list) return;
-
-   list.innerHTML = '';
-   const minLines = 5;
-   const total = devices.length;
-
-   for (let i = 0; i < Math.max(minLines, total); i++) {
-      const li = document.createElement('li');
-
-      if (i < total) {
-         const dev = devices[i];
-         li.textContent = dev.name || dev.mac;
-         if (dev.connected) li.classList.add('connected');
-
-         li.addEventListener('click', () => {
-            document
-               .querySelectorAll('#paired-devices-list li')
-               .forEach((el) => el.classList.remove('selected'));
-
-            li.classList.add('selected');
-            selectedDevice = dev;
-
-            const btn = document.getElementById('connect-button');
-            if (btn) btn.disabled = false;
-         });
+  async function pair(address) {
+    _setStatus(`Jumelage de ${address}…`);
+    try {
+      const r = await App.api(`/api/bluetooth/pair/${address}`, 'POST');
+      if (r.ok) {
+        _setStatus('Jumelage réussi ✓');
+        App.showToast('Jumelage réussi', 'green');
+        await loadPaired();
       } else {
-         li.innerHTML = '&nbsp;';
+        _setStatus(r.error || 'Jumelage échoué');
+        App.showToast(r.error || 'Jumelage échoué', 'red');
       }
+    } catch {
+      _setStatus('Erreur réseau');
+    }
+  }
 
-      list.appendChild(li);
-   }
+  // ── Connect / disconnect ───────────────────────────────────────────────────
 
-   appendTerminalCursor();
-}
+  async function connect(address) {
+    _setStatus(`Connexion à ${address}…`);
+    try {
+      const r = await App.api(`/api/bluetooth/connect/${address}`, 'POST');
+      if (r.ok) {
+        _setStatus('Connecté ✓');
+        App.showToast('Connecté', 'green');
+      } else {
+        _setStatus(r.error || 'Connexion échouée');
+      }
+    } catch {
+      _setStatus('Erreur réseau');
+    }
+  }
 
-export function appendTerminalCursor() {
-   const oldCursor = document.querySelector('.terminal-cursor');
-   if (oldCursor) oldCursor.remove();
+  async function disconnect(address) {
+    _setStatus(`Déconnexion de ${address}…`);
+    try {
+      const r = await App.api(`/api/bluetooth/disconnect/${address}`, 'POST');
+      _setStatus(r.ok ? 'Déconnecté' : (r.error || 'Erreur'));
+    } catch {
+      _setStatus('Erreur réseau');
+    }
+  }
 
-   const cursor = document.createElement('div');
-   cursor.className = 'terminal-cursor';
-   cursor.textContent = '▮';
-   document.querySelector('.paired-devices').appendChild(cursor);
-}
+  // Called by WS event 'bt_connection_change'
+  function onConnectionChange({ address, connected }) {
+    const dev = _paired.find(d => d.address === address);
+    if (dev) {
+      dev.connected = connected;
+      _renderPaired();
+    }
+    if (!connected && _selectedTarget === address) {
+      _selectedTarget = null;
+      const lbl = document.getElementById('bt-send-target');
+      if (lbl) lbl.textContent = 'Sélectionnez un appareil connecté';
+    }
+  }
 
-export function toggleBluetooth(state) {
-   fetch(`/bluetooth/${state ? 'on' : 'off'}`, { method: 'POST' })
-      .then((res) => res.json())
-      .then((data) => console.log('Bluetooth', data.status));
-}
+  // ── Remove ─────────────────────────────────────────────────────────────────
 
-export function connectToDevice(mac) {
-   const pin = document.getElementById('pin-input').value.trim();
-   const list = document.getElementById('paired-devices-list');
+  async function remove(address) {
+    if (!confirm('Supprimer ce jumelage ?')) return;
+    try {
+      const r = await App.api(`/api/bluetooth/remove/${address}`, 'POST');
+      if (r.ok) {
+        _setStatus('Appareil supprimé');
+        await loadPaired();
+      } else {
+        _setStatus(r.error || 'Erreur');
+      }
+    } catch {
+      _setStatus('Erreur réseau');
+    }
+  }
 
-   if (!pin) {
-      alert('Merci de renseigner le code PIN.');
+  // ── Send data ──────────────────────────────────────────────────────────────
+
+  async function sendData() {
+    if (!_selectedTarget) {
+      App.showToast('Sélectionnez un appareil connecté', 'red');
       return;
-   }
+    }
+    const input = document.getElementById('bt-send-input');
+    const msg   = (input?.value || '').trim();
+    if (!msg) return;
 
-   list.innerHTML = '';
-   const msg = document.createElement('li');
-   msg.textContent = `[ CONNECTING TO ${mac}... ]`;
-   msg.classList.add('scanning-line');
-   list.appendChild(msg);
-
-   fetch('/api/bluetooth/connect', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ mac, pin }),
-   })
-      .then((res) => res.json())
-      .then((result) => {
-         msg.remove();
-         const statusLi = document.createElement('li');
-
-         if (result.status === 'connected') {
-            statusLi.textContent = '[ CONNECTED ✔ ]';
-            statusLi.style.color = '#00ff99';
-         } else {
-            statusLi.textContent = '[ FAILED ✖ ]';
-            statusLi.style.color = 'orangered';
-         }
-
-         list.appendChild(statusLi);
-         appendTerminalCursor();
-      })
-      .catch((err) => {
-         msg.remove();
-         const errLi = document.createElement('li');
-         errLi.textContent = `[ ERREUR : ${err.message} ]`;
-         errLi.style.color = 'red';
-         list.appendChild(errLi);
-         appendTerminalCursor();
+    try {
+      const r = await App.api('/api/bluetooth/send', 'POST', {
+        address: _selectedTarget,
+        message: msg,
       });
-}
+      _logSend(r.ok
+        ? `✓ Envoyé à ${_selectedTarget} (${r.bytes_sent} octets)`
+        : `✗ Erreur : ${r.error}`);
+      if (r.ok && input) input.value = '';
+    } catch {
+      _logSend('✗ Erreur réseau');
+    }
+  }
 
-export function showScanningLine() {
-   const list = document.getElementById('paired-devices-list');
-   if (!list) return;
+  function _logSend(msg) {
+    const log = document.getElementById('bt-send-log');
+    if (!log) return;
+    const line = document.createElement('div');
+    line.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
+    log.appendChild(line);
+    log.scrollTop = log.scrollHeight;
+  }
 
-   const scanning = document.createElement('li');
-   scanning.textContent = '[ SCANNING... ]';
-   scanning.classList.add('scanning-line');
-   list.appendChild(scanning);
-}
+  // ── Load paired list ───────────────────────────────────────────────────────
 
-window.scanDevices = scanDevices;
+  async function loadPaired() {
+    try {
+      const r = await App.api('/api/bluetooth/devices', 'GET');
+      _paired = r.devices || [];
+      _renderPaired();
+    } catch {
+      _setStatus('Impossible de charger les appareils');
+    }
+  }
 
-window.addEventListener('DOMContentLoaded', () => {
-   const toggle = document.getElementById('bluetooth-toggle');
-   const terminalPanel = document.querySelector('.bluetooth-terminal-panel');
+  // ── Snapshot from WS ──────────────────────────────────────────────────────
 
-   // Charger l’état initial du Bluetooth
-   fetch('/api/bluetooth/status')
-      .then((res) => res.json())
-      .then((data) => {
-         toggle.checked = !!data.device; // Si un périphérique est connecté → BT actif
-         if (!toggle.checked && terminalPanel) terminalPanel.style.opacity = '0.25';
-      });
+  function applySnapshot(data) {
+    const toggle = document.getElementById('bt-power-toggle');
+    if (toggle) toggle.checked = data.power;
 
-   // Changement d’état
-   toggle.addEventListener('change', () => {
-      const isEnabled = toggle.checked;
-      toggleBluetooth(isEnabled);
-      if (terminalPanel) {
-         terminalPanel.style.opacity = isEnabled ? '1' : '0.25';
-         terminalPanel.style.pointerEvents = isEnabled ? 'auto' : 'none';
-      }
-   });
-});
+    _paired   = data.paired || [];
+    _scanning = data.scanning || false;
+
+    _renderPaired();
+    _updateScanBtn();
+  }
+
+  // ── Render: discovered devices ─────────────────────────────────────────────
+
+  function _renderDiscovered() {
+    const list = document.getElementById('bt-discovered-list');
+    if (!list) return;
+
+    if (!_discovered.length) {
+      list.innerHTML = '<span class="muted" style="font-size:0.8rem">Aucun appareil détecté</span>';
+      return;
+    }
+
+    list.innerHTML = _discovered.map(dev => `
+      <div class="bt-device" data-addr="${dev.address}">
+        <div class="bt-device__icon">${_icon(dev)}</div>
+        <div class="bt-device__info">
+          <div class="bt-device__name">${_esc(dev.name)}</div>
+          <div class="bt-device__addr">${dev.address} <span style="color:var(--clr-cyan)">${_rssiBar(dev.rssi)}</span></div>
+        </div>
+        <div class="bt-device__actions">
+          ${dev.paired
+            ? `<button class="bt-action bt-action--green" onclick="BT.connect('${dev.address}')">Connecter</button>`
+            : `<button class="bt-action bt-action--cyan"  onclick="BT.pair('${dev.address}')">Jumeler</button>`
+          }
+        </div>
+      </div>
+    `).join('');
+  }
+
+  // ── Render: paired devices ─────────────────────────────────────────────────
+
+  function _renderPaired() {
+    const list = document.getElementById('bt-paired-list');
+    if (!list) return;
+
+    if (!_paired.length) {
+      list.innerHTML = '<span class="muted" style="font-size:0.8rem">Aucun appareil jumelé</span>';
+      return;
+    }
+
+    list.innerHTML = _paired.map(dev => `
+      <div class="bt-device ${dev.connected ? 'connected' : ''}" data-addr="${dev.address}">
+        <div class="bt-device__icon">${_icon(dev)}</div>
+        <div class="bt-device__info">
+          <div class="bt-device__name">${_esc(dev.name)}</div>
+          <div class="bt-device__addr">
+            ${dev.address}
+            ${dev.connected
+              ? '<span class="text-green" style="margin-left:6px;font-size:0.7rem">● Connecté</span>'
+              : '<span class="muted"      style="margin-left:6px;font-size:0.7rem">○ Déconnecté</span>'}
+          </div>
+        </div>
+        <div class="bt-device__actions">
+          ${dev.connected
+            ? `<button class="bt-action bt-action--cyan" onclick="BT.selectForSend('${dev.address}','${_esc(dev.name)}')">Données</button>
+               <button class="bt-action bt-action--red"  onclick="BT.disconnect('${dev.address}')">Déconnecter</button>`
+            : `<button class="bt-action bt-action--green" onclick="BT.connect('${dev.address}')">Connecter</button>`
+          }
+          <button class="bt-action bt-action--red" onclick="BT.remove('${dev.address}')" title="Supprimer le jumelage">✕</button>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  // ── Select device for data send ───────────────────────────────────────────
+
+  function selectForSend(address, name) {
+    _selectedTarget = address;
+    const lbl = document.getElementById('bt-send-target');
+    if (lbl) lbl.textContent = `Cible : ${name} (${address})`;
+    // Scroll to send area
+    document.getElementById('bt-send-input')?.focus();
+  }
+
+  // ── Helpers ────────────────────────────────────────────────────────────────
+
+  function _setStatus(msg) {
+    const el = document.getElementById('bt-status-text');
+    if (el) el.textContent = msg;
+  }
+
+  function _esc(str) {
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  return {
+    setPower, toggleScan, startScan, stopScan,
+    pair, connect, disconnect, remove,
+    sendData, loadPaired, selectForSend,
+    applySnapshot, onDeviceFound, onConnectionChange,
+  };
+})();

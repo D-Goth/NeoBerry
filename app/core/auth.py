@@ -1,51 +1,54 @@
-from flask import Blueprint, render_template, request, redirect, url_for, session, flash
+"""
+NeoBerry v2 — core/auth.py
+PAM-based authentication with simulation fallback for dev mode.
+"""
+
 import os
-import secrets
-import pam
+import logging
+from flask_login import UserMixin
 
-auth_bp = Blueprint('auth', __name__)
+log = logging.getLogger("neoberry.auth")
 
-# PAM initialisation
-PAM_AVAILABLE = True
-p = None
+# ── PAM import (optional) ────────────────────────────────────────────────────
+
 try:
-    p = pam.pam()
-except ImportError:
-    PAM_AVAILABLE = False
+    import pam as _pam
+    _PAM = _pam.pam()
+    _HAS_PAM = True
+    log.info("PAM available — real authentication mode")
+except Exception:
+    _HAS_PAM = False
+    log.warning("PAM not available — using dev auth (user: admin / pass: neoberry)")
 
-@auth_bp.route("/login", methods=["GET", "POST"])
-def login():
-    if request.method == "POST":
-        username = request.form.get("username", "")
-        password = request.form.get("password", "")
-        if PAM_AVAILABLE and p:
-            if p.authenticate(username, password):
-                session["logged_in"] = True
-                session["username"] = username
-                next_url = request.args.get("next")
-                return redirect(next_url or url_for("index"))
-            else:
-                flash("Nom utilisateur ou mot de passe incorrect.", "error")
-        else:
-            # Mode sans PAM (debug ou fallback)
-            session["logged_in"] = True
-            session["username"] = username
-            next_url = request.args.get("next")
-            return redirect(next_url or url_for("index"))
-    return render_template("login.html")
+# In dev mode, accepted credentials (change via env vars)
+_DEV_USER = os.environ.get("NEOBERRY_DEV_USER", "admin")
+_DEV_PASS = os.environ.get("NEOBERRY_DEV_PASS", "neoberry")
 
-@auth_bp.route("/logout")
-def logout():
-    session.clear()
-    return redirect(url_for("auth.login"))
-    
-# Vérification du mot de passe pour l'utilisateur connecté
-def verify(password: str) -> bool:
-    if not PAM_AVAILABLE or not p:
-        return False
-    username = session.get("username")
+
+class User(UserMixin):
+    def __init__(self, username: str):
+        self.id = username
+
+
+def pam_authenticate(username: str, password: str) -> tuple["User | None", "str | None"]:
+    """
+    Authenticate a user.
+    Returns (User, None) on success, or (None, error_message) on failure.
+    """
     if not username:
-        return False
-    return p.authenticate(username, password)
+        return None, "Nom d'utilisateur requis"
+    if not password:
+        return None, "Mot de passe requis"
 
+    if _HAS_PAM:
+        if _PAM.authenticate(username, password, service="login"):
+            log.info("PAM auth success: %s", username)
+            return User(username), None
+        log.warning("PAM auth failed: %s", username)
+        return None, "Identifiants invalides"
 
+    # Dev mode fallback
+    if username == _DEV_USER and password == _DEV_PASS:
+        log.info("[DEV] Auth success: %s", username)
+        return User(username), None
+    return None, "Identifiants invalides (mode dev : admin / neoberry)"

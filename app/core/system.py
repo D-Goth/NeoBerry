@@ -1,207 +1,160 @@
-from flask import Blueprint, jsonify, session, request
-from functools import wraps
-from pathlib import Path
-import subprocess
-import platform
-import psutil
-import logging
-import time
+"""
+NeoBerry v2 — core/system.py
++ Fréquence CPU (MHz), Top 5 processus, Throttling RPi, Swap
+"""
 
-from utils.gpio_helpers import read_gpio, GPIO_PINS, is_raspberry_pi
-from core import auth  # utilisé pour vérifier le mot de passe de l'utilisateur
+import platform, subprocess, time, logging
+from datetime import timedelta
 
-system_bp = Blueprint("system", __name__)
+try:
+    import psutil
+    _HAS_PSUTIL = True
+except ImportError:
+    _HAS_PSUTIL = False
 
-def login_required(f):
-    @wraps(f)
-    def decorated(*args, **kwargs):
-        if not session.get("logged_in"):
-            return jsonify({"error": "Authentification requise"}), 401
-        return f(*args, **kwargs)
-    return decorated
+log = logging.getLogger("neoberry.system")
+_BOOT_TIME = time.time()
 
-last_counters = psutil.net_io_counters()
-last_time = time.time()
+_THROTTLE_FLAGS = {
+    0:  "Sous-tension détectée",
+    1:  "Fréquence limitée (arm)",
+    2:  "Throttling actif",
+    3:  "Température limite atteinte",
+    16: "Sous-tension s'est produite",
+    17: "Fréquence limitée s'est produite",
+    18: "Throttling s'est produit",
+    19: "Température limite s'est produite",
+}
 
-def convert_bytes(bytes_val):
-    if bytes_val < 1:
-        return "0 B/s"
-    units = ["B", "KB", "MB", "GB"]
-    index = 0
-    while bytes_val >= 1024 and index < len(units) - 1:
-        bytes_val /= 1024
-        index += 1
-    return f"{bytes_val:.2f} {units[index]}"
 
-def get_network_metrics():
-    global last_counters, last_time
-    current_counters = psutil.net_io_counters()
-    current_time = time.time()
-    elapsed = current_time - last_time
-    if elapsed == 0:
-        return {"network_up": "0 B/s", "network_down": "0 B/s"}
-    upload = (current_counters.bytes_sent - last_counters.bytes_sent) / elapsed
-    download = (current_counters.bytes_recv - last_counters.bytes_recv) / elapsed
-    last_counters = current_counters
-    last_time = current_time
-    return {
-        "network_up": convert_bytes(upload) + "/s",
-        "network_down": convert_bytes(download) + "/s",
-    }
-
-@system_bp.route("/api/network", methods=["GET"])
-@login_required
-def api_network():
+def _read_file(path):
     try:
-        metrics = get_network_metrics()
-        return jsonify({"metrics": metrics})
-    except Exception as e:
-        logging.error(f"Erreur API /api/network: {e}")
-        return jsonify({"error": "Erreur interne serveur"}), 500
+        with open(path) as f: return f.read().strip()
+    except Exception: return None
 
-@system_bp.route("/api/status", methods=["GET"])
-@login_required
-def api_status():
-    try:
-        cpu_load = round(psutil.cpu_percent(interval=0.5))
-        ram_load = psutil.virtual_memory().percent
 
-        cpu_temp = 0
-        board_temp = 0
-        if is_raspberry_pi():
+class SystemMonitor:
+
+    def cpu_percent(self, interval=0.1):
+        return psutil.cpu_percent(interval=interval) if _HAS_PSUTIL else 0.0
+
+    def cpu_freq(self):
+        if _HAS_PSUTIL:
             try:
-                output = subprocess.check_output(["vcgencmd", "measure_temp"]).decode()
-                cpu_temp = float(output.strip().split("=")[1].replace("'C", ""))
-            except Exception:
-                cpu_temp = 45.0
-            board_temp = cpu_temp - 5 if cpu_temp > 10 else 40
-        else:
-            temps = psutil.sensors_temperatures()
-            if temps:
-                for entries in temps.values():
-                    if entries:
-                        cpu_temp = max(cpu_temp, entries[0].current)
-                board_temp = cpu_temp
-            else:
-                cpu_temp = 42.0
-                board_temp = 38.0
+                f = psutil.cpu_freq()
+                if f: return {"current": round(f.current,1), "min": round(f.min,1), "max": round(f.max,1)}
+            except Exception: pass
+        try:
+            out = subprocess.check_output(["vcgencmd","measure_clock","arm"], timeout=2, text=True)
+            mhz = round(int(out.strip().split("=")[1]) / 1_000_000, 1)
+            return {"current": mhz, "min": None, "max": None}
+        except Exception: pass
+        raw = _read_file("/sys/devices/system/cpu/cpu0/cpufreq/scaling_cur_freq")
+        if raw:
+            try: return {"current": round(int(raw)/1000,1), "min": None, "max": None}
+            except ValueError: pass
+        return None
 
-        disk_usage = psutil.disk_usage("/")
-        disk_capacity = disk_usage.percent
+    def cpu_temperature(self):
+        if _HAS_PSUTIL:
+            try:
+                temps = psutil.sensors_temperatures()
+                for key in ("cpu_thermal","coretemp","acpitz","cpu-thermal"):
+                    if key in temps and temps[key]: return temps[key][0].current
+            except Exception: pass
+        raw = _read_file("/sys/class/thermal/thermal_zone0/temp")
+        if raw:
+            try: return int(raw)/1000.0
+            except ValueError: pass
+        try:
+            out = subprocess.check_output(["vcgencmd","measure_temp"], timeout=2, text=True)
+            return float(out.strip().split("=")[1].replace("'C",""))
+        except Exception: return None
 
-        disk_io = psutil.disk_io_counters()
-        disk_read = min(100, (disk_io.read_bytes / (1024**3)) * 10)
-        disk_write = min(100, (disk_io.write_bytes / (1024**3)) * 10)
+    def card_temperature(self):
+        try:
+            out = subprocess.check_output(["vcgencmd","measure_temp","pmic"], timeout=2, text=True)
+            return float(out.strip().split("=")[1].replace("'C",""))
+        except Exception: return None
 
-        net_metrics = get_network_metrics()
+    def ram(self):
+        if not _HAS_PSUTIL: return {"total":0,"used":0,"free":0,"percent":0.0}
+        m = psutil.virtual_memory()
+        return {"total":m.total,"used":m.used,"free":m.available,"percent":m.percent}
 
-        wifi_info = {
-            "network_type": "Ethernet",
-            "wifi_strength": 0,
-            "wifi_ssid": None,
-            "bluetooth_enabled": False,
-            "bluetooth_device": None,
-            "bluetooth_quality": 0,
+    def swap(self):
+        if not _HAS_PSUTIL: return None
+        try:
+            s = psutil.swap_memory()
+            if s.total == 0: return {"total":0,"used":0,"percent":0.0,"available":False}
+            return {"total":s.total,"used":s.used,"free":s.free,"percent":s.percent,"available":True}
+        except Exception: return None
+
+    def top_processes(self, n=5):
+        if not _HAS_PSUTIL: return []
+        try:
+            procs = []
+            for p in psutil.process_iter(["pid","name","cpu_percent","memory_percent","status"]):
+                try:
+                    i = p.info
+                    if i["status"] == psutil.STATUS_ZOMBIE: continue
+                    procs.append({"pid":i["pid"],"name":(i["name"] or "?")[:20],
+                                  "cpu":round(i["cpu_percent"] or 0,1),
+                                  "mem":round(i["memory_percent"] or 0,1)})
+                except (psutil.NoSuchProcess, psutil.AccessDenied): pass
+            procs.sort(key=lambda x:(x["cpu"],x["mem"]), reverse=True)
+            return procs[:n]
+        except Exception: return []
+
+    def throttling(self):
+        try:
+            out   = subprocess.check_output(["vcgencmd","get_throttled"], timeout=2, text=True)
+            hexv  = out.strip().split("=")[1]
+            value = int(hexv, 16)
+            flags = [{"bit":b,"label":l,"current":b<16}
+                     for b,l in _THROTTLE_FLAGS.items() if value & (1<<b)]
+            return {"available":True,"ok":value==0,"raw":hexv,"value":value,
+                    "undervoltage":bool(value&0x1),"throttled":bool(value&0x4),"flags":flags}
+        except FileNotFoundError: return {"available":False}
+        except Exception as e:    return {"available":False,"error":str(e)}
+
+    def uptime(self):
+        boot_ts = psutil.boot_time() if _HAS_PSUTIL else _BOOT_TIME
+        delta   = timedelta(seconds=int(time.time()-boot_ts))
+        days    = delta.days
+        h, rem  = divmod(delta.seconds, 3600)
+        m, _    = divmod(rem, 60)
+        parts   = []
+        if days: parts.append(f"{days}j")
+        if h:    parts.append(f"{h}h")
+        parts.append(f"{m}min")
+        return " ".join(parts)
+
+    def os_info(self):
+        uname = platform.uname()
+        host  = (_read_file("/etc/hostname") or uname.node).strip()
+        upd   = None
+        try:
+            out = subprocess.check_output(["stat","-c","%y","/var/lib/dpkg/info"], timeout=2, text=True)
+            upd = out.strip()[:10]
+        except Exception: pass
+        return {"os":f"{uname.system} {uname.release}","hostname":host,
+                "architecture":uname.machine,"last_update":upd}
+
+    def snapshot(self):
+        return {
+            "cpu_percent": self.cpu_percent(),
+            "cpu_temp":    self.cpu_temperature(),
+            "cpu_freq":    self.cpu_freq(),
+            "card_temp":   self.card_temperature(),
+            "ram":         self.ram(),
+            "swap":        self.swap(),
+            "uptime":      self.uptime(),
+            "throttling":  self.throttling(),
+            "top_procs":   self.top_processes(),
         }
 
-        if platform.system() == "Linux":
-            try:
-                subprocess.run(["which", "iwgetid"], check=True, stdout=subprocess.PIPE)
-                ssid = subprocess.check_output("iwgetid -r", shell=True).decode().strip()
-                if ssid:
-                    wifi_info["wifi_ssid"] = ssid
-                    wifi_info["network_type"] = "WiFi"
-                    wifi_info["wifi_strength"] = 70
-            except Exception:
-                pass
-
-        gpio_data = {pin: read_gpio(pin) for pin in GPIO_PINS}
-
-        return jsonify({
-            "cpu_load": cpu_load,
-            "ram_load": ram_load,
-            "cpu_temp": round(cpu_temp, 1),
-            "board_temp": round(board_temp, 1),
-            "disk_capacity_percent": round(disk_capacity, 1),
-            "disk_read_percent": round(disk_read, 1),
-            "disk_write_percent": round(disk_write, 1),
-            "bluetooth": {
-                "enabled": wifi_info["bluetooth_enabled"],
-                "device": wifi_info["bluetooth_device"],
-                "quality": wifi_info["bluetooth_quality"]
-            },
-            "network": {
-                "type": wifi_info["network_type"],
-                "wifi_strength": wifi_info["wifi_strength"],
-                "wifi_ssid": wifi_info["wifi_ssid"]
-            },
-            "gpio_states": gpio_data
-        })
-    except Exception as e:
-        logging.error(f"Erreur API /api/status: {e}")
-        return jsonify({"error": "Erreur interne serveur"}), 500
-        
-@system_bp.route("/api/restart-neoberry", methods=["POST"])
-def restart_neoberry():
-    try:
-        script_path = Path.home() / "NeoBerry" / "run_neoBerry.sh"
-        subprocess.Popen(
-            ["/bin/bash", str(script_path), "--restart"],
-            start_new_session=True
-        )
-        return jsonify(success=True)
-    except Exception as e:
-        return jsonify(success=False, error="Impossible de relancer NeoBerry."), 500
-
-@system_bp.route("/api/reboot", methods=["POST"])
-@login_required
-def reboot_system():
-    data = request.get_json()
-    password = data.get("password", "")
-    username = session.get("username")
-
-    if not username or not password:
-        return jsonify(success=False, error="Champs requis manquants."), 400
-
-    if not auth.verify(password):
-        return jsonify(success=False, error="Mot de passe incorrect."), 403
-
-    try:
-        subprocess.run(["sudo", "/usr/sbin/reboot"], check=True)
-        return jsonify(success=True)
-    except subprocess.CalledProcessError:
-        return jsonify(success=False, error="Impossible de redémarrer le système."), 500
-
-
-@system_bp.route("/api/shutdown", methods=["POST"])
-@login_required
-def api_shutdown():
-    data = request.get_json()
-    password = data.get("password", "")
-    username = session.get("username")
-
-    if not username or not password:
-        return jsonify(success=False, error="Champs requis manquants."), 400
-
-    if not auth.verify(password):
-        return jsonify(success=False, error="Mot de passe incorrect."), 403
-
-    try:
-        subprocess.run(["sudo", "shutdown", "-h", "now"], check=True)
-        return jsonify(success=True)
-    except subprocess.CalledProcessError as e:
-        logging.error(f"[SHUTDOWN] Erreur commande : {e.stderr}")
-        return jsonify(success=False, error="Échec de l'arrêt."), 500
-
-@system_bp.route("/api/update", methods=["POST"])
-@login_required
-def api_update():
-    try:
-        script_path = Path.home() / "NeoBerry" / "update_neoBerry.sh"
-        subprocess.run(["/bin/bash", str(script_path)], check=True)
-        return jsonify(success=True)
-    except subprocess.CalledProcessError as e:
-        logging.error(f"[UPDATE] Erreur update_neoBerry.sh : {e}")
-        return jsonify(success=False, error="Erreur durant la mise à jour via le script."), 500
-
-
+    def full_info(self):
+        snap = self.snapshot()
+        snap["os"] = self.os_info()
+        return snap
