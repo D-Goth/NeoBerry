@@ -6,7 +6,7 @@
 [![SocketIO](https://img.shields.io/badge/flask--socketio-5.3+-yellow)](https://flask-socketio.readthedocs.io)
 [![Bluetooth](https://img.shields.io/badge/Bluetooth-BlueZ%2FdBus-0059cc)](https://www.bluez.org)
 [![GPIO](https://img.shields.io/badge/RPi-GPIO-brightgreen)](https://pypi.org/project/RPi.GPIO)
-[![Licence](https://img.shields.io/badge/licence-CC%20BY--NC%204.0-green)](LICENSE)
+[![Licence](https://img.shields.io/badge/Licence-CC%20BY--NC%204.0-FF1654)](LICENSE)
 
 > Interface web pour surveiller et contrôler un Raspberry Pi en temps réel.
 > Dashboard drag-and-drop · Bluetooth complet · WebSocket natif · Mode simulation intégré.
