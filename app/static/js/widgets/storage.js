@@ -12,9 +12,9 @@ const StorageWidget = (() => {
   }
 
   const GAUGES = [
-    { id: 'gauge-disk',  label: 'Capacité Stockage', unit: '%',   max: 100 },
-    { id: 'gauge-write', label: 'Écriture Disque',    unit: '%',   max: 100 },
-    { id: 'gauge-read',  label: 'Lecture Disque',     unit: '%',   max: 100 },
+    { id: 'gauge-disk',  label: 'Capacité Stockage', unit: '%', max: 100 },
+    { id: 'gauge-write', label: 'Écriture Disque',    unit: '',  max: 100 },
+    { id: 'gauge-read',  label: 'Lecture Disque',     unit: '',  max: 100 },
   ];
 
   const _charts = {};
@@ -89,13 +89,11 @@ const StorageWidget = (() => {
     if (_charts['gauge-write']) {
       _charts['gauge-write'].data.datasets[0].data = [writePct, 100 - writePct];
       _charts['gauge-write']._nbRaw = _fmtShort(io.write || 0);
-      _charts['gauge-write']._nbConfig.unit = '';
       _charts['gauge-write'].update('active');
     }
     if (_charts['gauge-read']) {
       _charts['gauge-read'].data.datasets[0].data = [readPct, 100 - readPct];
       _charts['gauge-read']._nbRaw = _fmtShort(io.read || 0);
-      _charts['gauge-read']._nbConfig.unit = '';
       _charts['gauge-read'].update('active');
     }
   }

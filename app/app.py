@@ -146,6 +146,22 @@ def sys_shutdown():
     threading.Timer(1.0, lambda: os.system("sudo shutdown -h now")).start()
     return jsonify({"ok": True, "message": "Extinction…"})
 
+@app.route("/api/system/update", methods=["POST"])
+@login_required
+def sys_update():
+    log.info("Update demandé par %s", current_user.id)
+    def _run():
+        os.system("sudo apt-get update -qq && sudo apt-get upgrade -y -qq")
+    threading.Thread(target=_run, daemon=True).start()
+    return jsonify({"ok": True, "message": "Mise à jour lancée en arrière-plan…"})
+
+@app.route("/api/system/restart", methods=["POST"])
+@login_required
+def sys_restart():
+    log.info("Restart NeoBerry par %s", current_user.id)
+    threading.Timer(1.0, lambda: os.execv(__file__, ['python'] + [__file__])).start()
+    return jsonify({"ok": True, "message": "NeoBerry redémarre…"})
+
 @app.route("/api/system/info", methods=["GET"])
 @login_required
 def sys_info():             return jsonify(system.full_info())

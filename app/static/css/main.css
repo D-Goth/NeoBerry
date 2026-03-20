@@ -100,18 +100,48 @@ body::before {
 
 .topbar__spacer { flex: 1; }
 
-/* Horloge topbar */
+/* Horloge topbar — style v1 */
 .topbar__clock {
-  display: flex; flex-direction: column; align-items: flex-end; gap: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
   flex-shrink: 0;
+  padding: 0 6px;
 }
+
 .topbar__clock-time {
   font-family: var(--mono);
-  font-size: 1rem; font-weight: 700;
-  color: var(--txt); line-height: 1;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--txt);
+  line-height: 1;
+  letter-spacing: .02em;
 }
-.topbar__clock-date {
-  font-size: .68rem; color: var(--txt-2); line-height: 1; margin-top: 1px;
+
+.topbar__colon {
+  animation: blink-colon 1s step-start infinite;
+  color: var(--nb-red);
+}
+
+.topbar__clock-days {
+  display: flex;
+  gap: 5px;
+  font-size: .58rem;
+  font-weight: 600;
+  letter-spacing: .04em;
+}
+
+.topbar__clock-days span {
+  color: var(--txt-3);
+  opacity: .4;
+  transition: opacity .2s, color .2s, transform .2s;
+}
+
+.topbar__clock-days span.active {
+  color: #fff;
+  opacity: 1;
+  transform: scale(1.1);
 }
 
 .topbar__badge {
@@ -203,24 +233,117 @@ body::before {
 
 .gauge { position: relative; width: 110px; height: 110px; }
 .gauge svg { width: 100%; height: 100%; transform: rotate(-210deg); }
-/* Les jauges sont Chart.js doughnut (comme v1) — plus de SVG */
-.gauge-grid {
+/* ─── Surveillance système — sections étendues ───────────────────────────── */
+
+.sys-gauges-row {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
-  gap: 12px;
-  align-items: start;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 10px;
   justify-items: center;
 }
 
-.gauge-wrap {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-  width: 100%;
+.sys-extra-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-top: 4px;
 }
 
-.gauge__arc { transition: stroke-dashoffset .6s var(--ease), stroke .4s; }
+.sys-extra-card {
+  background: rgba(0,0,0,.3);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--r-md);
+  padding: 10px 12px;
+  display: flex; flex-direction: column; gap: 2px;
+  transition: border-color var(--t-n);
+}
+
+.sys-throttle-card { border-color: rgba(57,211,83,.15); }
+
+.sys-extra-title {
+  font-size: .68rem; font-weight: 700;
+  color: var(--nb-red); text-transform: uppercase;
+  letter-spacing: .06em;
+}
+
+.sys-extra-val {
+  font-family: var(--mono); font-size: 1rem;
+  font-weight: 700; color: var(--txt);
+  line-height: 1.2; margin-top: 3px;
+}
+
+.sys-extra-sub {
+  font-family: var(--mono); font-size: .68rem;
+  color: var(--txt-3); margin-top: 1px;
+}
+
+/* Mini barre Swap */
+.sys-mini-bar-bg {
+  width: 100%; height: 6px; border-radius: 3px;
+  background: rgba(255,255,255,.07); overflow: hidden;
+}
+.sys-mini-bar-fill {
+  height: 100%; border-radius: 3px;
+  background: #39d353;
+  transition: width .5s var(--ease), background .3s;
+}
+
+/* Top processus */
+.sys-proc-section {
+  display: flex; flex-direction: column; gap: 6px;
+  margin-top: 4px;
+}
+
+.sys-proc-title {
+  font-size: .72rem; font-weight: 700;
+  color: var(--nb-red); text-transform: uppercase;
+  letter-spacing: .06em;
+}
+
+.sys-proc-list { display: flex; flex-direction: column; gap: 5px; }
+
+.sys-proc-row {
+  display: flex; align-items: center; gap: 8px;
+  padding: 6px 9px;
+  background: rgba(0,0,0,.3);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--r-sm);
+  transition: border-color var(--t-f);
+}
+.sys-proc-row:hover { border-color: rgba(255,255,255,.1); }
+
+.sys-proc-name {
+  font-family: var(--mono); font-size: .74rem;
+  color: var(--txt); width: 110px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  flex-shrink: 0;
+}
+
+.sys-proc-bars {
+  flex: 1; display: flex; flex-direction: column; gap: 3px;
+}
+
+.sys-proc-bar-wrap {
+  width: 100%; height: 4px; border-radius: 2px;
+  background: rgba(255,255,255,.06); overflow: hidden;
+}
+
+.sys-proc-bar {
+  height: 100%; border-radius: 2px;
+  transition: width .5s var(--ease);
+  min-width: 2px;
+}
+
+.sys-proc-vals {
+  font-family: var(--mono); font-size: .68rem;
+  color: var(--txt-2); flex-shrink: 0;
+  width: 72px; text-align: right;
+}
+
+@media (max-width: 600px) {
+  .sys-extra-row { grid-template-columns: 1fr 1fr; }
+  .sys-throttle-card { grid-column: span 2; }
+}
 .gauge__center {
   position: absolute; inset: 0;
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px;
@@ -355,26 +478,90 @@ body::before {
 .voltage-graph canvas { width: 100% !important; height: 100% !important; }
 
 /* ─── Contrôles ──────────────────────────────────────────────────────────── */
-.ctrl-grid { display: flex; flex-wrap: wrap; gap: 7px; }
+.ctrl-grid { display: flex; flex-wrap: wrap; gap: 8px; }
 
-/* Boutons avec couleurs dédiées selon action */
 .ctrl-btn {
-  display: flex; align-items: center; gap: 5px;
-  padding: 7px 13px; border-radius: var(--r-sm);
-  border: 1px solid; cursor: pointer;
-  font-size: .8rem; font-family: var(--mono);
-  transition: all var(--t-f); background: transparent;
+  display: flex; align-items: center; gap: 8px;
+  padding: 9px 16px; border-radius: var(--r-md);
+  border: 1px solid rgba(255,255,255,.06);
+  background: #222;
+  cursor: pointer; font-size: .82rem;
+  font-family: var(--font); font-weight: 600;
+  color: var(--txt);
+  transition: all var(--t-f);
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  text-decoration: none;
 }
-.ctrl-btn--reboot  { color: #ff8c00; border-color: rgba(255,140,0,.35); background: rgba(255,140,0,.08); }
-.ctrl-btn--reboot:hover  { background: rgba(255,140,0,.18); box-shadow: 0 0 16px rgba(255,140,0,.2); }
-.ctrl-btn--shutdown { color: #ff4444; border-color: rgba(255,68,68,.35); background: rgba(255,68,68,.08); }
-.ctrl-btn--shutdown:hover { background: rgba(255,68,68,.18); box-shadow: 0 0 16px rgba(255,68,68,.2); }
-.ctrl-btn--bt  { color: #00aaff; border-color: rgba(0,170,255,.35); background: rgba(0,170,255,.08); }
-.ctrl-btn--bt:hover  { background: rgba(0,170,255,.18); }
-.ctrl-btn--git { color: var(--txt-2); border-color: var(--glass-border); background: rgba(255,255,255,.04); }
-.ctrl-btn--git:hover { color: var(--txt); border-color: rgba(255,255,255,.15); }
-.ctrl-btn--reset { color: var(--nb-red); border-color: var(--nb-red-border); background: var(--nb-red-dim); }
-.ctrl-btn--reset:hover { background: rgba(255,22,84,.28); box-shadow: var(--nb-red-glow); }
+.ctrl-btn:hover { background: #2a2a2a; border-color: rgba(255,255,255,.12); }
+.ctrl-btn:active { transform: scale(.96); }
+
+/* Pastille colorée à gauche */
+.ctrl-btn__dot {
+  width: 10px; height: 10px; border-radius: 50%;
+  flex-shrink: 0;
+  box-shadow: 0 0 6px currentColor;
+}
+
+/* Update — vert */
+.ctrl-btn--update .ctrl-btn__dot { background: #00e887; color: #00e887; }
+.ctrl-btn--update:hover { border-color: rgba(0,232,135,.3); box-shadow: 0 0 12px rgba(0,232,135,.15); }
+
+/* Reboot — orange */
+.ctrl-btn--reboot .ctrl-btn__dot { background: #ff8c00; color: #ff8c00; }
+.ctrl-btn--reboot:hover { border-color: rgba(255,140,0,.3); box-shadow: 0 0 12px rgba(255,140,0,.15); }
+
+/* Shutdown — rouge */
+.ctrl-btn--shutdown .ctrl-btn__dot { background: #ff4444; color: #ff4444; }
+.ctrl-btn--shutdown:hover { border-color: rgba(255,68,68,.3); box-shadow: 0 0 12px rgba(255,68,68,.15); }
+
+/* Restart NeoBerry — cyan */
+.ctrl-btn--restart .ctrl-btn__dot { background: #00d4ff; color: #00d4ff; }
+.ctrl-btn--restart:hover { border-color: rgba(0,212,255,.3); box-shadow: 0 0 12px rgba(0,212,255,.15); }
+
+/* ── Boutons rainbow (GitHub + Black-Lab) ─────────────────────────────── */
+.ctrl-btn--rainbow {
+  background: #222;
+  border: 1px solid transparent;
+  background-clip: padding-box;
+  position: relative;
+  color: var(--txt);
+  font-weight: 700;
+}
+
+.ctrl-btn--rainbow::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: calc(var(--r-md) + 1px);
+  background: linear-gradient(90deg,
+    #ff0000, #ff7700, #ffff00, #00ff00,
+    #00ffff, #0077ff, #8800ff, #ff0099, #ff0000
+  );
+  background-size: 300% 100%;
+  animation: rgb-wave 3s linear infinite;
+  z-index: -1;
+}
+
+.ctrl-btn--rainbow::after {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: calc(var(--r-md) + 1px);
+  background: linear-gradient(90deg,
+    #ff0000, #ff7700, #ffff00, #00ff00,
+    #00ffff, #0077ff, #8800ff, #ff0099, #ff0000
+  );
+  background-size: 300% 100%;
+  animation: rgb-wave 3s linear infinite;
+  filter: blur(8px);
+  opacity: .4;
+  z-index: -2;
+}
+
+.ctrl-btn--rainbow:hover::after { opacity: .7; filter: blur(12px); }
+.ctrl-btn--rainbow:hover { background: #2a2a2a; }
 
 /* ─── Toggle ─────────────────────────────────────────────────────────────── */
 .toggle { position: relative; width: 36px; height: 20px; flex-shrink: 0; cursor: pointer; }
@@ -559,6 +746,7 @@ body::before {
 
 /* ─── Animations ──────────────────────────────────────────────────────────── */
 @keyframes pulse-dot  { 0%,100%{opacity:1} 50%{opacity:.3} }
+@keyframes blink-colon { 0%,100%{opacity:1} 50%{opacity:.15} }
 @keyframes slide-up   { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
 @keyframes fade-in    { from{opacity:0} to{opacity:1} }
 @keyframes spin       { to{transform:rotate(360deg)} }

@@ -45,58 +45,27 @@ const App = (() => {
 
   function getSocket() { return _socket; }
 
-  // ── Horloge avec jour de semaine ───────────────────────────────────────────
-
-  const JOURS = ['Dimanche','Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'];
-  const JOURS_COURTS = ['Di','Lu','Ma','Me','Je','Ve','Sa'];
-  const MOIS = ['janvier','février','mars','avril','mai','juin',
-                'juillet','août','septembre','octobre','novembre','décembre'];
+  // ── Horloge topbar — style v1 ─────────────────────────────────────────────
 
   function initClock() {
-    // Topbar clock (compact)
-    const timeEl = document.getElementById('topbar-time');
-    const dateEl = document.getElementById('topbar-date');
-
-    // Widget clock (full)
-    const clockTime = document.getElementById('clock-time');
-    const clockDate = document.getElementById('clock-date');
-    const clockWeek = document.getElementById('clock-week');
-    const clockDays = document.getElementById('clock-days');
-
     function tick() {
-      const now   = new Date();
-      const h     = String(now.getHours()).padStart(2,'0');
-      const m     = String(now.getMinutes()).padStart(2,'0');
-      const s     = String(now.getSeconds()).padStart(2,'0');
-      const jour  = now.getDay();
-      const date  = now.getDate();
-      const mois  = MOIS[now.getMonth()];
-      const annee = now.getFullYear();
+      const now = new Date();
+      const h   = String(now.getHours()).padStart(2, '0');
+      const m   = String(now.getMinutes()).padStart(2, '0');
+      const s   = String(now.getSeconds()).padStart(2, '0');
+      const day = now.getDay();
 
-      // Semaine ISO
-      const d   = new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()));
-      const dayNum = d.getUTCDay() || 7;
-      d.setUTCDate(d.getUTCDate() + 4 - dayNum);
-      const yearStart = new Date(Date.UTC(d.getUTCFullYear(),0,1));
-      const weekNum = Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+      const elH = document.getElementById('topbar-h');
+      const elM = document.getElementById('topbar-m');
+      const elS = document.getElementById('topbar-s');
+      if (elH) elH.textContent = h;
+      if (elM) elM.textContent = m;
+      if (elS) elS.textContent = s;
 
-      // Topbar
-      if (timeEl) timeEl.textContent = `${h}:${m}:${s}`;
-      if (dateEl) dateEl.textContent = `${JOURS[jour].slice(0,3)} ${date} ${mois.slice(0,3)}.`;
-
-      // Widget horloge
-      if (clockTime) {
-        clockTime.innerHTML = `${h}<span>:</span>${m}<span style="font-size:1.4rem;color:var(--txt-2)">:${s}</span>`;
-      }
-      if (clockDate) clockDate.textContent = `${JOURS[jour]} ${date} ${mois} ${annee}`;
-      if (clockWeek) clockWeek.textContent = `Semaine ${weekNum}`;
-      if (clockDays) {
-        clockDays.innerHTML = JOURS_COURTS.map((j, i) =>
-          `<div class="clock-day ${i === jour ? 'today' : ''}">${j}</div>`
-        ).join('');
-      }
+      document.querySelectorAll('.topbar__clock-days span').forEach(span => {
+        span.classList.toggle('active', parseInt(span.dataset.day) === day);
+      });
     }
-
     tick();
     setInterval(tick, 1000);
   }
@@ -104,7 +73,12 @@ const App = (() => {
   // ── Actions système ────────────────────────────────────────────────────────
 
   async function sysAction(action) {
-    const labels = { reboot: 'Rebooter le Raspberry Pi ?', shutdown: 'Éteindre le Raspberry Pi ?' };
+    const labels = {
+      reboot:   'Rebooter le Raspberry Pi ?',
+      shutdown: 'Éteindre le Raspberry Pi ?',
+      update:   'Lancer la mise à jour du système ?',
+      restart:  'Redémarrer NeoBerry ?',
+    };
     if (!confirm(labels[action] || `Action : ${action} ?`)) return;
     try {
       const r = await fetch(`/api/system/${action}`, { method: 'POST' });
