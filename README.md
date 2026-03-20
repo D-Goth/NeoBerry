@@ -16,7 +16,7 @@
 ## 🚀 Installation rapide
 
 ```bash
-git clone -b v2-dev https://github.com/D-Goth/NeoBerry.git
+git clone https://github.com/D-Goth/NeoBerry.git
 cd NeoBerry
 bash install_neoberry.sh
 ```
@@ -38,7 +38,7 @@ Connexion avec votre **compte Linux** (authentification PAM).
 ## 🧪 Mode développement (VM / hors Raspberry Pi)
 
 ```bash
-git clone -b v2-dev https://github.com/D-Goth/NeoBerry.git
+git clone https://github.com/D-Goth/NeoBerry.git
 cd NeoBerry
 
 python3 -m venv venv
