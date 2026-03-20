@@ -57,7 +57,7 @@ const SystemWidget = (() => {
           if (!chart._nbConfig) return;
           const { ctx, width, height } = chart;
           const raw   = chart._nbRaw ?? '0';
-          const unit  = chart._nbConfig.unit || '%';
+          const unit  = chart._nbConfig.unit ?? '%';
           const label = chart._nbConfig.label || '';
           const color = _arcEndColor(chart);
           ctx.save();
