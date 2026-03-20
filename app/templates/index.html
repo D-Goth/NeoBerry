@@ -146,6 +146,16 @@
             <button class="ctrl-btn ctrl-btn--restart"  onclick="App.sysAction('restart')"><span class="ctrl-btn__dot"></span>Restart NeoBerry</button>
             <a class="ctrl-btn ctrl-btn--rainbow" href="https://github.com/D-Goth/NeoBerry" target="_blank">⤴ GitHub</a>
             <a class="ctrl-btn ctrl-btn--rainbow" href="https://www.black-lab.fr" target="_blank">⤴ Black-Lab.fr</a>
+            <!-- Autostart toggle -->
+            <div class="ctrl-autostart" id="ctrl-autostart">
+              <label class="toggle" title="Démarrage automatique au boot">
+                <input type="checkbox" id="autostart-toggle" onchange="App.setAutostart(this.checked)">
+                <div class="toggle__track"></div>
+                <div class="toggle__thumb"></div>
+              </label>
+              <span class="ctrl-autostart__label">Démarrage auto au boot</span>
+              <span class="ctrl-autostart__status" id="autostart-status"></span>
+            </div>
             <button class="ctrl-btn" onclick="App.resetLayout()" style="font-size:.72rem;color:var(--txt-3);border-color:transparent;background:transparent;">⊞ Reset layout</button>
           </div>
         </div>

@@ -162,9 +162,32 @@ def sys_restart():
     threading.Timer(1.0, lambda: os.execv(__file__, ['python'] + [__file__])).start()
     return jsonify({"ok": True, "message": "NeoBerry redémarre…"})
 
-@app.route("/api/system/info", methods=["GET"])
+@app.route("/api/system/autostart", methods=["GET"])
 @login_required
-def sys_info():             return jsonify(system.full_info())
+def sys_autostart_status():
+    import subprocess
+    try:
+        result = subprocess.run(
+            ["systemctl", "is-enabled", "neoberry"],
+            capture_output=True, text=True, timeout=3
+        )
+        enabled = result.stdout.strip() == "enabled"
+        return jsonify({"ok": True, "enabled": enabled})
+    except Exception as e:
+        return jsonify({"ok": False, "error": str(e), "enabled": False})
+
+@app.route("/api/system/autostart", methods=["POST"])
+@login_required
+def sys_autostart_set():
+    import subprocess
+    enable = bool(request.get_json(force=True).get("enable", True))
+    action = "enable" if enable else "disable"
+    try:
+        subprocess.run(["sudo", "systemctl", action, "neoberry"],
+                       check=True, timeout=5)
+        return jsonify({"ok": True, "enabled": enable})
+    except Exception as e:
+        return jsonify({"ok": False, "error": str(e)})
 
 @app.route("/api/battery",   methods=["GET"])
 @login_required

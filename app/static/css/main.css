@@ -779,6 +779,23 @@ body::before {
 .text-red   { color: var(--nb-red); }
 .text-green { color: var(--pin-on); }
 
+/* Autostart toggle dans les contrôles */
+.ctrl-autostart {
+  display: flex; align-items: center; gap: 8px;
+  padding: 7px 13px;
+  background: #222;
+  border: 1px solid rgba(255,255,255,.06);
+  border-radius: var(--r-md);
+  width: 100%;
+}
+.ctrl-autostart__label { font-size: .82rem; color: var(--txt-2); flex: 1; }
+.ctrl-autostart__status {
+  font-size: .72rem; font-family: var(--mono); color: var(--txt-3);
+  transition: color var(--t-n);
+}
+.ctrl-autostart__status.on  { color: var(--pin-on); }
+.ctrl-autostart__status.off { color: #ff4444; }
+
 /* ─── Responsive ─────────────────────────────────────────────────────────── */
 @media (max-width:768px) {
   .modal__body { grid-template-columns: 1fr; }

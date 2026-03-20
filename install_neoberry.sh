@@ -139,8 +139,36 @@ WantedBy=multi-user.target
 SVCEOF
 
 systemctl daemon-reload
-systemctl enable "${SERVICE_NAME}"
 success "Service systemd configuré."
+
+# ── Autostart au démarrage ────────────────────────────────────
+echo ""
+read -r -p "$(echo -e "${CYAN}[NeoBerry]${NC} Lancer NeoBerry automatiquement au démarrage ? [O/n] : ")" AUTOSTART
+AUTOSTART="${AUTOSTART:-O}"
+
+if [[ "${AUTOSTART,,}" =~ ^(o|oui|y|yes)$ ]]; then
+  systemctl enable "${SERVICE_NAME}"
+  success "Démarrage automatique activé ✓"
+else
+  systemctl disable "${SERVICE_NAME}" 2>/dev/null || true
+  warn "Démarrage automatique désactivé — lancez manuellement : bash run_neoberry.sh --start"
+fi
+
+# ── Démarrer maintenant ? ─────────────────────────────────────
+echo ""
+read -r -p "$(echo -e "${CYAN}[NeoBerry]${NC} Démarrer NeoBerry maintenant ? [O/n] : ")" STARTNOW
+STARTNOW="${STARTNOW:-O}"
+
+if [[ "${STARTNOW,,}" =~ ^(o|oui|y|yes)$ ]]; then
+  systemctl start "${SERVICE_NAME}"
+  sleep 2
+  if systemctl is-active --quiet "${SERVICE_NAME}"; then
+    IP=$(hostname -I 2>/dev/null | awk '{print $1}' || echo "localhost")
+    success "NeoBerry démarré ✓ → http://${IP}:5000"
+  else
+    warn "Démarrage échoué — vérifiez : bash run_neoberry.sh --logs"
+  fi
+fi
 
 # ── Permissions groupes ────────────────────────────────────────
 info "Ajout de ${APP_USER} aux groupes bluetooth/gpio..."

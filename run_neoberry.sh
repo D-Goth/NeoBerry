@@ -39,7 +39,7 @@ fi
 
 # ── Vérification service installé ─────────────────────────────
 _check_service() {
-  if ! systemctl list-unit-files "${SERVICE}.service" &>/dev/null | grep -q "${SERVICE}"; then
+  if ! systemctl list-unit-files 2>/dev/null | grep -q "^${SERVICE}.service"; then
     error "Service '${SERVICE}' non trouvé. Lancez d'abord : bash install_neoberry.sh"
   fi
 }

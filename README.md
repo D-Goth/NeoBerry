@@ -6,7 +6,7 @@
 [![SocketIO](https://img.shields.io/badge/flask--socketio-5.3+-yellow)](https://flask-socketio.readthedocs.io)
 [![Bluetooth](https://img.shields.io/badge/Bluetooth-BlueZ%2FdBus-0059cc)](https://www.bluez.org)
 [![GPIO](https://img.shields.io/badge/RPi-GPIO-brightgreen)](https://pypi.org/project/RPi.GPIO)
-[![Licence](https://img.shields.io/badge/licence-MIT-green)](LICENSE)
+[![Licence](https://img.shields.io/badge/licence-CC%20BY--NC%204.0-green)](LICENSE)
 
 > Interface web pour surveiller et contrôler un Raspberry Pi en temps réel.
 > Dashboard drag-and-drop · Bluetooth complet · WebSocket natif · Mode simulation intégré.
@@ -310,7 +310,13 @@ vcgencmd measure_temp
 
 ## 📄 Licence
 
-MIT — voir [LICENSE](LICENSE)
+**CC BY-NC 4.0** — Creative Commons Attribution-NonCommercial 4.0 International
+
+Vous êtes libre de partager et d'adapter ce projet **à condition de** :
+- citer l'auteur original (D-Goth / Black-Lab)
+- ne pas en faire un usage commercial
+
+[Voir le fichier LICENSE](LICENSE) · [Texte complet de la licence](https://creativecommons.org/licenses/by-nc/4.0/)
 
 ---
 

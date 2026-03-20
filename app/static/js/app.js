@@ -92,6 +92,49 @@ const App = (() => {
     location.reload();
   }
 
+  // ── Autostart toggle ───────────────────────────────────────────────────────
+
+  async function loadAutostart() {
+    try {
+      const d = await api('/api/system/autostart', 'GET');
+      _applyAutostart(d.enabled, d.ok);
+    } catch {
+      // hors RPi / service absent — on cache silencieusement
+      const el = document.getElementById('ctrl-autostart');
+      if (el) el.style.display = 'none';
+    }
+  }
+
+  async function setAutostart(enable) {
+    const status = document.getElementById('autostart-status');
+    if (status) { status.textContent = '…'; status.className = 'ctrl-autostart__status'; }
+    try {
+      const d = await api('/api/system/autostart', 'POST', { enable });
+      _applyAutostart(d.enabled, d.ok);
+      showToast(enable ? 'Démarrage auto activé' : 'Démarrage auto désactivé',
+                enable ? 'green' : 'red');
+    } catch {
+      showToast('Erreur', 'red');
+    }
+  }
+
+  function _applyAutostart(enabled, ok) {
+    const toggle = document.getElementById('autostart-toggle');
+    const status = document.getElementById('autostart-status');
+    if (toggle) toggle.checked = !!enabled;
+    if (status) {
+      if (!ok) {
+        status.textContent = 'N/A';
+        status.className = 'ctrl-autostart__status';
+        const el = document.getElementById('ctrl-autostart');
+        if (el) el.style.opacity = '.45';
+      } else {
+        status.textContent = enabled ? 'Activé' : 'Désactivé';
+        status.className   = 'ctrl-autostart__status ' + (enabled ? 'on' : 'off');
+      }
+    }
+  }
+
   // ── Toast ─────────────────────────────────────────────────────────────────
 
   function showToast(msg, type = 'red') {
@@ -150,9 +193,10 @@ const App = (() => {
   document.addEventListener('DOMContentLoaded', () => {
     initClock();
     initSocket();
+    setTimeout(loadAutostart, 800);
   });
 
-  return { sysAction, resetLayout, showToast, updateNetBadge, api, getSocket };
+  return { sysAction, resetLayout, setAutostart, showToast, updateNetBadge, api, getSocket };
 })();
 
 function openBluetooth()    { document.getElementById('bt-modal-overlay').classList.add('open'); BT.loadPaired(); }
