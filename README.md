@@ -10,6 +10,9 @@
 
 > Interface web pour surveiller et contrôler un Raspberry Pi en temps réel.
 > Dashboard drag-and-drop · Bluetooth complet · WebSocket natif · Mode simulation intégré.
+>
+> <img width="1613" height="859" alt="NeoBerry v2 - login" src="https://github.com/user-attachments/assets/d1667a4f-a0af-49cd-9592-0978f4405d3e" />
+<img width="1613" height="1040" alt="NeoBerry v2 - Dash_VM" src="https://github.com/user-attachments/assets/c145fd5d-27ff-44e2-91e7-3d279cc2bdb2" />
 
 ---
 
