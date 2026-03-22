@@ -70,6 +70,7 @@ info "Installation des dépendances Python..."
   flask flask-login flask-socketio \
   gunicorn \
   psutil python-dotenv requests \
+  six \
   -q
 # python-pam en option (pas dispo partout via pip)
 "${VENV_DIR}/bin/pip" install python-pam -q 2>/dev/null \

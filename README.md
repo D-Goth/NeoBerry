@@ -6,13 +6,10 @@
 [![SocketIO](https://img.shields.io/badge/flask--socketio-5.3+-yellow)](https://flask-socketio.readthedocs.io)
 [![Bluetooth](https://img.shields.io/badge/Bluetooth-BlueZ%2FdBus-0059cc)](https://www.bluez.org)
 [![GPIO](https://img.shields.io/badge/RPi-GPIO-brightgreen)](https://pypi.org/project/RPi.GPIO)
-[![Licence](https://img.shields.io/badge/Licence-CC%20BY--NC%204.0-FF1654)](LICENSE)
+[![Licence](https://img.shields.io/badge/licence-CC%20BY--NC%204.0-green)](LICENSE)
 
 > Interface web pour surveiller et contrôler un Raspberry Pi en temps réel.
 > Dashboard drag-and-drop · Bluetooth complet · WebSocket natif · Mode simulation intégré.
->
-> <img width="1613" height="859" alt="NeoBerry v2 - login" src="https://github.com/user-attachments/assets/d1667a4f-a0af-49cd-9592-0978f4405d3e" />
-<img width="1613" height="1040" alt="NeoBerry v2 - Dash_VM" src="https://github.com/user-attachments/assets/c145fd5d-27ff-44e2-91e7-3d279cc2bdb2" />
 
 ---
 

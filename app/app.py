@@ -162,6 +162,20 @@ def sys_restart():
     threading.Timer(1.0, lambda: os.execv(__file__, ['python'] + [__file__])).start()
     return jsonify({"ok": True, "message": "NeoBerry redémarre…"})
 
+@app.route("/api/system/info", methods=["GET"])
+@login_required
+def sys_info():
+    try:
+        return jsonify(system.full_info())
+    except Exception as e:
+        log.error("sys_info error: %s", e)
+        snap = {}
+        try:    snap = system.snapshot()
+        except: pass
+        try:    snap["os"] = system.os_info()
+        except: snap["os"] = {"os":"—","hostname":"—","architecture":"—","last_update":"—"}
+        return jsonify(snap)
+
 @app.route("/api/system/autostart", methods=["GET"])
 @login_required
 def sys_autostart_status():
