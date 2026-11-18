@@ -6,8 +6,9 @@ Détection alimentation RPi — par ordre de priorité :
   3. /sys/class/power_supply     (sysfs)
   4. INA219 (I2C)
   5. PoE HAT
-  6. vcgencmd measure_volts      (tension brute RPi — toujours dispo)
-  7. Simulation
+Sans batterie détectée :
+  - RPi (vcgencmd présent) → mode "mains" : statut secteur via get_throttled
+  - Hors RPi               → mode "simulation" (batterie fictive, dev)
 """
 
 import os, glob, logging, time, subprocess, shutil
@@ -45,20 +46,36 @@ def _vcgencmd_volts() -> float | None:
 
 
 def _vcgencmd_throttled() -> dict:
-    """Statut tension via registre throttling."""
+    """Registre get_throttled décodé (bits 0-3 = état actuel, 16-19 = depuis le boot)."""
     if not shutil.which("vcgencmd"):
         return {"available": False}
     try:
-        out   = subprocess.check_output(["vcgencmd", "get_throttled"], timeout=2, text=True)
-        code  = int(out.strip().split("=")[1], 16)
-        if code == 0x0:
-            return {"available": True, "status": "ok",   "label": "🟢 Tension OK"}
-        elif code & 0x1:
-            return {"available": True, "status": "bad",  "label": "🔴 Sous-tension"}
-        else:
-            return {"available": True, "status": "warn", "label": "🟡 Tension instable"}
+        out  = subprocess.check_output(["vcgencmd", "get_throttled"], timeout=2, text=True)
+        code = int(out.strip().split("=")[1], 16)
     except Exception:
         return {"available": False}
+
+    under_now    = bool(code & 0x1)
+    capped_now   = bool(code & 0x2)
+    throttle_now = bool(code & 0x4)
+    under_boot   = bool(code & 0x10000)
+
+    if under_now:
+        status, label = "bad", "Sous-tension en cours"
+    elif capped_now or throttle_now:
+        status, label = "warn", "Fréquence limitée"
+    else:
+        status, label = "ok", "Tension OK"
+
+    return {
+        "available":    True,
+        "raw":          hex(code),
+        "status":       status,
+        "label":        label,
+        "under_now":    under_now,
+        "under_boot":   under_boot,
+        "throttle_now": throttle_now or capped_now,
+    }
 
 
 # ── psutil sensors_battery ────────────────────────────────────────────────────
@@ -241,13 +258,58 @@ def _simulate() -> dict:
 
 class BatteryMonitor:
 
+    SAMPLE_EVERY = 30      # secondes entre deux points de la frise
+    TIMELINE_LEN = 120     # 120 × 30 s = 1 heure
+    MAX_EVENTS   = 10
+
+    _RANK = {"ok": 0, "warn": 1, "bad": 2}
+
     def __init__(self):
         self._history: list[dict] = []
-        self._volt_status = _vcgencmd_throttled()
-        log.info("Battery init — vcgencmd: %s", self._volt_status)
+        self._timeline: list[str] = []
+        self._events: list[int] = []
+        self._event_count = 0
+        self._was_under = False
+        self._bucket_worst = None
+        self._bucket_start = time.time()
+        self._is_rpi = shutil.which("vcgencmd") is not None
+        log.info("Battery init — RPi: %s", self._is_rpi)
+
+    def _track_power(self, thr: dict) -> None:
+        if not thr.get("available"):
+            return
+        now = time.time()
+
+        if thr["under_now"] and not self._was_under:
+            self._event_count += 1
+            self._events.append(int(now))
+            self._events = self._events[-self.MAX_EVENTS:]
+        self._was_under = thr["under_now"]
+
+        st = thr["status"]
+        if self._bucket_worst is None or self._RANK[st] > self._RANK[self._bucket_worst]:
+            self._bucket_worst = st
+
+        if now - self._bucket_start >= self.SAMPLE_EVERY or not self._timeline:
+            self._timeline.append(self._bucket_worst)
+            self._timeline = self._timeline[-self.TIMELINE_LEN:]
+            self._bucket_worst = None
+            self._bucket_start = now
+
+    def _power_block(self, thr: dict) -> dict:
+        return {
+            "throttled":      thr,
+            "core_voltage":   _vcgencmd_volts(),
+            "timeline":       self._timeline,
+            "sample_every":   self.SAMPLE_EVERY,
+            "events":         self._events,
+            "event_count":    self._event_count,
+        }
 
     def snapshot(self) -> dict:
-        # Ordre de priorité
+        thr = _vcgencmd_throttled()
+        self._track_power(thr)
+
         data = (
             _psutil_battery()  or
             _upower_battery()  or
@@ -256,22 +318,19 @@ class BatteryMonitor:
             _poe_battery()
         )
 
-        # Si aucune batterie détectée, on retourne quand même la tension RPi
-        if not data:
+        if data:
+            data["mode"] = "battery"
+        elif self._is_rpi:
+            data = {"mode": "mains", "available": True, "source": "secteur"}
+        else:
             data = _simulate()
+            data["mode"] = "simulation"
 
-        # Toujours enrichir avec la tension vcgencmd si dispo (RPi nu)
-        vcg_volt = _vcgencmd_volts()
-        if vcg_volt and not data.get("voltage"):
-            data["voltage"] = vcg_volt
+        data["power"] = self._power_block(thr)
 
-        # Statut tension alimentation
-        data["volt_status"] = self._volt_status
-
-        # Historique
-        if data.get("voltage"):
+        if data["mode"] != "mains" and data.get("voltage"):
             self._history.append({"t": int(time.time()), "v": data["voltage"],
-                                   "p": data.get("percent")})
+                                  "p": data.get("percent")})
             self._history = self._history[-30:]
         data["history"] = self._history
 
