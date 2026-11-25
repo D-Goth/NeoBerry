@@ -217,28 +217,34 @@ const SystemWidget = (() => {
     // Throttling
     const thr = data.throttling;
     if (thr && _el('sys-throttle-val')) {
-      const card = _el('sys-throttle-card');
+      const card    = _el('sys-throttle-card');
+      const flagsEl = _el('sys-throttle-flags');
+      const flags   = thr.flags || [];
+      const current = flags.filter(f => f.current);
+      const past    = flags.filter(f => !f.current);
+      if (flagsEl) flagsEl.innerHTML = '';
+
       if (!thr.available) {
         _el('sys-throttle-val').textContent = 'Non dispo (hors RPi)';
         _el('sys-throttle-val').style.color = 'var(--txt-3)';
-      } else if (thr.ok) {
-        _el('sys-throttle-val').innerHTML = '<span style="color:#39d353">✓ Tout va bien</span>';
-        if (card) card.style.borderColor = 'rgba(57,211,83,.3)';
-      } else {
+      } else if (current.length) {
         const problems = [];
         if (thr.undervoltage) problems.push('⚡ Sous-tension');
         if (thr.throttled)    problems.push('🌡 Throttling');
         _el('sys-throttle-val').innerHTML =
-          `<span style="color:#ff4444">${problems.join(' · ') || '⚠ Problème'}</span>`;
+          `<span style="color:#ff4444">${problems.join(' · ') || '⚠ Limitation active'}</span>`;
         if (card) card.style.borderColor = 'rgba(255,68,68,.4)';
-        // Flags détail
-        const flagsEl = _el('sys-throttle-flags');
-        if (flagsEl && thr.flags?.length) {
-          flagsEl.innerHTML = thr.flags
-            .filter(f => f.current)
-            .map(f => `<div style="font-size:.65rem;color:#ff9944;margin-top:2px">⚠ ${f.label}</div>`)
-            .join('');
-        }
+        if (flagsEl) flagsEl.innerHTML = current
+          .map(f => `<div style="font-size:.65rem;color:#ff9944;margin-top:2px">⚠ ${f.label}</div>`)
+          .join('');
+      } else if (past.length) {
+        _el('sys-throttle-val').innerHTML = '<span style="color:#39d353">✓ OK actuellement</span>';
+        if (card) card.style.borderColor = 'rgba(255,140,0,.35)';
+        if (flagsEl) flagsEl.innerHTML =
+          `<div style="font-size:.65rem;color:#ff8c00;margin-top:2px">Déjà survenu depuis le boot : ${past.map(f => f.label.replace(" s'est produite", '').replace(" s'est produit", '')).join(', ')}</div>`;
+      } else {
+        _el('sys-throttle-val').innerHTML = '<span style="color:#39d353">✓ Tout va bien</span>';
+        if (card) card.style.borderColor = 'rgba(57,211,83,.3)';
       }
     }
 
